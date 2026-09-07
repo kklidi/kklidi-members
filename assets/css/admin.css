@@ -1,0 +1,38 @@
+/* Loaded only on Tools > KKLIDI Members. */
+.kklidi-members-admin {
+	max-width: 1120px;
+}
+
+.kklidi-members-admin .kklidi-members-admin-card {
+	margin: 20px 0;
+	padding: 24px;
+	border: 1px solid #dcdcde;
+	border-radius: 8px;
+	background: #fff;
+}
+
+.kklidi-members-admin .kklidi-members-admin-card h2:first-child,
+.kklidi-members-admin .kklidi-members-admin-card h3:first-child {
+	margin-top: 0;
+}
+
+.kklidi-members-admin .kklidi-members-admin-table {
+	display: block;
+	max-width: 100%;
+	overflow-x: auto;
+}
+
+.kklidi-members-admin .kklidi-members-admin-table th,
+.kklidi-members-admin .kklidi-members-admin-table td {
+	vertical-align: middle;
+}
+
+.kklidi-members-admin .kklidi-members-admin-table form {
+	margin: 0;
+}
+
+@media (max-width: 600px) {
+	.kklidi-members-admin .kklidi-members-admin-card {
+		padding: 16px;
+	}
+}

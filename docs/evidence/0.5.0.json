@@ -1,0 +1,305 @@
+{
+  "release": "0.5.0",
+  "synthetic_run": "ca8f302832b2459481ad9dcceed5b183",
+  "execution_status": "PASS",
+  "production_acceptance": "PARTIAL",
+  "contracts": {
+    "AUTH-REDIRECT-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-LOGIN-002": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-CSRF-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-REGISTER-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-REGISTER-002": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-PROFILE-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-CONSENT-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-LOGOUT-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-RESET-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-WITHDRAW-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-RATE-LIMIT-001": [
+      {
+        "status": "PASS",
+        "parallel_processes": 8,
+        "parallel_calls": 100,
+        "parallel_allowed": 10
+      },
+      {
+        "status": "PASS",
+        "parallel_processes": 8,
+        "parallel_calls": 100,
+        "parallel_allowed": 10
+      }
+    ],
+    "AUTH-AUDIT-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-MIGRATION-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-COOKIE-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-ENUM-001": [
+      {
+        "status": "PARTIAL"
+      },
+      {
+        "status": "PARTIAL"
+      }
+    ],
+    "AUTH-PRIVILEGE-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-PERF-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-PERF-002": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-WOO-001": [
+      {
+        "status": "SYNTHETIC_PASS"
+      },
+      {
+        "status": "SYNTHETIC_PASS"
+      }
+    ],
+    "AUTH-LMS-001": [
+      {
+        "status": "SYNTHETIC_PASS"
+      },
+      {
+        "status": "SYNTHETIC_PASS"
+      }
+    ],
+    "AUTH-KBOARD-001": [
+      {
+        "status": "SYNTHETIC_PASS"
+      },
+      {
+        "status": "SYNTHETIC_PASS"
+      }
+    ],
+    "AUTH-PERF-003": [
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-DEVICE-001": [
+      {
+        "status": "PARTIAL"
+      },
+      {
+        "status": "PARTIAL"
+      }
+    ]
+  },
+  "integration": {
+    "mamp-lms-4f91a2c6d8be": {
+      "status": "PASS",
+      "passed": {
+        "woocommerce_order_reconciled_to_lms_enrollment": true,
+        "wordpress_user_id_preserved_across_domains": true,
+        "order_reconciliation_idempotent": true,
+        "progress_percent": 100,
+        "certificate_owned_by_same_user": true,
+        "private_question_owned_by_same_user": true,
+        "student_course_and_lesson_access": true,
+        "outsider_course_lesson_and_question_denied": true,
+        "members_profile_delegation_status": 302,
+        "members_profile_delegation_target": "members profile route",
+        "members_css_on_lms": false,
+        "notification_mail_sunk": true,
+        "members_off_learning_status": 200,
+        "members_off_lms_profile_status": 200,
+        "members_off_anonymous_core_login": true,
+        "members_off_fatal_error": false
+      },
+      "cleanup": {
+        "synthetic_users_remaining": 0,
+        "synthetic_posts_and_product_remaining": 0,
+        "synthetic_order_remaining": 0,
+        "synthetic_enrollments_remaining": 0,
+        "synthetic_progress_remaining": 0,
+        "synthetic_certificates_remaining": 0,
+        "synthetic_questions_remaining": 0,
+        "synthetic_question_messages_remaining": 0,
+        "synthetic_activity_remaining": 0,
+        "synthetic_devices_remaining": 0,
+        "original_options_restored": true,
+        "members_active": true
+      }
+    },
+    "mamp-kboard-394cb2f1d392": {
+      "status": "PARTIAL",
+      "modes": {
+        "on": {
+          "guest_write": false,
+          "member_write": true,
+          "post_owner": true,
+          "comment_owner": true,
+          "list_and_document_http_200": true,
+          "comment_rendered": true,
+          "members_css": false,
+          "comment_login_link": "Members"
+        },
+        "off": {
+          "guest_write": false,
+          "member_write": true,
+          "post_owner": true,
+          "comment_owner": true,
+          "list_and_document_http_200": true,
+          "comment_rendered": true,
+          "members_css": false,
+          "comment_login_link": "WordPress Core"
+        }
+      },
+      "cleanup": {
+        "remaining": {
+          "board": 0,
+          "content": 0,
+          "comment": 0,
+          "user": 0,
+          "page": 0
+        },
+        "members_restored": true
+      },
+      "not_run": [
+        "D06: actual ownership decisions for three legacy restriction pages and three menus",
+        "Interactive KBoard JavaScript submission"
+      ]
+    },
+    "mamp-woo-be0342cba88e": {
+      "status": "PASS",
+      "transport": "HTTP forms, no JavaScript engine",
+      "cleanup": {
+        "cleaned": true,
+        "run_token": "be0342cba88e"
+      },
+      "browser_javascript": "NOT_RUN",
+      "checkout_login_post": true,
+      "cart_preserved": true,
+      "rendered_member_order": true,
+      "guest_order_not_claimed": true,
+      "woo_device_allowed": true,
+      "woo_device_blocked": true
+    }
+  },
+  "performance": [
+    {
+      "status": "PASS",
+      "prefix": "wp_",
+      "samples_per_block": 100,
+      "blocks": 3,
+      "off_median_ms": 248.337,
+      "on_median_ms": 242.519,
+      "median_budget_ms": 17.139,
+      "off_p95_ms": 292.176,
+      "on_p95_ms": 273.389,
+      "p95_budget_ms": 30.194,
+      "off_query_median": 5.0,
+      "on_query_median": 5.0,
+      "off_memory_median": 37748736.0,
+      "on_memory_median": 37748736.0
+    }
+  ],
+  "scope_note": "HTTP/PHP evidence; interactive browser JavaScript and deployment policy gates remain open."
+}

@@ -1,0 +1,88 @@
+{
+  "contract": "AUTH-UI-001",
+  "version": 1,
+  "status": "SPECIFIED",
+  "implementation_contract": "AUTH-UI-002",
+  "screens": {
+    "login": {
+      "template": "templates/login.php",
+      "route": "kklidi_members_login",
+      "audiences": ["guest"],
+      "states": ["default", "missing_input", "invalid_request", "credential_error", "rate_limited", "device_exchange_required", "completion_notice"],
+      "requirements": ["generic_public_error", "safe_local_redirect", "core_authentication"]
+    },
+    "register": {
+      "template": "templates/register.php",
+      "route": "kklidi_members_register",
+      "audiences": ["guest"],
+      "states": ["closed", "documents_unavailable", "default", "validation_error", "required_consent_error", "generic_duplicate_or_race_error", "retryable_storage_error", "success"],
+      "requirements": ["no_role_or_user_id_input", "no_auto_login", "core_user"]
+    },
+    "account": {
+      "template": "templates/account.php",
+      "route": "kklidi_members_account",
+      "audiences": ["guest", "member"],
+      "states": ["guest", "authenticated", "withdrawal_requested_notice"],
+      "requirements": ["members_navigation_only", "no_woocommerce_or_lms_domain_data"]
+    },
+    "profile": {
+      "template": "templates/profile.php",
+      "route": "kklidi_members_profile",
+      "audiences": ["member"],
+      "states": ["guest_redirect", "default", "validation_error", "storage_error", "success"],
+      "requirements": ["email_read_only", "field_allowlist", "current_user_only"]
+    },
+    "password": {
+      "template": "templates/password.php",
+      "route": "kklidi_members_password",
+      "audiences": ["member"],
+      "states": ["guest_redirect", "default", "invalid_request", "current_password_error", "new_password_error", "success_reauthentication"],
+      "requirements": ["core_password", "current_password_check", "session_revocation"]
+    },
+    "consent": {
+      "template": "templates/consent.php",
+      "route": "kklidi_members_consent",
+      "audiences": ["member"],
+      "states": ["guest_redirect", "documents_unavailable", "default", "required_consent_error", "storage_error", "success"],
+      "requirements": ["versioned_evidence", "optional_consent_withdrawal", "no_legacy_rewrite"]
+    },
+    "withdrawal": {
+      "template": "templates/withdrawal.php",
+      "route": "kklidi_members_withdrawal",
+      "audiences": ["member", "administrator"],
+      "states": ["guest_redirect", "default", "administrator_manual_review", "invalid_request", "current_password_error", "storage_error", "requested"],
+      "requirements": ["preserve_wordpress_user_id", "block_account", "revoke_core_sessions"]
+    },
+    "logout": {
+      "template": "templates/logout.php",
+      "route": "kklidi_members_logout",
+      "audiences": ["guest", "member"],
+      "states": ["guest_redirect", "confirmation", "invalid_request", "success"],
+      "requirements": ["post_with_nonce", "core_logout", "safe_local_redirect"]
+    },
+    "admin": {
+      "template": "templates/admin.php",
+      "route": "wp-admin/tools.php?page=kklidi-members",
+      "audiences": ["administrator"],
+      "states": ["capability_denied", "settings_default", "settings_saved", "withdrawal_queue_empty", "withdrawal_queue_populated", "audit_empty", "audit_populated"],
+      "requirements": ["manage_kklidi_members", "server_capability_check", "admin_nonce"]
+    }
+  },
+  "global_requirements": [
+    "wordpress_core_auth",
+    "server_rendered",
+    "gettext",
+    "route_scoped_assets",
+    "keyboard_accessible",
+    "responsive",
+    "no_external_assets",
+    "no_php_session"
+  ],
+  "out_of_scope": [
+    "theme_redesign",
+    "woocommerce_lms_ui",
+    "email_verification_2fa_social",
+    "kboard_permission_engine",
+    "client_side_form_framework"
+  ]
+}

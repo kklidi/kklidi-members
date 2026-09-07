@@ -1,0 +1,302 @@
+# Copyright (C) 2026 KKLIDI
+# This file is distributed under the same license as the KKLIDI Members plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: KKLIDI Members 0.5.0\n"
+"Report-Msgid-Bugs-To: https://kklidi.com/\n"
+"POT-Creation-Date: 2026-09-07 00:00+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Domain: kklidi-members\n"
+
+msgid "KKLIDI Members"
+msgstr ""
+
+msgid "You do not have permission to access this page."
+msgstr ""
+
+msgid "We could not verify this request. Please reload the login page and try again."
+msgstr ""
+
+msgid "Enter your username or email and password."
+msgstr ""
+
+msgid "There have been too many login attempts. Please try again later."
+msgstr ""
+
+msgid "Please check your login details."
+msgstr ""
+
+msgid "We could not verify this request."
+msgstr ""
+
+msgid "Please check your current password."
+msgstr ""
+
+msgid "The new password must be at least 12 characters and match the confirmation."
+msgstr ""
+
+msgid "New registrations are currently closed."
+msgstr ""
+
+msgid "We could not verify this request. Please reload the registration page."
+msgstr ""
+
+msgid "Please try again later."
+msgstr ""
+
+msgid "There have been too many registration attempts. Please try again later."
+msgstr ""
+
+msgid "Please check the registration details."
+msgstr ""
+
+msgid "The password must be at least 12 characters and match the confirmation."
+msgstr ""
+
+msgid "Please accept the required terms and privacy policy."
+msgstr ""
+
+msgid "Another registration request is being processed. Please try again later."
+msgstr ""
+
+msgid "We could not complete the registration. Please use login or password reset."
+msgstr ""
+
+msgid "Registration is incomplete. Please try again from this page."
+msgstr ""
+
+msgid "Please review and accept the required consent documents."
+msgstr ""
+
+msgid "We could not save the required consent."
+msgstr ""
+
+msgid "We could not save the optional consent."
+msgstr ""
+
+msgid "We could not save the optional consent withdrawal."
+msgstr ""
+
+msgid "Your consent settings have been saved."
+msgstr ""
+
+msgid "This document type is not supported."
+msgstr ""
+
+msgid "A document version and content are required."
+msgstr ""
+
+msgid "The saved content differs for the same document hash."
+msgstr ""
+
+msgid "We could not save the document."
+msgstr ""
+
+msgid "We could not set the current document."
+msgstr ""
+
+msgid "KKLIDI Members 0.5.0 currently supports single-site installations only."
+msgstr ""
+
+msgid "Please check the display name or phone number format."
+msgstr ""
+
+msgid "We could not save your profile."
+msgstr ""
+
+msgid "Your profile has been saved."
+msgstr ""
+
+msgid "This account is not available."
+msgstr ""
+
+msgid "We could not process this request. Please try again later."
+msgstr ""
+
+msgid "Administrator accounts require separate manual review for withdrawal."
+msgstr ""
+
+msgid "We could not save the withdrawal request."
+msgstr ""
+
+msgid "%s Login"
+msgstr ""
+
+msgid "Log in"
+msgstr ""
+
+msgid "Username or email"
+msgstr ""
+
+msgid "Password"
+msgstr ""
+
+msgid "Remember me"
+msgstr ""
+
+msgid "Register"
+msgstr ""
+
+msgid "Email"
+msgstr ""
+
+msgid "Confirm password"
+msgstr ""
+
+msgid "First name"
+msgstr ""
+
+msgid "Last name"
+msgstr ""
+
+msgid "Display name"
+msgstr ""
+
+msgid "Phone"
+msgstr ""
+
+msgid "Required consent"
+msgstr ""
+
+msgid "I agree to the service terms."
+msgstr ""
+
+msgid "I agree to the privacy policy."
+msgstr ""
+
+msgid "Optional consent"
+msgstr ""
+
+msgid "I agree to receive marketing information."
+msgstr ""
+
+msgid "Create account"
+msgstr ""
+
+msgid "My account"
+msgstr ""
+
+msgid "Hello, %s"
+msgstr ""
+
+msgid "Account navigation"
+msgstr ""
+
+msgid "Profile"
+msgstr ""
+
+msgid "Change password"
+msgstr ""
+
+msgid "Consent settings"
+msgstr ""
+
+msgid "Request withdrawal"
+msgstr ""
+
+msgid "Log out"
+msgstr ""
+
+msgid "Current password"
+msgstr ""
+
+msgid "New password"
+msgstr ""
+
+msgid "Confirm new password"
+msgstr ""
+
+msgid "Forgot your password?"
+msgstr ""
+
+msgid "Bio"
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
+msgid "Service terms"
+msgstr ""
+
+msgid "Privacy policy"
+msgstr ""
+
+msgid "I agree to the current version."
+msgstr ""
+
+msgid "An administrator must publish this document first."
+msgstr ""
+
+msgid "Marketing communications"
+msgstr ""
+
+msgid "Save consent settings"
+msgstr ""
+
+msgid "Login is blocked immediately after you submit this request. Each service administrator reviews order, learning, certificate, and post data according to its retention policy."
+msgstr ""
+
+msgid "Submit withdrawal request"
+msgstr ""
+
+msgid "Settings saved."
+msgstr ""
+
+msgid "Member settings"
+msgstr ""
+
+msgid "Public registration is enabled only when WordPress registration is allowed and the required documents are published."
+msgstr ""
+
+msgid "Enable public registration"
+msgstr ""
+
+msgid "Members owns the Core login URL"
+msgstr ""
+
+msgid "Members owns the Core registration URL"
+msgstr ""
+
+msgid "Optional marketing consent"
+msgstr ""
+
+msgid "New version"
+msgstr ""
+
+msgid "New document content"
+msgstr ""
+
+msgid "Current version:"
+msgstr ""
+
+msgid "Save settings"
+msgstr ""
+
+msgid "Pending withdrawals"
+msgstr ""
+
+msgid "User ID"
+msgstr ""
+
+msgid "Action"
+msgstr ""
+
+msgid "Confirm login block"
+msgstr ""
+
+msgid "No pending requests."
+msgstr ""
+
+msgid "Recent security events"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Result"
+msgstr ""
+
+msgid "Reason"
+msgstr ""

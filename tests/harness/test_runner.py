@@ -1,0 +1,223 @@
+"""Small safety tests for a harness that provisions and destroys temporary data."""
+import json
+import unittest
+from pathlib import Path
+import os
+import stat
+import tempfile
+from unittest.mock import patch
+
+from run import (Browser, HarnessError, LOCK, archive_name, assert_identity,
+                 assert_production_shape, hidden_input, owned_cleanup, verified_archive)
+
+
+class HarnessGuards(unittest.TestCase):
+    def test_dependency_tampering_fails_before_execution(self):
+        with tempfile.TemporaryDirectory(prefix='kkh-cache-test-') as directory:
+            cache = Path(directory)
+            (cache / f'wordpress-{LOCK["version"]}.zip').write_bytes(b'tampered')
+            with patch('run.CACHE', cache), self.assertRaisesRegex(HarnessError, 'checksum mismatch'):
+                verified_archive()
+
+    def test_archive_rejects_path_escape(self):
+        for name in ('../x', '/wordpress/x', 'wordpress/../../x', 'wordpress/C:/x',
+                     'wordpress\\x', 'other/wp-config.php'):
+            with self.subTest(name=name), self.assertRaises(HarnessError):
+                archive_name(name)
+
+    def test_archive_allows_core_paths(self):
+        self.assertEqual(archive_name('wordpress/wp-includes/user.php').parts[0], 'wordpress')
+
+    def test_cannot_target_existing_or_remote_sites(self):
+        for base in ('http://127.0.0.1:8888', 'http://localhost:25000', 'https://example.com',
+                     'http://127.0.0.1:25000/ns_0727', 'http://user@127.0.0.1:25000'):
+            with self.subTest(base=base), self.assertRaises(HarnessError):
+                Browser(base)
+
+    def test_request_cannot_change_origin(self):
+        browser = Browser('http://127.0.0.1:25000')
+        for path in ('//example.com', 'https://example.com', '/\\example.com', '/x\r\nHost: x'):
+            with self.subTest(path=path), self.assertRaises(HarnessError):
+                browser.request(path)
+
+    def test_cleanup_rejects_unowned_directory(self):
+        with self.assertRaises(HarnessError):
+            owned_cleanup(Path(__file__).resolve().parent, 'not-an-owner')
+
+    def test_cleanup_handles_read_only_content_inside_owned_root(self):
+        root = Path(tempfile.mkdtemp(prefix='kklidi-members-harness-')).resolve()
+        run_id = 'owned-read-only-test'
+        (root / 'owner').write_text(run_id)
+        child = root / 'copied-source'
+        child.mkdir()
+        item = child / 'file.php'
+        item.write_text('<?php')
+        os.chmod(item, stat.S_IREAD)
+        os.chmod(child, stat.S_IREAD)
+        owned_cleanup(root, run_id)
+        self.assertFalse(root.exists())
+
+    def test_identity_oracle_rejects_wrong_identity_and_privilege(self):
+        expected = {'id': 2, 'roles': ['subscriber'], 'display_name': '합성 회원'}
+        observed = {'run_id': 'run', 'prefix': 'kkh_', 'logged_in': True, 'user_id': 2,
+                    'roles': ['subscriber'], 'can_read': True, 'can_manage_options': False,
+                    'display_name': '합성 회원', 'users_count': 3, 'plugins': [],
+                    'members_files': [], 'kklidi_cookies': [], 'php_session_active': False}
+        assert_identity(observed, expected, 'kkh_', 'run')
+        for changes in ({'user_id': 3}, {'logged_in': False}, {'roles': ['administrator']},
+                        {'can_manage_options': True}, {'run_id': 'other'}, {'users_count': 4}):
+            with self.subTest(changes=changes), self.assertRaises(HarnessError):
+                assert_identity(dict(observed, **changes), expected, 'kkh_', 'run')
+
+    def test_hidden_input_is_required_and_html_decoded(self):
+        document = '<input type="hidden" name="redirect_to" value="/?a=1&amp;b=2">'
+        self.assertEqual(hidden_input(document, 'redirect_to'), '/?a=1&b=2')
+        with self.assertRaises(HarnessError):
+            hidden_input(document, 'nonce')
+
+    def test_production_runtime_stays_bounded(self):
+        assert_production_shape()
+
+    def test_auth_ui_001_covers_every_runtime_surface(self):
+        repository = Path(__file__).resolve().parents[2]
+        contract = json.loads((repository / 'tests/harness/ui_contract.json').read_text(encoding='utf-8'))
+        routes = {
+            'login': ('kklidi_members_login', 'templates/login.php'),
+            'register': ('kklidi_members_register', 'templates/register.php'),
+            'account': ('kklidi_members_account', 'templates/account.php'),
+            'profile': ('kklidi_members_profile', 'templates/profile.php'),
+            'password': ('kklidi_members_password', 'templates/password.php'),
+            'consent': ('kklidi_members_consent', 'templates/consent.php'),
+            'withdrawal': ('kklidi_members_withdrawal', 'templates/withdrawal.php'),
+            'logout': ('kklidi_members_logout', 'templates/logout.php'),
+        }
+
+        self.assertEqual(contract['contract'], 'AUTH-UI-001')
+        self.assertEqual(contract['version'], 1)
+        self.assertEqual(contract['status'], 'SPECIFIED')
+        self.assertEqual(contract['implementation_contract'], 'AUTH-UI-002')
+        self.assertEqual(set(contract['screens']), set(routes) | {'admin'})
+
+        plugin_source = (repository / 'includes/Core/Plugin.php').read_text(encoding='utf-8')
+        for screen_name, (route, template) in routes.items():
+            with self.subTest(screen=screen_name):
+                screen = contract['screens'][screen_name]
+                self.assertEqual(screen['route'], route)
+                self.assertEqual(screen['template'], template)
+                self.assertTrue((repository / template).is_file())
+                self.assertIn("'" + route + "'", plugin_source)
+                self.assertTrue(screen['audiences'])
+                self.assertTrue(screen['states'])
+                self.assertEqual(len(screen['states']), len(set(screen['states'])))
+                self.assertTrue(screen['requirements'])
+
+        admin = contract['screens']['admin']
+        self.assertEqual(admin['template'], 'templates/admin.php')
+        self.assertTrue((repository / admin['template']).is_file())
+        self.assertIn('manage_kklidi_members', admin['requirements'])
+
+        required_global = {
+            'wordpress_core_auth', 'server_rendered', 'gettext',
+            'route_scoped_assets', 'keyboard_accessible', 'responsive',
+            'no_external_assets', 'no_php_session',
+        }
+        self.assertTrue(required_global.issubset(set(contract['global_requirements'])))
+        required_exclusions = {
+            'theme_redesign', 'woocommerce_lms_ui',
+            'email_verification_2fa_social', 'kboard_permission_engine',
+        }
+        self.assertTrue(required_exclusions.issubset(set(contract['out_of_scope'])))
+
+    def test_auth_ui_002_uses_scoped_styles_and_accessible_shells(self):
+        repository = Path(__file__).resolve().parents[2]
+        frontend_css = (repository / 'assets/css/members.css').read_text(encoding='utf-8')
+        admin_css = (repository / 'assets/css/admin.css').read_text(encoding='utf-8')
+        template_names = ('login', 'register', 'account', 'profile', 'password',
+                          'consent', 'withdrawal', 'logout')
+
+        self.assertIn('@media (max-width: 480px)', frontend_css)
+        self.assertIn(':focus-visible', frontend_css)
+        self.assertNotIn('url(http', frontend_css.lower())
+        self.assertNotIn('url(http', admin_css.lower())
+        for name in template_names:
+            with self.subTest(template=name):
+                source = (repository / 'templates' / f'{name}.php').read_text(encoding='utf-8')
+                self.assertIn('wp_head();', source)
+                self.assertIn('wp_footer();', source)
+                self.assertIn('kklidi-members-page', source)
+                self.assertIn('kklidi-members-main', source)
+
+        plugin_source = (repository / 'includes/Core/Plugin.php').read_text(encoding='utf-8')
+        admin_source = (repository / 'includes/Admin/AdminController.php').read_text(encoding='utf-8')
+        self.assertIn("add_action('wp_enqueue_scripts'", plugin_source)
+        self.assertIn('is_frontend_route', plugin_source)
+        self.assertIn("add_action('admin_enqueue_scripts'", admin_source)
+        self.assertIn("tools_page_kklidi-members", admin_source)
+        production_source = '\n'.join(path.read_text(encoding='utf-8') for path in (
+            repository / 'kklidi-members.php',
+            repository / 'includes/Core/Plugin.php',
+            repository / 'includes/Admin/AdminController.php',
+        ))
+        self.assertNotIn('wp_enqueue_script(', production_source)
+
+    def test_mamp_woo_fixture_is_pinned_and_self_cleaning(self):
+        repository = Path(__file__).resolve().parents[2]
+        source = (repository / 'tests/harness/mamp_woo_case.php').read_text(encoding='utf-8')
+        self.assertIn("$sandbox_root = 'C:/MAMP/htdocs/kklidi-members-mamp-sandbox';", source)
+        self.assertNotIn('$argv[3]', source)
+        self.assertNotIn('$action =', source)
+        self.assertIn('$fixture_action =', source)
+        self.assertIn("preg_match('/^[a-f0-9]{12}$/', $run_token)", source)
+        self.assertIn("untrailingslashit(home_url('/')) !== 'http://localhost:8888/kklidi-members-mamp-sandbox'", source)
+        self.assertIn("'_kklidi_members_test_run'", source)
+        self.assertIn("$order->delete(true);", source)
+        self.assertIn("wp_delete_user((int) $state['user_id']);", source)
+        self.assertIn("$restore_option($name, $snapshot);", source)
+        self.assertIn("deactivate_plugins($wci_plugin, true);", source)
+        self.assertIn("$fixture_action === 'members-off'", source)
+        self.assertIn("$fixture_action === 'members-on'", source)
+        self.assertIn("'members_was_active' => is_plugin_active($members_plugin)", source)
+
+    def test_mamp_lms_fixture_is_pinned_and_self_cleaning(self):
+        repository = Path(__file__).resolve().parents[2]
+        source = (repository / 'tests/harness/mamp_lms_case.php').read_text(encoding='utf-8')
+        self.assertIn("$sandbox_root = 'C:/MAMP/htdocs/kklidi-members-mamp-sandbox';", source)
+        self.assertNotIn('$argv[3]', source)
+        self.assertNotIn('$action =', source)
+        self.assertIn('$fixture_action =', source)
+        self.assertIn("preg_match('/^[a-f0-9]{12}$/', $run_token)", source)
+        self.assertIn("untrailingslashit(home_url('/')) !== 'http://localhost:8888/kklidi-members-mamp-sandbox'", source)
+        self.assertIn("'_kklidi_members_lms_test_run'", source)
+        self.assertIn("'pre_wp_mail'", source)
+        self.assertIn("$wpdb->delete(kklidi_lms_table('private_questions')", source)
+        self.assertIn('wp_delete_post($post_id, true);', source)
+        self.assertIn('wp_delete_user($user_id);', source)
+        self.assertIn('$restore_option($name, $snapshot);', source)
+        self.assertIn("$fixture_action === 'members-off'", source)
+        self.assertIn("$fixture_action === 'members-on'", source)
+        self.assertIn("$fixture_action === 'student-cookie'", source)
+        self.assertIn("$fixture_action === 'outsider-cookie'", source)
+        self.assertIn('wp_generate_auth_cookie(', source)
+        self.assertIn('kklidi_dl_register_device(', source)
+        self.assertIn("'kklidi_dl_fp'", source)
+        self.assertIn('kklidi_dl_sign_fingerprint(', source)
+        self.assertIn("$wpdb->prefix . KKLIDI_DL_TABLE", source)
+        self.assertIn('KKLIDI_LMS_WooCommerce::capture_order_item_entitlement(', source)
+        self.assertIn('KKLIDI_LMS_WooCommerce::reconcile_order(', source)
+        self.assertIn('KKLIDI_LMS_Enrollments::get_by_order(', source)
+        self.assertIn("$order->delete(true);", source)
+        self.assertIn("$product->delete(true);", source)
+
+    def test_lms_profile_delegation_is_route_scoped(self):
+        repository = Path(__file__).resolve().parents[2]
+        source = (repository / 'includes/Core/Plugin.php').read_text(encoding='utf-8')
+        self.assertIn("shortcode_exists('kklidi_lms_my_classroom')", source)
+        self.assertIn("has_shortcode((string) $page->post_content, 'kklidi_lms_my_classroom')", source)
+        self.assertIn("is_singular('page')", source)
+        self.assertIn("wp_safe_redirect(Url::profile());", source)
+        self.assertNotIn('KKLIDI_LMS_Enrollments', source)
+        self.assertNotIn("kklidi_lms_table(", source)
+
+
+if __name__ == '__main__':
+    unittest.main()
