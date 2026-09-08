@@ -26,9 +26,11 @@ def build():
     missing = sorted(message for message in messages
         if message != 'KKLIDI Members' and translation.gettext(message) == message)
     assert not missing, 'Missing Korean translations: ' + repr(missing)
+    release_doc = 'docs/RELEASE-' + version + '.md'
+    evidence_doc = 'docs/evidence/' + version + '.json'
     files = sorted(set(PRODUCTION_FILES + ['README.md', 'readme.txt', 'CHANGELOG.md',
         'docs/PRODUCT.md', 'docs/ARCHITECTURE.md', 'docs/SECURITY.md', 'docs/MIGRATION.md',
-        'docs/HARNESS_PLAN.md', 'docs/UI_UX.md', 'docs/RELEASE-0.5.0.md', 'docs/evidence/0.5.0.json']))
+        'docs/HARNESS_PLAN.md', 'docs/UI_UX.md', release_doc, evidence_doc]))
     assert all(not path.startswith(('tests/', '.harness/')) for path in files)
     assert all((ROOT / path).is_file() for path in files)
     destination = ROOT / 'dist'

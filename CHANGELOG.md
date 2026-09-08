@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.6.0 — 2026-09-08
+
+- Made WordPress `users_can_register` the only public-registration switch; required
+  service/privacy documents still fail closed.
+- Fixed the 1.0 signup policy at optional phone, no email-verification module, and no
+  automatic login. Fixed withdrawal at immediate access revocation plus manual owner
+  review, with no automatic user/domain deletion.
+- Assigned legacy page/menu ownership without adding a Members restriction engine.
+- Added fixed-sandbox concurrent registration/Core reset, enumeration timing,
+  browser JavaScript, proxy/cache capability, and read-only D06 audit evidence.
+- Declared the actually executed support baseline: WordPress 7.1, PHP 8.3,
+  single-site; WooCommerce 11.1.0 is the tested optional integration.
+
 ## 0.5.0 — 2026-09-08
 
 First repository release of the Core-based Members MVP and its behavior harness.

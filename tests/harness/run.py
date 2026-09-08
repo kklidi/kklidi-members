@@ -494,13 +494,24 @@ def run_mvp_cases(base, env, fixture, command, php_cli):
     key = env['KKH_PROBE_KEY']
     active = ['kklidi-members/kklidi-members.php']
 
+    missing_documents = command(php_cli + [HERE / 'mvp_setup.php', 'core-on-no-documents'], json_result=True)
+    require(missing_documents == {'required_ready': False, 'legacy_registration_option': '1',
+                                  'users_can_register': True}, 'Missing-document gate setup failed')
     disabled = Browser(base)
     status, _, document = disabled.request('/?kklidi_members_register=1')
     require(status == 200 and 'New registrations are currently closed.' in document
-            and 'name="email"' not in document, 'Disabled registration exposed a form')
+            and 'name="email"' not in document, 'Missing required documents exposed registration')
 
-    setup = command(php_cli + [HERE / 'mvp_setup.php'], json_result=True)
-    require(setup == {'required_ready': True, 'registration_enabled': '1',
+    core_disabled = command(php_cli + [HERE / 'mvp_setup.php', 'documents-ready-core-off'], json_result=True)
+    require(core_disabled == {'required_ready': True, 'legacy_registration_option': '1',
+                              'users_can_register': False}, 'Core-disabled gate setup failed')
+    disabled = Browser(base)
+    status, _, document = disabled.request('/?kklidi_members_register=1')
+    require(status == 200 and 'New registrations are currently closed.' in document
+            and 'name="email"' not in document, 'Core-disabled registration exposed a form')
+
+    setup = command(php_cli + [HERE / 'mvp_setup.php', 'core-on'], json_result=True)
+    require(setup == {'required_ready': True, 'legacy_registration_option': '0',
                       'users_can_register': True}, 'MVP setup failed')
 
     allowed_destinations = [
@@ -593,7 +604,7 @@ def run_mvp_cases(base, env, fixture, command, php_cli):
         'first_name': '합성',
         'last_name': '회원',
         'display_name': '합성 신규 회원',
-        'phone': '010-1234-5678',
+        'phone': '',
         'consent_service': '1',
         'consent_privacy': '1',
         'role': 'administrator',
@@ -609,7 +620,8 @@ def run_mvp_cases(base, env, fixture, command, php_cli):
     require(probe['users_count'] == 4 and new_user.get('login_is_private') is True
             and new_user.get('roles') == ['subscriber'] and new_user.get('state') == 'active'
             and new_user.get('service_consents') == 1 and new_user.get('privacy_consents') == 1
-            and new_user.get('marketing_actions') == [], 'Registration persistence contract failed')
+            and new_user.get('marketing_actions') == [] and new_user.get('phone') == '',
+            'Registration persistence contract failed')
     # A fresh request for the same email has the same public failure shape and creates no user.
     duplicate = Browser(base)
     _, _, duplicate_form = duplicate.request('/?kklidi_members_register=1')
@@ -623,9 +635,15 @@ def run_mvp_cases(base, env, fixture, command, php_cli):
     require(status == 200 and 'We could not complete the registration. Please use login or password reset.' in duplicate_body
             and duplicate_probe['users_count'] == 4, 'Duplicate registration changed identity state')
     results['AUTH-REGISTER-001'] = {'status': 'PASS', 'users_created': 1,
-                                    'required_consents': 2, 'auto_login': False}
+                                    'required_consents': 2, 'auto_login': False,
+                                    'core_registration_authority': True,
+                                    'legacy_toggle_ignored': True,
+                                    'required_documents_fail_closed': True,
+                                    'phone_optional': True,
+                                    'email_verification': False}
     results['AUTH-REGISTER-002'] = {'status': 'PASS', 'duplicate_created': 0,
-                                    'role_injection_ignored': True, 'disabled_form_hidden': True}
+                                    'role_injection_ignored': True, 'disabled_form_hidden': True,
+                                    'core_disabled_form_hidden': True}
 
     # Profile updates are self-only, allowlisted, sanitized, and keep email/role/state immutable.
     profile_browser, response, _ = members_login(base, env, env['KKH_MVP_EMAIL'], env['KKH_USER_PASSWORD'])
@@ -1032,7 +1050,7 @@ def assert_activation_unchanged(before, after):
             and all(name.endswith(('kklidi_mem_consents', 'kklidi_mem_login_audit'))
                     for name in after['custom_tables'])
             and set(after['tables']) == set(before['tables']) | set(after['custom_tables'])
-            and after['plugin_option_count'] >= 6,
+            and after['plugin_option_count'] >= 5,
             'Members activation did not create exactly the approved persistence')
 
 
@@ -1047,7 +1065,7 @@ def assert_members_writes_bounded(after_activation, after_cases):
                           after_cases['usermeta_key_hashes'].get(key))
     require(changed_meta in ([], ['session_tokens']),
             'Members login wrote user metadata outside Core session tokens')
-    require(len(after_cases['custom_tables']) == 2 and after_cases['plugin_option_count'] >= 6,
+    require(len(after_cases['custom_tables']) == 2 and after_cases['plugin_option_count'] >= 5,
             'Members login changed the approved persistence shape')
     return changed_meta
 

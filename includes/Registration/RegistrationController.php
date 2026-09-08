@@ -15,8 +15,7 @@ final class RegistrationController {
 		require_once KKLIDI_MEMBERS_DIR . 'includes/Consent/Repository.php';
 		nocache_headers();
 		header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, private');
-		$enabled = get_option('kklidi_members_registration_enabled', '0') === '1'
-			&& (bool) get_option('users_can_register', false)
+		$enabled = (bool) get_option('users_can_register', false)
 			&& \KKLIDI\Members\Consent\Documents::required_ready();
 		$message = $enabled ? '' : __('New registrations are currently closed.', 'kklidi-members');
 		$request_id = self::text('request_id');

@@ -11,12 +11,12 @@ final class Installer {
 
 	public static function activate(): void {
 		if (is_multisite()) {
-			wp_die(esc_html__('KKLIDI Members 0.5.0 currently supports single-site installations only.', 'kklidi-members'));
+			wp_die(esc_html__('KKLIDI Members currently supports single-site installations only.', 'kklidi-members'));
 		}
 
 		self::create_tables();
 		add_option('kklidi_members_schema_version', self::SCHEMA_VERSION, '', 'no');
-		add_option('kklidi_members_registration_enabled', '0', '', 'no');
+		delete_option('kklidi_members_registration_enabled');
 		add_option('kklidi_members_own_login_url', '0', '', 'no');
 		add_option('kklidi_members_own_register_url', '0', '', 'no');
 		add_option('kklidi_members_audit_success_days', '30', '', 'no');

@@ -15,9 +15,9 @@
 ## 2. 로그인·가입·프로필·비밀번호
 
 - 로그인은 기존 username 또는 email을 받는다. credential 실패는 계정 존재·disabled 여부를 공개하지 않는 공통 메시지를 사용한다. 존재하지 않는 계정도 비교 가능한 password 검증 비용을 가져 timing 차이를 줄인다. 자격증명·비밀번호를 trim/sanitize_text_field로 바꾸지 않는다.
-- 가입 입력은 이메일, 비밀번호/확인, 이름, 표시명, 전화, 승인된 필수 동의에 한정한다. role/capability/user_id/account_state/email_verified arbitrary meta는 거부한다. 신규 역할은 검토된 low-privilege subscriber, 요청 parameter로 변경 불가다.
+- 가입 입력은 이메일, 비밀번호/확인, 이름, 표시명, 선택 전화, 승인된 필수 동의에 한정한다. role/capability/user_id/account_state/email_verified arbitrary meta는 거부한다. 신규 역할은 검토된 low-privilege subscriber, 요청 parameter로 변경 불가다.
 - 비밀번호는 긴 passphrase·password manager·붙여넣기를 허용한다. 제안 기본은 신규/변경 12자 이상, 합리적인 입력 상한(예: UTF-8 1,024 bytes); 길이 제한은 UI와 서버가 같은 규칙으로 검사한다. 기존 짧은 비밀번호의 로그인 자체를 migration 중 막지 않는다. 해시 방식·salt는 Core에 맡긴다.
-- 가입 동시성/부분 실패는 ARCHITECTURE의 lock·pending·idempotency로 관리한다. 동의 영속화 없이 가입 성공/자동 로그인이라고 응답하지 않는다. public users_can_register=0은 조용히 무시하지 않는다. 신규 가입 enabled 설정은 관리자 명시 결정이 필요하다.
+- 가입 동시성/부분 실패는 ARCHITECTURE의 lock·pending·idempotency로 관리한다. 동의 영속화 없이 가입 성공/자동 로그인이라고 응답하지 않는다. 공개 가입의 단일 운영 스위치는 Core `users_can_register`이며 0이면 가입 폼과 처리를 닫는다. 값이 1이어도 서비스 약관·개인정보 처리방침의 현재 문서가 모두 준비되지 않으면 fail-closed한다. Members 전용 가입 활성화 옵션은 두지 않는다.
 - self profile은 `get_current_user_id()`만 수정한다. first_name/last_name/display_name/phone와 선택 description을 allowlist로 다루며 저장은 WP API, 출력은 문맥별 escape다. 닉네임을 sanitize_user로 파괴하지 않는다.
 - password 변경·탈퇴·향후 이메일 변경/소셜 link·unlink는 최근 5분 이내 재인증을 제안한다. 2FA가 활성인 계정은 2FA도 요구한다. 재인증 증명은 목적·사용자·브라우저·시간에 묶고 임의 user_id를 받지 않는다.
 - 1.0 이메일은 표시 전용이다. 미래 변경은 새 주소 소유 증명 전 user_email을 교체하지 않고, 기존 주소로 변경 안내한다. old user_login은 보존한다.
@@ -87,11 +87,11 @@ wp-login, Members, Woo login, social login, XML-RPC, REST/application password, 
 1. 본인 로그인 + POST nonce + 최근 재인증 → 영향 안내(구매/강의/증명서/게시물) → 고유 request ID로 요청.
 2. `active → withdrawal_pending`을 원자 전환하고 신규 로그인 차단, 기존 Core session token·application password 철회. 새 protected request에서도 차단 상태 확인. 중복 요청은 같은 처리 결과.
 3. 관리자 queue는 제한된 capability로 조회한다. Woo/LMS/PMS/KBoard 각 소유자가 개인정보·거래/학습 증거·법적 보존을 평가하고, 재시도 가능한 단계별 완료 상태를 기록한다.
-4. `withdrawal_pending → disabled`로 확정하고 승인 정책에 따라 계정 연락처·이름·게시물 노출 등을 익명화/삭제한다. 1.0은 요청·차단·수동 처리 queue까지 제공하며 자동 익명화·전체 삭제는 D02가 확정될 때 구현한다.
+4. `withdrawal_pending → disabled`로 확정한다. 1.0의 D02 정책은 요청·차단·수동 처리 queue까지이며 Members가 계정 연락처·이름·게시물이나 외부 도메인을 자동 익명화·삭제하지 않는다. 사이트의 WordPress privacy 절차와 각 도메인 owner가 실제 처리 범위를 판정한다.
 
 주문/정산/인증서 snapshot/질문 본문에는 users/usermeta 밖 개인정보가 있을 수 있다. user row만 익명화했다고 전체 삭제 완료로 표시하지 않는다. WordPress privacy export/erasure와 domain API로 협업한다. 완료와 보류, 법적 보존 중, 작업 실패를 구별하고 회원에게 실제 처리 범위를 알린다.
 
-`wp_delete_user()` 호출이나 다른 회원에게 작성물 일괄 재할당을 기본 탈퇴로 사용하지 않는다. 최소 tombstone user ID를 남겨 order/enrollment/progress/certificate/question/activity 참조를 유지하는 방안을 권장한다. 복구 가능 기간·재가입 이메일/소셜 처리·완전 삭제의 참조 처리·법적 보존 기간은 **USER_DECISION_REQUIRED D02**다. 관리자 계정·정산 담당자·유일 관리자 탈퇴는 별도 수동 심사로 보낸다.
+`wp_delete_user()` 호출이나 다른 회원에게 작성물 일괄 재할당을 기본 탈퇴로 사용하지 않는다. 1.0은 tombstone user ID를 남겨 order/enrollment/progress/certificate/question/activity 참조를 유지하고 self-service 복구를 제공하지 않는다. 법정·계약 보존기간은 Members가 발명하지 않으며 사이트 privacy owner가 관할 기준을 기록하기 전 자동 삭제를 실행하지 않는다. 관리자 계정·정산 담당자·유일 관리자 탈퇴는 별도 수동 심사로 보낸다.
 
 Members 비활성 시 meta guard도 없어질 수 있다. 차단 계정 존재 후 제품을 비활성화하려면 동등 lifecycle enforcement를 먼저 이관해야 한다. “LMS fatal 없음”은 탈퇴/2FA 정책 유지의 대체 검증이 아니다. 긴 in-flight 요청·비동기 작업은 실행 직전 domain 권한과 계정 상태를 다시 검사하도록 통합 계약에 명시한다.
 

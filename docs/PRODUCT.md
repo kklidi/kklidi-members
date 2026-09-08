@@ -111,7 +111,7 @@ KBoard는 12개 board 중 author/roles 제한을 갖는 board가 있고 412개 c
 | 최소 로그인 audit, route rate limiting, 최소 관리자 설정 | MVP_REQUIRED | 인증 공격 대응·운영 가능성 |
 | Woo/LMS URL·사용자 ID·device-limit 호환 | MVP_REQUIRED | 강결합 없이 기존 기능 유지 |
 | 이메일 가입 인증 | MVP_OPTIONAL | 현재 꺼져 있음; 필요 정책이면 release gate 승격 |
-| 가입 후 자동 로그인 | MVP_OPTIONAL | 현재 저장 설정과 다르므로 정책 고지; 기본 off |
+| 가입 후 자동 로그인 | MVP_OPTIONAL | D01에서 1.0 제외로 확정; 명시적 로그인 유지 |
 | 기존 소개(description) 편집 | MVP_OPTIONAL | LMS 화면 있으나 populated 0명 |
 | 프로필 이메일 셀프 변경 | FUTURE | 1.0은 표시 전용, 안전한 재검증 flow 완성 후 제공 |
 | 이메일/SMS verification OTP | FUTURE | 소유 확인 요구가 생길 때만 |
@@ -122,7 +122,7 @@ KBoard는 12개 board 중 author/roles 제한을 갖는 board가 있고 412개 c
 | 마케팅 동의 UI·신규 display_name 유일성 | UNKNOWN | 수집 목적/고유 nickname 정책 D03/D04 |
 | 범용 유료회원/정기결제/쿠폰/쪽지/대량문자/자동등업/페이지 접근 엔진/본인인증 | REMOVE | 현재 회원 MVP에 불필요, 다른 domain과 중복 |
 
-기존 전화가 없는 계정을 일괄 차단하지 않는다. 신규 필수 전화 정책은 self-asserted 연락처이며 인증된 휴대폰 또는 본인인증 증거가 아니다.
+기존 전화가 없는 계정을 일괄 차단하지 않는다. D01에서 전화는 신규 가입과 프로필 모두 선택 입력으로 확정했다. 저장된 값은 self-asserted 연락처이며 인증된 휴대폰 또는 본인인증 증거가 아니다.
 
 ## 7. Fork 판정
 
@@ -150,12 +150,12 @@ KBoard는 12개 board 중 author/roles 제한을 갖는 board가 있고 412개 c
 
 | ID | 결정 | 기본 설계 제안 / 결정이 필요한 시점 |
 | --- | --- | --- |
-| D01 | 공개 가입을 열지, 전화 필수 여부, 이메일 인증 필수화, 자동 로그인 | 공개 가입은 현재 닫힘 유지. 구현은 가능, 활성화 직전 결정 |
-| D02 | 탈퇴 비활성화·복구 가능성·개인정보 삭제 범위·Woo/LMS/정산/게시물 보존 기간 | 즉시 로그인 차단 후 관리 처리. 법적 기간 임의 확정 금지; 운영 탈퇴 전 결정 |
+| D01 | **DECIDED 2026-09-08** | 전화 선택, 이메일 가입 인증 미도입, 가입 후 자동 로그인 없음. 공개 가입은 Core `users_can_register`만 사용하며 필수 문서가 없으면 닫힘 |
+| D02 | **DECIDED FOR 1.0 2026-09-08** | 즉시 로그인 차단·세션 철회 후 수동 queue. self-service 복구·자동 익명화·`wp_delete_user` 없음. Core ID와 외부 도메인 참조를 보존하고 실제 삭제/보존 완료는 각 도메인 owner와 사이트 privacy 절차가 판정 |
 | D03 | 마케팅 수집 목적·문구·채널·철회 | 현행 명시적 증거 없으므로 기본 수집 안 함 |
 | D04 | display_name 중복 금지 지속 여부 | nickname은 identity 아님. 1.0 제안은 중복 허용, 기존 이름 변경 안 함; UI 확정 전 결정 |
 | D05 | 과거 계정의 email state와 재동의 조건 | legacy_unknown 유지, 전원 강제 차단/검증 완료 처리 금지 |
-| D06 | restriction 3페이지·메뉴 3개의 소유자와 현재 비활성 상태가 의도인지 | 정상 clone baseline와 기대 계약을 분리 기록; 전환 시작 gate |
-| D07 | 최소 지원 WP/PHP/Woo 버전·multisite | 우선 single-site, 로컬 버전은 관찰값이지 배포 지원 범위 아님; 테스트 환경 확정 시 결정 |
+| D06 | **DECIDED 2026-09-08** | 정산 2페이지/메뉴는 payout, 강의실 메뉴는 LMS/LearnDash, 정적 가입신청 2페이지는 사이트 콘텐츠 운영 owner. Members는 이 접근 엔진을 소유하지 않음 |
+| D07 | **DECIDED FOR 0.6.0 2026-09-08** | 지원 판정은 single-site WordPress 7.1/PHP 8.3/Woo 11.1.0 조합. PHP 7.4~8.3 syntax 통과는 runtime 지원 주장으로 확대하지 않음 |
 
-Phase 0 문서 작성은 위 답변 없이 완료 가능하다. 미확정 정책을 구현 중 임의로 운영에 적용하지 않는다.
+D03~D05는 해당 선택 기능이나 legacy 전환을 실제로 시작할 때까지 기존 보수적 기본값을 유지한다. FUTURE/OPTIONAL 기능은 별도 승인 없이 구현하지 않는다.

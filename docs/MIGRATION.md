@@ -45,7 +45,10 @@ reference에는 Cosmosfarm/WP-Members의 설정·페이지·데이터가 남아 
 | page 34 checkout | Woo checkout + 활성 WCI redirect | Members는 login URL/안전한 return target만 제공 |
 | LMS 강의실 profile tab | Members 활성 시 공통 URL로 위임 | 비활성 시 기존 LMS/Core fallback, 인증서 verified name은 LMS |
 | billing_phone | Members self-phone adapter + Woo customer API | 과거 주문 phone 불변, phone_number conflict 자동 해결 금지 |
-| restriction pages/메뉴 | 해당 page를 소유한 서비스의 권한 + 테마/메뉴 표시 | UI 숨김만으로 권한 보호했다고 간주하지 않음 |
+| page 10601 / menu 10609 강사 정산 | `kklidi-payout-system`의 정산 권한 | Members restriction meta에 의존하지 않음 |
+| page 10603 / menu 10608 파트너 정산 | `kklidi-payout-system`의 정산 권한 | 메뉴 숨김은 보안 경계가 아님 |
+| page 2640 / menu 9298 내 강의실 | LMS/LearnDash의 강의 접근 권한 | Members는 enrollment/access를 판정하지 않음 |
+| pages 10987/11278 가입신청 | 사이트 콘텐츠 운영 owner | 실행 shortcode가 없어 현재 Core 공개 페이지로 관찰됨. 필요하면 owner가 publish/권한을 별도 결정 |
 | device-limit | 기존 device-limit plugin | authenticate 거부·wp_login 후속 조치 보존; 자체 장치 인증 복제 없음 |
 
 ## 5. 데이터 전환 절차와 실패 복구

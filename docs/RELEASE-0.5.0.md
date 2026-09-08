@@ -29,11 +29,18 @@ The aggregate, credential-free execution evidence is in [evidence/0.5.0.json](ev
   Members and Core, no Members CSS. Fixture data removed.
 - Korean MO catalog can be loaded and resolves English source strings.
 
+## Post-0.5.0 working-tree correction
+
+Public registration now uses Core `users_can_register` as its only enable/disable
+authority. The obsolete Members toggle is ignored and cleaned up; missing required
+service/privacy documents still close registration. This correction was verified after
+the tagged 0.5.0 artifact and therefore is not claimed as part of that immutable tag.
+
 ## Open gates before production
 
 | Gate | Remaining work |
 | --- | --- |
-| D01 | Decide public registration, required phone, email verification and automatic login; existing defaults remain unchanged. |
+| D01 | Core `users_can_register` now owns public registration. Decide required phone, email verification and automatic login before enabling it in production. |
 | D02 | Decide withdrawal recovery, PII treatment and retention by domain; no automatic deletion policy is invented. |
 | D06 | Assign the actual service owners of three legacy restriction pages and three menu items; KBoard tests cannot establish protection on these unrelated pages. |
 | D07 | Confirm supported minimum versions; plugin header minimums are historical declarations, not a tested multi-version matrix. |

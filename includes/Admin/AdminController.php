@@ -71,10 +71,7 @@ final class AdminController {
 			}
 		}
 
-		$registration = isset($_POST['registration_enabled'])
-			&& (bool) get_option('users_can_register', false)
-			&& \KKLIDI\Members\Consent\Documents::required_ready();
-		update_option('kklidi_members_registration_enabled', $registration ? '1' : '0', false);
+		delete_option('kklidi_members_registration_enabled');
 		update_option('kklidi_members_own_login_url', isset($_POST['own_login_url']) ? '1' : '0', false);
 		update_option('kklidi_members_own_register_url', isset($_POST['own_register_url']) ? '1' : '0', false);
 	}

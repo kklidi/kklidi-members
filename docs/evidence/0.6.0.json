@@ -1,0 +1,567 @@
+{
+  "release": "0.6.0",
+  "synthetic_run": "7ce8ebf01c7043da8ae56b2916eef332",
+  "execution_status": "PASS",
+  "production_acceptance": "PARTIAL",
+  "contracts": {
+    "AUTH-REDIRECT-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-LOGIN-002": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-CSRF-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-REGISTER-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-REGISTER-002": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-PROFILE-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-CONSENT-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-LOGOUT-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-RESET-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-WITHDRAW-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-RATE-LIMIT-001": [
+      {
+        "status": "PASS",
+        "parallel_processes": 8,
+        "parallel_calls": 100,
+        "parallel_allowed": 10
+      },
+      {
+        "status": "PASS",
+        "parallel_processes": 8,
+        "parallel_calls": 100,
+        "parallel_allowed": 10
+      }
+    ],
+    "AUTH-AUDIT-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-MIGRATION-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-COOKIE-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-ENUM-001": [
+      {
+        "status": "PARTIAL"
+      },
+      {
+        "status": "PARTIAL"
+      }
+    ],
+    "AUTH-PRIVILEGE-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-PERF-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-PERF-002": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-WOO-001": [
+      {
+        "status": "SYNTHETIC_PASS"
+      },
+      {
+        "status": "SYNTHETIC_PASS"
+      }
+    ],
+    "AUTH-LMS-001": [
+      {
+        "status": "SYNTHETIC_PASS"
+      },
+      {
+        "status": "SYNTHETIC_PASS"
+      }
+    ],
+    "AUTH-KBOARD-001": [
+      {
+        "status": "SYNTHETIC_PASS"
+      },
+      {
+        "status": "SYNTHETIC_PASS"
+      }
+    ],
+    "AUTH-PERF-003": [
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-DEVICE-001": [
+      {
+        "status": "PARTIAL"
+      },
+      {
+        "status": "PARTIAL"
+      }
+    ]
+  },
+  "integration": {
+    "mamp-lms-4f91a2c6d8be": {
+      "run_id": "mamp-lms-4f91a2c6d8be",
+      "date": "2026-09-08",
+      "contract": "AUTH-LMS-001",
+      "status": "PASS",
+      "environment": {
+        "site": "dedicated MAMP sandbox",
+        "wordpress": "7.1",
+        "woocommerce": "11.1.0",
+        "lms": "1.1.1",
+        "device_limit": "1.1.3",
+        "members": "0.2.0"
+      },
+      "passed": {
+        "woocommerce_order_reconciled_to_lms_enrollment": true,
+        "wordpress_user_id_preserved_across_domains": true,
+        "order_reconciliation_idempotent": true,
+        "progress_percent": 100,
+        "certificate_owned_by_same_user": true,
+        "private_question_owned_by_same_user": true,
+        "student_course_and_lesson_access": true,
+        "outsider_course_lesson_and_question_denied": true,
+        "members_profile_delegation_status": 302,
+        "members_profile_delegation_target": "members profile route",
+        "members_css_on_lms": false,
+        "notification_mail_sunk": true,
+        "members_off_learning_status": 200,
+        "members_off_lms_profile_status": 200,
+        "members_off_anonymous_core_login": true,
+        "members_off_fatal_error": false
+      },
+      "cleanup": {
+        "synthetic_users_remaining": 0,
+        "synthetic_posts_and_product_remaining": 0,
+        "synthetic_order_remaining": 0,
+        "synthetic_enrollments_remaining": 0,
+        "synthetic_progress_remaining": 0,
+        "synthetic_certificates_remaining": 0,
+        "synthetic_questions_remaining": 0,
+        "synthetic_question_messages_remaining": 0,
+        "synthetic_activity_remaining": 0,
+        "synthetic_devices_remaining": 0,
+        "original_options_restored": true,
+        "members_active": true
+      },
+      "secrets_recorded": false
+    },
+    "mamp-kboard-ea7b48dd03da": {
+      "contract": "AUTH-KBOARD-001",
+      "run_id": "mamp-kboard-ea7b48dd03da",
+      "status": "PASS",
+      "modes": {
+        "on": {
+          "guest_write": false,
+          "member_write": true,
+          "post_owner": true,
+          "comment_owner": true,
+          "list_and_document_http_200": true,
+          "comment_rendered": true,
+          "members_css": false,
+          "comment_login_link": "Members"
+        },
+        "off": {
+          "guest_write": false,
+          "member_write": true,
+          "post_owner": true,
+          "comment_owner": true,
+          "list_and_document_http_200": true,
+          "comment_rendered": true,
+          "members_css": false,
+          "comment_login_link": "WordPress Core"
+        }
+      },
+      "d06_ownership_evidence": "reference-d06-20260908.json",
+      "interactive_submission": "OUT_OF_SCOPE_FOR_REMOVAL_COMPATIBILITY",
+      "cleanup": {
+        "remaining": {
+          "board": 0,
+          "content": 0,
+          "comment": 0,
+          "user": 0,
+          "page": 0
+        },
+        "members_restored": true
+      }
+    },
+    "mamp-woo-34a0dd972b54": {
+      "run_id": "mamp-woo-34a0dd972b54",
+      "status": "PASS",
+      "transport": "HTTP forms, no JavaScript engine",
+      "checkout_login_post": true,
+      "cart_preserved": true,
+      "rendered_member_order": true,
+      "guest_order_not_claimed": true,
+      "woo_device_allowed": true,
+      "woo_device_blocked": true,
+      "browser_javascript": "NOT_RUN",
+      "cleanup": {
+        "cleaned": true,
+        "run_token": "34a0dd972b54"
+      }
+    },
+    "mamp-race-efa20f156534": {
+      "run_id": "mamp-race-efa20f156534",
+      "status": "PASS",
+      "workers": 8,
+      "registration": {
+        "submissions": 8,
+        "successes": 1,
+        "users": 1,
+        "required_consents": 2,
+        "phone_optional": true
+      },
+      "reset": {
+        "submissions": 8,
+        "localized_success_responses": 0,
+        "matching_final_passwords": 1,
+        "replay_form_available": false,
+        "one_time_result": true
+      },
+      "cleanup": {
+        "cleaned": true,
+        "run_token": "efa20f156534"
+      }
+    },
+    "mamp-timing-14214682d5dd": {
+      "run_id": "mamp-timing-14214682d5dd",
+      "status": "PASS",
+      "samples_per_group": 9,
+      "public_message_equal": true,
+      "existing_ms": {
+        "median": 1223.537,
+        "p95": 1265.785
+      },
+      "missing_ms": {
+        "median": 1201.747,
+        "p95": 1253.89
+      },
+      "median_ratio": 1.018,
+      "threshold_ratio": 2.0,
+      "cleanup": {
+        "cleaned": true,
+        "run_token": "14214682d5dd"
+      }
+    },
+    "browser-chrome-3b1df5c97a20": {
+      "run_id": "browser-chrome-3b1df5c97a20",
+      "status": "PASS",
+      "browser": "Chrome 152",
+      "engine": "actual browser JavaScript",
+      "page_language": "ko-KR",
+      "login_form_rendered": true,
+      "members_stylesheet_loaded": true,
+      "members_asset_version": "0.6.0",
+      "viewport_360": {
+        "horizontal_overflow": false,
+        "main_width": 340,
+        "form_width": 302
+      },
+      "device_fingerprint_script_loaded": true,
+      "device_fingerprint_cookie_created": true,
+      "device_fingerprint_signature_cookie_created": true,
+      "javascript_exceptions": 0,
+      "console_errors": 0,
+      "transport": "http",
+      "secure_cookie_gate": "NOT_TESTED_ON_HTTP"
+    }
+  },
+  "performance": [
+    {
+      "status": "PASS",
+      "prefix": "wp_",
+      "samples_per_block": 100,
+      "blocks": 3,
+      "off_median_ms": 410.489,
+      "on_median_ms": 408.147,
+      "median_budget_ms": 22.467,
+      "off_p95_ms": 497.415,
+      "on_p95_ms": 501.655,
+      "p95_budget_ms": 53.354,
+      "off_query_median": 5.0,
+      "on_query_median": 5.0,
+      "off_memory_median": 37748736.0,
+      "on_memory_median": 37748736.0
+    }
+  ],
+  "deployment_preflight": {
+    "status": "BLOCKED",
+    "reason": "trusted_https_base_url_required",
+    "network_request_sent": false
+  },
+  "local_environment": {
+    "forwarded_header_ignored": true,
+    "external_object_cache": false,
+    "transport": "http",
+    "multisite": false
+  },
+  "d06_reference_audit": {
+    "reference": "ns_0727",
+    "database_mode": "read_only_transaction_rolled_back",
+    "active_plugin_slugs": [
+      "query-monitor",
+      "all-in-one-wp-migration",
+      "cosmosfarm-pay-for-woocommerce",
+      "cosmosfarm-quick-buy-woocomerce",
+      "disable-emails",
+      "duplicate-page",
+      "imagify",
+      "insert-headers-and-footers",
+      "kadence-blocks-pro",
+      "kadence-blocks",
+      "kadence-pro",
+      "kadence-shop-kit",
+      "kboard-comments",
+      "kboard-remove-powered-by",
+      "kboard",
+      "kklidi-device-limit",
+      "kklidi-lms-migration",
+      "kklidi-lms",
+      "kklidi-payout-system",
+      "kklidi-private-download-manager",
+      "kklidi-text-replacer",
+      "kklidi-woocommerce-integration",
+      "loco-translate",
+      "woocommerce"
+    ],
+    "theme": {
+      "template": "kadence",
+      "stylesheet": "nosasu-kadence-child"
+    },
+    "pages": [
+      {
+        "id": 2640,
+        "title": "내 강의실",
+        "slug": "my-dashboard",
+        "type": "page",
+        "status": "publish",
+        "parent": 0,
+        "shortcodes": [
+          "ld_dashboard"
+        ],
+        "meta": {
+          "_wp_page_template": "default",
+          "cosmosfarm_members_page_restriction_roles": [
+            "administrator"
+          ]
+        }
+      },
+      {
+        "id": 10601,
+        "title": "강사 정산",
+        "slug": "instructor-dashboard",
+        "type": "page",
+        "status": "publish",
+        "parent": 0,
+        "shortcodes": [
+          "kklidi_instructor_dashboard"
+        ],
+        "meta": {
+          "_wp_page_template": "default",
+          "cosmosfarm_members_page_restriction": "1",
+          "cosmosfarm_members_page_restriction_roles": [
+            "administrator",
+            "ld_instructor"
+          ]
+        }
+      },
+      {
+        "id": 10603,
+        "title": "파트너정산",
+        "slug": "partner-dashboard",
+        "type": "page",
+        "status": "publish",
+        "parent": 0,
+        "shortcodes": [
+          "kklidi_partner_dashboard"
+        ],
+        "meta": {
+          "_wp_page_template": "default",
+          "cosmosfarm_members_page_restriction_roles": [
+            "administrator"
+          ]
+        }
+      },
+      {
+        "id": 10987,
+        "title": "마케팅 파트너스 가입신청",
+        "slug": "partners_new",
+        "type": "page",
+        "status": "publish",
+        "parent": 0,
+        "shortcodes": [
+          "null"
+        ],
+        "meta": {
+          "cosmosfarm_members_page_restriction": "2",
+          "cosmosfarm_members_page_restriction_roles": [
+            "administrator"
+          ]
+        }
+      },
+      {
+        "id": 11278,
+        "title": "학생회 가입신청",
+        "slug": "campus-partners",
+        "type": "page",
+        "status": "publish",
+        "parent": 0,
+        "shortcodes": [
+          "null"
+        ],
+        "meta": {
+          "cosmosfarm_members_page_restriction": "2",
+          "cosmosfarm_members_page_restriction_roles": [
+            "administrator"
+          ]
+        }
+      }
+    ],
+    "menu_items": [
+      {
+        "id": 9298,
+        "title": "",
+        "status": "publish",
+        "meta": {
+          "_menu_item_classes": "a:1:{i:0;s:0:\"\";}",
+          "_menu_item_menu_item_parent": "0",
+          "_menu_item_object": "page",
+          "_menu_item_object_id": "2640",
+          "_menu_item_target": "",
+          "_menu_item_type": "post_type",
+          "_menu_item_url": "",
+          "_menu_item_xfn": "",
+          "_wpmem_item_settings": "in"
+        }
+      },
+      {
+        "id": 10608,
+        "title": "",
+        "status": "publish",
+        "meta": {
+          "_menu_item_classes": "a:1:{i:0;s:24:\"kklidi-partner-dashboard\";}",
+          "_menu_item_menu_item_parent": "0",
+          "_menu_item_object": "page",
+          "_menu_item_object_id": "10603",
+          "_menu_item_target": "",
+          "_menu_item_type": "post_type",
+          "_menu_item_url": "",
+          "_menu_item_xfn": "",
+          "_wpmem_item_settings": "in"
+        }
+      },
+      {
+        "id": 10609,
+        "title": "강사정산",
+        "status": "publish",
+        "meta": {
+          "_menu_item_classes": "a:1:{i:0;s:27:\"kklidi-instructor-dashboard\";}",
+          "_menu_item_menu_item_parent": "0",
+          "_menu_item_object": "page",
+          "_menu_item_object_id": "10601",
+          "_menu_item_target": "",
+          "_menu_item_type": "post_type",
+          "_menu_item_url": "",
+          "_menu_item_xfn": "",
+          "_wpmem_item_settings": "in"
+        }
+      }
+    ]
+  },
+  "scope_note": "Local behavior/browser gates passed; production TLS, persistent cache/proxy outage, and production migration need an identified deployment environment."
+}

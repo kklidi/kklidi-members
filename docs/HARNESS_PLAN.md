@@ -28,8 +28,8 @@ reference와 독립된 WP DB/filesystem에 synthetic 사용자 A/B, subscriber/a
 | AUTH-LOGIN-001 / MVP | 기존 이메일 및 별도 username 회원이 유효 credential로 로그인, remember on/off | Core cookie로 다음 요청에서 같은 ID; 역할 불변; 올바른 목적지; 성공 event 1회; device-limit 정상 경로 |
 | AUTH-LOGIN-002 / MVP | 틀린 password/없는 회원/disabled/pending/과도한 입력 | 공통 credential 오류·인증 cookie 없음·다음 요청 비회원; 기존 third-party auth 거부 보존 |
 | AUTH-LOGOUT-001 / MVP | nonce 있는 logout 실행, 이전 cookie 재사용 | 로그아웃/세션 폐기 후 보호 자원 접근 불가; 외부 redirect 거부; 재실행 안전 |
-| AUTH-REGISTER-001 / MVP | 가입 enabled + 필수 필드·동의 제출, 한국어 표시명 포함 | WP user 정확히 1개·서버 역할·필수 동의 영속화. 기본 자동 로그인 없음; 재전송 중복 없음; 저장 실패 시 pending·재시도로 완료 |
-| AUTH-REGISTER-002 / MVP | duplicate email/동시 동일 email/필수 누락/동의 누락/role·ID 주입/가입 disabled | 성공 계정 0개 또는 경합 중 1개만; role 상승 없음; 기존 email/login 불변; 안전한 오류 안내 |
+| AUTH-REGISTER-001 / MVP | Core `users_can_register=1` + 필수 문서 준비 + 필수 필드·동의 제출, 한국어 표시명·빈 전화 포함 | WP user 정확히 1개·서버 역할·필수 동의 영속화. 기존 Members 가입 option 값은 결과에 영향 없음; 전화 선택; 이메일 인증·자동 로그인 없음; 재전송 중복 없음; 저장 실패 시 pending·재시도로 완료 |
+| AUTH-REGISTER-002 / MVP | Core `users_can_register=0`, 필수 문서 미준비, duplicate email/동시 동일 email/필수 누락/동의 누락/role·ID 주입 | 가입 폼·처리 닫힘 또는 성공 계정 0개, 경합 중 1개만; role 상승 없음; 기존 email/login 불변; 안전한 오류 안내 |
 | AUTH-RESET-001 / MVP | 분실→sink link→유효 key로 reset, 만료·재사용·다른 login·동시 소비 | 실제 Core password만 변경; 이전 key 재사용 거부; old session 무효 확인; 자동 로그인 없음; public 존재 여부 비노출 |
 | AUTH-REDIRECT-001 / MVP | LMS lesson·강의실 tab·checkout 목적지; 외부/동일 host 다른 port/CRLF/이중 인코딩/중첩 URL | 허용된 원래 목적지 유지, 위험 주소는 local fallback; 무한 루프 없음; 목적지 resource 권한 별도 검사 |
 | AUTH-PROFILE-001 / MVP | A가 이름·표시명·전화 수정; B user_id/role/state/meta/script 주입 | A allowlist만 변경, B/role/verified/과거 주문 불변; 한글 보존·출력 escape·invalid email/phone 거부; 1.0 email read-only |
@@ -152,6 +152,7 @@ reference와 독립된 WP DB/filesystem에 synthetic 사용자 A/B, subscriber/a
 
 ### 5.3 0.5.0 추가 검증
 
+- `257a25a207b646f88ba74cd0dd93bfb0`: post-0.5.0 one-prefix synthetic 재검증에서 Core on/필수 문서 없음, Core off/필수 문서 준비, Core on/필수 문서 준비의 세 상태를 실행했다. 앞의 두 상태는 가입 폼을 숨겼고 마지막 상태는 obsolete Members option이 `0`이어도 가입·필수 동의 저장에 성공했다. 전체 24개 MVP 계약 PASS, 임시 DB 제거와 프로세스 종료를 확인했다. 성능 블록은 이 소규모 재검증에서 제외했다.
 - `mamp-woo-be0342cba88e`: 실제 로그인 POST 뒤 checkout 복귀, 같은 쿠키 세션의 Woo Store API cart 상품 보존, 회원 주문 상세 링크 표시와 guest 주문 제외, Woo 자체 로그인 폼의 device-limit 허용/거부 PASS. HTTP form 검증이며 JavaScript 엔진을 실행한 브라우저 증거는 아니다.
 - `mamp-kboard-394cb2f1d392`: 실제 KBoard 6.5의 목록·게시글·댓글 HTTP 200, 회원/비회원 쓰기 권한, 게시글·댓글 작성자 ID 유지, Members CSS 0을 on/off에서 확인했다. 합성 board/content/comment/user/page 잔존 0. D06 restriction 3페이지·메뉴 3개의 운영 owner가 미확정이므로 전체 계약은 PARTIAL이다.
 - `concurrency_case.php`: 별도 PHP 프로세스 8개에서 동일 limiter key에 100회 요청, 각 prefix에서 정확히 10회 허용. 분산 공격·가입/reset 경합 전체 통과로 확대 해석하지 않는다.
@@ -159,4 +160,6 @@ reference와 독립된 WP DB/filesystem에 synthetic 사용자 A/B, subscriber/a
 
 일반 실행은 cache만 사용하는 offline 방식이며 dependency 준비만 공식 HTTPS 다운로드를 사용한다. 매 실행 fresh DB와 per-run synthetic secret을 만들며 기존 endpoint/datadir 입력 option은 없다. runner safety unit 검사는 별도로 실행한다. 실행 절차와 상세 guard는 `tests/harness/README.md`가 소유한다.
 
-D07의 위 버전은 **harness에서 측정한 환경 선택**이며 제품 지원 최소 버전 확정이 아니다. D01/D06은 관찰된 정책을 그대로 기록한 상태로 현재 합성 fixture 검증은 진행할 수 있다. 공개 가입·legacy 활성 전환에 들어가기 전에는 원래 정책 결정 gate를 적용한다. 이는 baseline과 제품 acceptance를 구분한 명확화이며 Phase 0의 인증/보안 설계를 변경하지 않는다.
+D01은 선택 전화, 이메일 인증 없음, 자동 로그인 없음으로 확정했다. D02는 자동 삭제 없는 차단·수동 queue 계약으로 확정했다. D06의 정산/강의실 owner와 정적 신청 페이지의 사이트 운영 owner를 읽기 전용 감사로 분리했고 Members는 범용 제한 엔진을 소유하지 않는다. D07의 0.6.0 지원 판정은 실제 runtime을 실행한 single-site WordPress 7.1/PHP 8.3/Woo 11.1.0에 한정한다.
+
+2026-09-08 보강 실행: `mamp-race-efa20f156534`에서 Apache PHP worker 8개가 같은 이메일 가입 8건을 동시에 처리해 사용자 1명과 필수 동의 2건만 만들었고, 같은 Core reset key를 미리 연 8개 브라우저가 동시에 제출한 뒤 최종 비밀번호 일치 1개·key 재사용 폼 0개를 확인했다. `mamp-timing-14214682d5dd`는 존재/부재 identifier 각 9회의 공개 오류 문구가 같고 median 1223.537/1201.747ms, 비율 1.018임을 측정했다. 실제 Chrome 152는 한국어 로그인 렌더, 0.6.0 asset, device-limit fingerprint JS/cookie, console 오류 0, 360px 가로 overflow 0을 확인했다. MAMP는 HTTP·외부 object cache 없음이므로 trusted TLS/Secure cookie와 persistent-cache 장애는 운영 환경 gate로 남는다.

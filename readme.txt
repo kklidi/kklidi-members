@@ -1,9 +1,9 @@
 === KKLIDI Members ===
 Contributors: kklidi
-Requires at least: 6.1
+Requires at least: 7.1
 Tested up to: 7.1
-Requires PHP: 7.4
-Stable tag: 0.5.0
+Requires PHP: 8.3
+Stable tag: 0.6.0
 
 Core-based member accounts with scoped UI, consent records and safe withdrawal handling.
 
@@ -14,9 +14,10 @@ KKLIDI Members adds login, registration, profile, consent and account management
 WooCommerce orders and LMS enrollment/progress stay with their respective plugins.
 Korean UI uses WordPress gettext translation catalogs.
 
-0.5.0 is a development validation release. See docs/RELEASE-0.5.0.md for unresolved
-production policy, HTTPS/browser and concurrency verification gates.
-The minimum-version declarations above are not a tested multi-version matrix.
+0.6.0 closes the bounded D01/D02/D06 policy gates and adds real Chrome,
+registration/reset race, and enumeration-timing evidence. See docs/RELEASE-0.6.0.md.
+Production TLS, persistent-cache/proxy failure, and production migration remain
+environment-specific gates.
 
 == Installation ==
 
@@ -25,6 +26,10 @@ The minimum-version declarations above are not a tested multi-version matrix.
 3. Review registration and consent policy before changing the closed defaults.
 
 == Changelog ==
+
+= 0.6.0 =
+* Core registration authority and bounded 1.0 signup/withdrawal policy decisions.
+* Actual Chrome, Apache race, timing, and read-only legacy ownership evidence.
 
 = 0.5.0 =
 * Core account MVP, localized frontend/admin UI, bounded LMS profile delegation.

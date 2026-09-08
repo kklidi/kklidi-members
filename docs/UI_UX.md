@@ -35,7 +35,7 @@
 | 동의 | 회원 | 비회원 redirect, 필수 문서 없음, 기본, 필수 동의 누락, 저장 오류, 저장 성공 | 공개된 문서의 version/hash/snapshot에 대해 필수 동의를 기록한다. 선택 마케팅 동의는 체크와 철회를 모두 명시적으로 처리한다. |
 | 탈퇴 요청 | 회원 | 비회원 redirect, 일반 회원 기본, 관리자 수동 검토 안내, nonce 오류, 현재 비밀번호 오류, 저장 오류, 요청 완료 | 즉시 user ID를 삭제하지 않는다. 요청을 저장하고 계정을 차단하며 Core session을 철회한 뒤 로그아웃한다. |
 | 로그아웃 | 비회원, 회원 | 비회원 redirect, 확인, nonce 오류, 완료 | GET은 확인 화면만 보여준다. nonce가 있는 POST에서 Core logout을 실행하고 안전한 로컬 목적지로 이동한다. |
-| 관리자 | `manage_kklidi_members` capability 보유자 | 접근 거부, 설정 기본/저장 완료, 탈퇴 queue 빈 상태/목록, audit 빈 상태/목록 | 공개 가입과 route 소유 설정을 관리하고 탈퇴 요청과 최소 audit을 검토한다. nonce만으로 capability 검사를 대신하지 않는다. |
+| 관리자 | `manage_kklidi_members` capability 보유자 | 접근 거부, 설정 기본/저장 완료, 탈퇴 queue 빈 상태/목록, audit 빈 상태/목록 | Core 공개 가입 상태와 필수 문서 전제조건을 안내하고 route 소유 설정을 관리하며 탈퇴 요청과 최소 audit을 검토한다. 공개 가입 자체는 WordPress 일반 설정이 소유한다. nonce만으로 capability 검사를 대신하지 않는다. |
 
 ## 4. 화면 구조와 접근성
 

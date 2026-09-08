@@ -218,6 +218,49 @@ class HarnessGuards(unittest.TestCase):
         self.assertNotIn('KKLIDI_LMS_Enrollments', source)
         self.assertNotIn("kklidi_lms_table(", source)
 
+    def test_registration_uses_core_gate_and_ignores_legacy_toggle(self):
+        repository = Path(__file__).resolve().parents[2]
+        registration = (repository / 'includes/Registration/RegistrationController.php').read_text(encoding='utf-8')
+        admin = (repository / 'includes/Admin/AdminController.php').read_text(encoding='utf-8')
+        installer = (repository / 'includes/Core/Installer.php').read_text(encoding='utf-8')
+        template = (repository / 'templates/admin.php').read_text(encoding='utf-8')
+        setup = (repository / 'tests/harness/mvp_setup.php').read_text(encoding='utf-8')
+
+        self.assertIn("get_option('users_can_register', false)", registration)
+        self.assertIn('Documents::required_ready()', registration)
+        self.assertNotIn("get_option('kklidi_members_registration_enabled'", registration)
+        self.assertNotIn("update_option('kklidi_members_registration_enabled'", admin)
+        self.assertIn("delete_option('kklidi_members_registration_enabled');", admin)
+        self.assertIn("delete_option('kklidi_members_registration_enabled');", installer)
+        self.assertNotIn('name="registration_enabled"', template)
+        self.assertIn('WordPress registration is allowed', template)
+        self.assertIn("$mode === 'core-on-no-documents'", setup)
+        self.assertIn("$mode === 'documents-ready-core-off'", setup)
+        self.assertIn("$mode === 'core-on'", setup)
+        self.assertIn("update_option('kklidi_members_registration_enabled', '0'", setup)
+
+    def test_post_050_gates_have_bounded_executable_checks(self):
+        repository = Path(__file__).resolve().parents[2]
+        template = (repository / 'templates/register.php').read_text(encoding='utf-8')
+        self.assertRegex(template, r'name="phone"[^>]*>')
+        self.assertNotRegex(template, r'name="phone"[^>]*required')
+
+        d06 = (repository / 'tests/harness/reference_d06_audit.php').read_text(encoding='utf-8')
+        self.assertIn("$root = 'C:/MAMP/htdocs/ns_0727';", d06)
+        self.assertIn('SET SESSION TRANSACTION READ ONLY', d06)
+        self.assertIn('$db->rollback();', d06)
+        self.assertNotIn("require $root . '/wp-load.php'", d06)
+
+        for name in ('mamp_race_case.php', 'mamp_timing_case.php', 'mamp_environment_case.php'):
+            source = (repository / 'tests/harness' / name).read_text(encoding='utf-8')
+            self.assertIn("C:/MAMP/htdocs/kklidi-members-mamp-sandbox", source)
+            self.assertNotIn('$argv[3]', source)
+
+        preflight = (repository / 'tests/harness/deployment_preflight.py').read_text(encoding='utf-8')
+        self.assertIn("parsed.scheme != 'https'", preflight)
+        self.assertIn("'network_request_sent': False", preflight)
+        self.assertNotIn('password', preflight.split('def inspect', 1)[0])
+
 
 if __name__ == '__main__':
     unittest.main()

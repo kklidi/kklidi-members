@@ -2,7 +2,7 @@
 
 WordPress Core Auth 위에서 KKLIDI 서비스가 공유하는 회원·계정·인증 UX 계층.
 
-**현재 배포 버전: 0.5.0 검증판.** 아래 0.2.0 기록은 이전 검증 이력이다. 0.5.0에서는 실제 MAMP Woo 로그인 POST→checkout→동일 세션 장바구니, 주문 상세 링크의 소유권 분리, Woo 기기 제한 허용/차단을 추가 검증했다. KBoard 게시판·댓글·작성 권한과 Members on/off 호환성, DB prefix 2종의 100회 병렬 rate-limit 검사도 통과했다. 운영 정책과 HTTPS/브라우저/추가 race gate는 [0.5.0 릴리스 문서](docs/RELEASE-0.5.0.md)를 기준으로 한다.
+**현재 배포 버전: 0.6.0 검증판.** 0.6.0은 Core 공개가입 단일 스위치, D01/D02/D06 정책, 실제 Chrome 렌더/device fingerprint, Apache 동시 가입·Core reset, 열거 시간 분포를 검증했다. 운영 TLS·persistent-cache/proxy 장애·운영 마이그레이션은 [0.6.0 릴리스 문서](docs/RELEASE-0.6.0.md)의 환경 gate를 따른다.
 
 이전 검증 기록: **첫 MVP runtime 0.2.0 구현 및 24개 MVP 계약의 합성 WordPress 실행 완료**. 최신 합성 실행은 19개 PASS, 3개 SYNTHETIC_PASS, 2개 PARTIAL이다. 실제 device-limit 1.1.3의 Members/Core 허용·차단·제거 경로는 통과했다. MAMP의 WooCommerce 11.1.0/WCI 1.0.3에서는 익명 checkout 로그인 이동, 주문 소유권 분리, Members-off Core fallback/no-fatal을 확인했으며 브라우저 로그인 제출 뒤 cart 유지와 렌더링된 주문 목록은 남아 있다. 실제 KKLIDI LMS 1.1.1에서는 Woo 주문→수강 등록, 같은 WordPress user ID의 진도·수료증·비공개 질문, 수강자/비수강자 접근 분리, Members 프로필 위임과 Members-off 폴백을 통과했다. KBoard 제거 전 호환성 smoke, device-limit의 Woo 로그인 입구, TLS/browser, D01/D02/D06/D07 정책 결정도 배포 gate다. KBoard 권한 엔진 이전·복제와 content migration은 범위 밖이다. 제품 방향 판정은 **GREENFIELD_RECOMMENDED**다.
 
@@ -25,7 +25,7 @@ WordPress Core Auth 위에서 KKLIDI 서비스가 공유하는 회원·계정·�
 
 현재 DB의 WordPress prefix는 `wp_`였다. 사용자 요청의 custom prefix 예시와 다르지만, 신규 제품은 항상 `$wpdb->prefix`와 WordPress API를 사용한다. 현지 payout 플러그인에는 `kklidi_pos_*`가 관찰되었다. 요청한 신규 convention `kklidi_mem_*`는 그대로 유지한다.
 
-회원 434명과 기존 WordPress ID를 보존한다. 로그인·가입·reset·profile·동의·최소 감사·안전한 탈퇴 요청을 작은 1.0으로 권장한다. 가입 이메일 인증은 선택, TOTP·SMS OTP·소셜 로그인은 후속 버전이다. 공개 가입 활성화와 탈퇴 보존 정책은 배포 전 사용자 결정이 필요하다.
+회원 434명과 기존 WordPress ID를 보존한다. 로그인·가입·reset·profile·동의·최소 감사·안전한 탈퇴 요청을 작은 1.0으로 권장한다. D01은 전화 선택, 이메일 가입 인증 없음, 가입 후 자동 로그인 없음으로 확정했다. 공개 가입 여부는 WordPress Core의 `users_can_register`가 단독으로 결정하며, 필수 서비스·개인정보 문서가 준비되지 않으면 Members 가입 화면은 닫힌다. D02는 자동 삭제 없이 즉시 접근 차단 후 관리자와 각 도메인 owner가 수동 조정하는 정책이다.
 
 ## 조사 안전 경계와 한계
 
