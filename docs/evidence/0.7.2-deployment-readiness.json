@@ -9,7 +9,7 @@
     "versions_recorded": true,
     "supported_runtime": true,
     "current_members_version": true,
-    "owners_assigned": false,
+    "owners_assigned": true,
     "route_owners_match_contract": true,
     "backup_hash": false,
     "backup_time": false,
@@ -20,7 +20,6 @@
   },
   "failed": [
     "trusted_https_url",
-    "owners_assigned",
     "backup_hash",
     "backup_time",
     "restore_tested"

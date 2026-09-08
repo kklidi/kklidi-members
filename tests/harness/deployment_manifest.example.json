@@ -12,13 +12,13 @@
     "woocommerce": "11.1.0"
   },
   "owners": {
-    "members_runtime": "ROLE_REQUIRED",
-    "wordpress_privacy": "ROLE_REQUIRED",
-    "woocommerce": "ROLE_REQUIRED",
-    "lms": "ROLE_REQUIRED",
-    "payout": "ROLE_REQUIRED",
-    "site_content": "ROLE_REQUIRED",
-    "rollback": "ROLE_REQUIRED"
+    "members_runtime": "KKLIDI Members runtime owner",
+    "wordpress_privacy": "WordPress privacy and compliance owner",
+    "woocommerce": "WooCommerce order and payment owner",
+    "lms": "KKLIDI LMS learning-domain owner",
+    "payout": "Payout and settlement owner",
+    "site_content": "Site content and application-page owner",
+    "rollback": "Release and rollback owner"
   },
   "route_owners": {
     "members_account": "members_runtime",
