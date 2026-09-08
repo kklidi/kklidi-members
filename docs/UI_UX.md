@@ -5,13 +5,13 @@
 ## 1. 계약 상태
 
 - 계약 ID: `AUTH-UI-001`
-- 상태: **SPECIFIED**
-- 다음 구현 계약: `AUTH-UI-002`
+- `AUTH-UI-001` 상태: **SPECIFIED**
+- `AUTH-UI-002` 상태: **IMPLEMENTED_AND_VERIFIED**
 - 범위: 로그인, 가입, 계정 홈, 프로필, 비밀번호 변경, 동의, 탈퇴 요청, 로그아웃 확인, Members 관리자 화면
 
 `AUTH-UI-001`은 화면 구현 전에 사용자에게 보이는 상태와 완료 기준을 고정한다. 현재 템플릿이 HTTP에서 렌더링된 사실만으로 이 계약이 구현되었다고 판정하지 않는다. CSS 적용, 반응형 브라우저 검증, 키보드 조작 검증은 `AUTH-UI-002`에서 수행한다.
 
-`AUTH-UI-002`는 2026-09-07에 구현했다. 공통 frontend stylesheet, 관리자 전용 stylesheet, 8개 frontend page shell, route 전용 asset hook을 추가했으며 JavaScript는 추가하지 않았다. MAMP sandbox에서 가입·로그인 오류·로그인 회원의 6개 계정 화면·관리자 화면을 확인했다. 이 smoke는 화면 구조·자산 격리·반응형·focus의 증거이며, 모든 보안 상태 전이의 UI 회귀는 기존 MVP behavior harness와 후속 통합 gate가 계속 소유한다.
+`AUTH-UI-002`는 2026-09-07에 구현했다. 공통 frontend stylesheet, 관리자 전용 stylesheet, 8개 frontend page shell, route 전용 asset hook을 추가했으며 JavaScript는 추가하지 않았다. MAMP sandbox에서 가입·로그인 오류·로그인 회원의 6개 계정 화면·관리자 화면을 확인했고, 2026-09-09의 0.7.1 패키지를 Chrome 360px viewport에서 다시 확인해 한국어 번역 적용, route 전용 0.7.1 자산, focus 규칙과 가로 overflow 부재를 검증했다. 이 smoke는 화면 구조·자산 격리·반응형·focus의 증거이며, 모든 보안 상태 전이의 UI 회귀는 기존 MVP behavior harness와 후속 통합 gate가 계속 소유한다.
 
 ## 2. 공통 원칙
 

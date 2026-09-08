@@ -42,7 +42,7 @@ Reference root `R = C:/MAMP/htdocs/ns_0727`, 플러그인 root `P = R/wp-content
 
 | 기능 | 설정·경로·데이터 근거 | 분류와 결론 |
 | --- | --- | --- |
-| 로그인 UI | E04 로그인 shortcode, skin=two, 두 플러그인 현재 비활성 | REQUIRED: `AUTH-UI-001` 화면 계약 고정. `AUTH-UI-002` 구현·브라우저 검증 대기 |
+| 로그인 UI | E04 로그인 shortcode, skin=two, 두 플러그인 현재 비활성 | REQUIRED: `AUTH-UI-001` 화면 계약 고정. `AUTH-UI-002` 구현·MAMP/Chrome 브라우저 검증 완료 |
 | 로그인 redirect | login_redirect_page=main; E08 login_redirect가 목적지를 home으로 덮음 | REPLACEABLE: 안전한 원래 목적지 우선으로 의도적 변경 |
 | 가입 보정 | allow_email_login=1, username 숨김·email 대입; 로컬 nicename 보정 추가 코드 | REQUIRED: 한국어 표시명과 비어 있지 않은 slug를 별도로 검증 |
 | 가입 후 자동 로그인 | auto_login_after_registration=1, verify_email 빈값; E08 Core cookie 설정 분기 | MVP_OPTIONAL에 해당하는 REPLACEABLE; 1.0 기본은 명시적 로그인 |

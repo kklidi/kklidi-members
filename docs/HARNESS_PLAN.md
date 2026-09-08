@@ -21,7 +21,7 @@ reference와 독립된 WP DB/filesystem에 synthetic 사용자 A/B, subscriber/a
 
 ## 2. Behavior contracts
 
-아래 표는 기대 계약이며 현재 실행 결과는 §5와 0.5.0 릴리스 문서가 소유한다. MVP=1.0 필수, OPTIONAL=해당 기능을 포함하면 필수, FUTURE=1.0에는 실행 대상 아님. 각 사건은 별도 fixture에서 반복해 데이터 오염을 피한다.
+아래 표는 기대 계약이며 실행 결과의 연혁은 §5, 현재 판정은 최신 릴리스 문서와 `docs/evidence/<version>.json`이 소유한다. MVP=1.0 필수, OPTIONAL=해당 기능을 포함하면 필수, FUTURE=1.0에는 실행 대상 아님. 각 사건은 별도 fixture에서 반복해 데이터 오염을 피한다.
 
 | ID / 대상 | 조건과 사용자 행동 | 기대 결과·실패/경계 검증 |
 | --- | --- | --- |
@@ -92,9 +92,9 @@ reference와 독립된 WP DB/filesystem에 synthetic 사용자 A/B, subscriber/a
 
 최소 보고 항목은 환경 버전, route owner, fixture, case ID, 기대/실제, 증거 파일, 실패 원인, 남은 unknown, cleanup/rollback 결과다. raw credential/token/사용자 개인정보를 증거 artifact에 넣지 않는다. 이미 사용자 데이터가 있는 reference에서 “시험 삼아 로그인”하는 검증은 이 계획에 포함되지 않는다.
 
-## 5. AUTH-LOGIN-001 현재 실행 범위
+## 5. 실행 증거 연혁
 
-`tests/harness`는 **CORE_BASELINE_ONLY**와 **MEMBERS_ON**을 순서대로 구분한 뒤 24개 MVP 계약을 합성 WordPress에서 실행한다. 실제 device-limit 1.1.3 파일을 읽기 전용 reference에서 임시 site로 복사해 PHP hook을 검증한다. Woo/LMS는 합성 domain row와 Members off fallback까지만 검증하고, KBoard는 제거 전 호환성 smoke와 Members off no-fatal만 검증하므로 실제 전체 stack release 판정은 PARTIAL이다.
+다음 표는 최초 24개 계약 합성 실행의 역사적 snapshot이다. `tests/harness`는 **CORE_BASELINE_ONLY**와 **MEMBERS_ON**을 순서대로 구분하고, 당시에는 실제 device-limit 1.1.3 파일을 읽기 전용 reference에서 임시 site로 복사해 PHP hook을 검증했다. 그 시점의 Woo/LMS는 합성 domain row와 Members-off fallback, KBoard는 제한된 smoke만 검증했으므로 당시 전체 stack 판정은 PARTIAL이었다. 이후 실제 MAMP 보강과 현재 판정은 §5.1 이후 및 최신 릴리스 evidence를 따른다.
 
 | 항목 | 실행 결과 |
 | --- | --- |
@@ -108,14 +108,14 @@ reference와 독립된 WP DB/filesystem에 synthetic 사용자 A/B, subscriber/a
 | 활성화·쓰기 | identity/role/domain 지문 불변; 승인된 audit/consent 표 2개와 비자동로드 option 6개만 생성; 로그인 중 Core session token과 제한/audit 기록만 변경 |
 | 구조적 성능 guard | 일반 frontend에서 entry/Core router만 load; Members CSS/JS·PHP session·custom DB write·외부 HTTP event 0 |
 | 신뢰성 control | cookie 제거 시 anonymous, wrong-ID assertion 실패, observer 무키 403, 비대상 route 404 |
-| 전체 계약 | 24개 모두 실행 경로 존재: 19 PASS, 3 SYNTHETIC_PASS(Woo/LMS/KBoard), 2 PARTIAL(enum timing, device Woo entry) |
+| 당시 전체 계약 | 24개 모두 실행 경로 존재: 19 PASS, 3 SYNTHETIC_PASS(Woo/LMS/KBoard), 2 PARTIAL(enum timing, device Woo entry) |
 | 관리자·탈퇴 | `wp_`/임의 prefix 모두 일반 회원 관리자 GET 거부·관리자 nonce 재사용 거부; 대기 queue 표시 후 `withdrawal_pending→disabled`, ID 보존, 재실행 audit 중복 0 |
 | 성능 | 3×100 off/on: median 406.481→405.573ms, p95 477.919→477.217ms; 각 허용 budget 내, query median 5→5 |
 | runner safety | 15/15 unit 검사 PASS; production·harness PHP syntax 검사 PASS |
 | side effects | mail sink 실동작 및 WP HTTP API 차단 검증; 실제 외부 송신 없음 |
 | cleanup | 소유 PHP/MySQL 프로세스 종료, 임시 DB/filesystem 삭제 확인 |
 | 증거 | `.harness/reports/dde968a6cb8a4367abb69708568c62bc.json` (git 제외; 최신은 latest.json) |
-| 미검증 | Woo browser login 제출 후 cart/checkout 연속성과 렌더링된 My Account 주문, KBoard 제거 전 호환성 smoke/no-fatal, KBoard 권한 parity/content migration(범위 밖), device-limit Woo form, TLS/Secure cookie, browser JS, 분산/병렬 abuse campaign |
+| 당시 미검증 | Woo browser login 제출 후 cart/checkout 연속성과 렌더링된 My Account 주문, KBoard 제거 전 호환성 smoke/no-fatal, KBoard 권한 parity/content migration(범위 밖), device-limit Woo form, TLS/Secure cookie, browser JS, 분산/병렬 abuse campaign |
 
 ### 5.1 AUTH-WOO-001 MAMP 실제 stack 보강
 
@@ -129,7 +129,7 @@ reference와 독립된 WP DB/filesystem에 synthetic 사용자 A/B, subscriber/a
 | 정책 설정 | 실행 중 guest checkout=no, checkout signup=no, My Account registration=no로 관찰된 Phase 0 정책 고정 |
 | optional dependency | Members off에서 checkout은 Core `wp-login.php`로 이동하고 My Account는 HTTP 200/치명 오류 없음; 같은 검증의 `finally`에서 Members 재활성화 |
 | cleanup | 합성 user/product/order 4개 부재 확인, guest checkout=yes·signup=no·registration=no 원복, WCI 비활성화 후 임시 복사 삭제, Members 활성 확인 |
-| 판정 | **PARTIAL**: 실제 redirect·domain ownership·Members-off는 통과. 브라우저 로그인 POST 뒤 같은 Woo session의 cart/checkout 유지와 렌더링된 My Account 주문은 아직 미실행 |
+| 당시 판정 | **PARTIAL**: 실제 redirect·domain ownership·Members-off는 통과했으나, 이 실행에서는 로그인 POST 뒤 같은 Woo session의 cart/checkout 유지와 렌더링된 My Account 주문을 아직 실행하지 않음 |
 | 증거 | `.harness/reports/mamp-woo-c4a9e2d710bf.json` |
 
 ### 5.2 AUTH-LMS-001 MAMP 실제 stack 보강
@@ -154,7 +154,7 @@ reference와 독립된 WP DB/filesystem에 synthetic 사용자 A/B, subscriber/a
 
 - `257a25a207b646f88ba74cd0dd93bfb0`: post-0.5.0 one-prefix synthetic 재검증에서 Core on/필수 문서 없음, Core off/필수 문서 준비, Core on/필수 문서 준비의 세 상태를 실행했다. 앞의 두 상태는 가입 폼을 숨겼고 마지막 상태는 obsolete Members option이 `0`이어도 가입·필수 동의 저장에 성공했다. 전체 24개 MVP 계약 PASS, 임시 DB 제거와 프로세스 종료를 확인했다. 성능 블록은 이 소규모 재검증에서 제외했다.
 - `mamp-woo-be0342cba88e`: 실제 로그인 POST 뒤 checkout 복귀, 같은 쿠키 세션의 Woo Store API cart 상품 보존, 회원 주문 상세 링크 표시와 guest 주문 제외, Woo 자체 로그인 폼의 device-limit 허용/거부 PASS. HTTP form 검증이며 JavaScript 엔진을 실행한 브라우저 증거는 아니다.
-- `mamp-kboard-394cb2f1d392`: 실제 KBoard 6.5의 목록·게시글·댓글 HTTP 200, 회원/비회원 쓰기 권한, 게시글·댓글 작성자 ID 유지, Members CSS 0을 on/off에서 확인했다. 합성 board/content/comment/user/page 잔존 0. D06 restriction 3페이지·메뉴 3개의 운영 owner가 미확정이므로 전체 계약은 PARTIAL이다.
+- `mamp-kboard-394cb2f1d392`: 실제 KBoard 6.5의 목록·게시글·댓글 HTTP 200, 회원/비회원 쓰기 권한, 게시글·댓글 작성자 ID 유지, Members CSS 0을 on/off에서 확인했다. 합성 board/content/comment/user/page 잔존 0. 이 실행 당시에는 D06 restriction 3페이지·메뉴 3개의 운영 owner가 미확정이어서 전체 계약을 PARTIAL로 기록했다.
 - `concurrency_case.php`: 별도 PHP 프로세스 8개에서 동일 limiter key에 100회 요청, 각 prefix에서 정확히 10회 허용. 분산 공격·가입/reset 경합 전체 통과로 확대 해석하지 않는다.
 - 공개 정책과 환경별 미검증 항목은 [RELEASE-0.5.0.md](RELEASE-0.5.0.md)에 남긴다. 이전 실행의 수치·분류는 역사적 증거로 유지한다.
 

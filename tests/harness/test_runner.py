@@ -163,6 +163,7 @@ class HarnessGuards(unittest.TestCase):
         admin_source = (repository / 'includes/Admin/AdminController.php').read_text(encoding='utf-8')
         self.assertIn("add_action('wp_enqueue_scripts'", plugin_source)
         self.assertIn('is_frontend_route', plugin_source)
+
         self.assertIn("add_action('admin_enqueue_scripts'", admin_source)
         self.assertIn("tools_page_kklidi-members", admin_source)
         production_source = '\n'.join(path.read_text(encoding='utf-8') for path in (
@@ -171,6 +172,17 @@ class HarnessGuards(unittest.TestCase):
             repository / 'includes/Admin/AdminController.php',
         ))
         self.assertNotIn('wp_enqueue_script(', production_source)
+
+    def test_phase_zero_documents_do_not_report_completed_ui_as_pending(self):
+        repository = Path(__file__).resolve().parents[2]
+        product = (repository / 'docs/PRODUCT.md').read_text(encoding='utf-8')
+        ui_ux = (repository / 'docs/UI_UX.md').read_text(encoding='utf-8')
+        harness = (repository / 'docs/HARNESS_PLAN.md').read_text(encoding='utf-8')
+
+        self.assertNotIn('AUTH-UI-002` 구현·브라우저 검증 대기', product)
+        self.assertIn('AUTH-UI-002` 상태: **IMPLEMENTED_AND_VERIFIED**', ui_ux)
+        self.assertIn('현재 판정은 최신 릴리스 문서', harness)
+        self.assertNotIn('현재 실행 결과는 §5와 0.5.0 릴리스 문서', harness)
 
     def test_mamp_woo_fixture_is_pinned_and_self_cleaning(self):
         repository = Path(__file__).resolve().parents[2]
