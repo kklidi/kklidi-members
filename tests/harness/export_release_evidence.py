@@ -1,4 +1,5 @@
 """Export only credential-free aggregate evidence for the current plugin version."""
+import hashlib
 import json
 from pathlib import Path
 import re
@@ -30,6 +31,14 @@ def main():
         assert data['status'] == 'PASS'
         integrations[data['run_id']] = {key: value for key, value in data.items()
             if key != 'reset_bootstrap'}
+    lifecycle = newest(reports, 'mamp-lifecycle-*.json')
+    package_path = ROOT / ('dist/kklidi-members-' + version + '.zip')
+    package_manifest_path = ROOT / ('dist/kklidi-members-' + version + '.manifest.json')
+    package_manifest = json.loads(package_manifest_path.read_text(encoding='utf-8'))
+    package_sha256 = hashlib.sha256(package_path.read_bytes()).hexdigest()
+    assert package_manifest['version'] == version
+    assert package_manifest['archive_sha256'] == package_sha256
+    assert lifecycle['new_archive_sha256'] == package_sha256
     https = newest(reports, 'mamp-https-*.json')
     assert https['status'] == 'PASS'
     preflight = https['preflight']
@@ -40,6 +49,12 @@ def main():
         'synthetic_run': synthetic['run_id'],
         'execution_status': synthetic['status'],
         'production_acceptance': 'PARTIAL',
+        'package': {
+            'archive': package_path.name,
+            'sha256': package_sha256,
+            'manifest': package_manifest_path.name,
+            'files': len(package_manifest['files']),
+        },
         'contracts': contracts,
         'integration': integrations,
         'performance': synthetic['mvp_contracts'].get('AUTH-PERF-003', []),

@@ -61,9 +61,9 @@ class Client:
             return response.status, response.headers, response.read().decode('utf-8', errors='replace')
 
 
-def run_checked(arguments, env=None):
+def run_checked(arguments, env=None, cwd=None):
     result = subprocess.run([str(item) for item in arguments], env=env, capture_output=True,
-                            timeout=60, creationflags=subprocess.CREATE_NO_WINDOW)
+                            cwd=cwd, timeout=60, creationflags=subprocess.CREATE_NO_WINDOW)
     if result.returncode:
         raise RuntimeError('Command failed: ' + Path(str(arguments[0])).name)
     return result
@@ -71,6 +71,7 @@ def run_checked(arguments, env=None):
 
 def create_certificates(directory):
     directory.mkdir(parents=True)
+    openssl_env = dict(os.environ, RANDFILE=str(directory / '.rnd'))
     ca_key, ca_cert = directory / 'ca.key', directory / 'ca.crt'
     server_key, request, server_cert = directory / 'server.key', directory / 'server.csr', directory / 'server.crt'
     extensions = directory / 'server.ext'
@@ -80,12 +81,12 @@ def create_certificates(directory):
         encoding='ascii')
     run_checked([OPENSSL, 'req', '-config', OPENSSL_CONFIG, '-x509', '-newkey', 'rsa:2048', '-nodes', '-sha256',
                  '-keyout', ca_key, '-out', ca_cert, '-days', '1',
-                 '-subj', '/CN=KKLIDI Members Harness CA'])
+                 '-subj', '/CN=KKLIDI Members Harness CA'], env=openssl_env, cwd=directory)
     run_checked([OPENSSL, 'req', '-config', OPENSSL_CONFIG, '-newkey', 'rsa:2048', '-nodes', '-sha256',
-                 '-keyout', server_key, '-out', request, '-subj', '/CN=localhost'])
+                 '-keyout', server_key, '-out', request, '-subj', '/CN=localhost'], env=openssl_env, cwd=directory)
     run_checked([OPENSSL, 'x509', '-req', '-in', request, '-CA', ca_cert, '-CAkey', ca_key,
                  '-CAcreateserial', '-out', server_cert, '-days', '1', '-sha256',
-                 '-extfile', extensions])
+                 '-extfile', extensions], env=openssl_env, cwd=directory)
     return ca_cert, server_cert, server_key
 
 
@@ -201,7 +202,11 @@ if (in_array(($_SERVER['REMOTE_ADDR'] ?? ''), array('127.0.0.1', '::1'), true)
         if run_root.is_dir() and run_root.parent == https_root:
             shutil.rmtree(run_root)
         report['certificate_directory_removed'] = not run_root.exists()
-        if not report['mu_plugin_removed'] or not report['certificate_directory_removed']:
+        if https_root.is_dir() and not any(https_root.iterdir()):
+            https_root.rmdir()
+        report['certificate_root_removed'] = not https_root.exists()
+        if (not report['mu_plugin_removed'] or not report['certificate_directory_removed']
+                or not report['certificate_root_removed']):
             report['status'] = 'FAIL'
         destination = ROOT / '.harness/reports' / (report['run_id'] + '.json')
         destination.parent.mkdir(parents=True, exist_ok=True)

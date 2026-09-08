@@ -16,11 +16,12 @@ ROOT = HERE.parents[1]
 SANDBOX = Path('C:/MAMP/htdocs/kklidi-members-mamp-sandbox')
 PLUGIN = SANDBOX / 'wp-content/plugins/kklidi-members'
 PHP = 'C:/MAMP/bin/php/php8.3.1/php.exe'
-PREVIOUS_VERSION = '0.7.0'
+PREVIOUS_VERSION = '0.7.1'
 CURRENT_VERSION = re.search(
     r'\* Version: (\d+\.\d+\.\d+)',
     (ROOT / 'kklidi-members.php').read_text(encoding='utf-8'),
 ).group(1)
+ALLOWED_INITIAL_VERSIONS = ('0.7.0', PREVIOUS_VERSION, CURRENT_VERSION)
 OLD_ARCHIVE = ROOT / ('dist/kklidi-members-' + PREVIOUS_VERSION + '.zip')
 NEW_ARCHIVE = ROOT / ('dist/kklidi-members-' + CURRENT_VERSION + '.zip')
 
@@ -82,6 +83,26 @@ def extract(archive, destination):
     return extracted
 
 
+def assert_plugin_parent_writable(token):
+    probe = PLUGIN.parent / ('.kklidi-members-lifecycle-' + token + '.probe')
+    try:
+        with probe.open('x', encoding='ascii') as stream:
+            stream.write(token)
+    except OSError as error:
+        raise RuntimeError('MAMP plugin directory is not writable; grant access before lifecycle mutation') from error
+    finally:
+        if probe.exists():
+            probe.unlink()
+
+
+def move_same_volume(source, destination):
+    source = source.resolve(strict=True)
+    parent = destination.parent.resolve(strict=True)
+    if source.drive.casefold() != parent.drive.casefold() or destination.exists():
+        raise RuntimeError('Lifecycle move must stay on one volume and target an absent path')
+    os.replace(source, destination)
+
+
 def main():
     token = secrets.token_hex(6)
     report = {'run_id': 'mamp-lifecycle-' + token, 'status': 'FAIL',
@@ -97,12 +118,13 @@ def main():
             raise RuntimeError('Fixed MAMP sandbox path mismatch')
         if not OLD_ARCHIVE.is_file() or not NEW_ARCHIVE.is_file():
             raise RuntimeError('Lifecycle release archives are missing')
+        assert_plugin_parent_writable(token)
         report['old_archive_sha256'] = hashlib.sha256(OLD_ARCHIVE.read_bytes()).hexdigest()
         report['new_archive_sha256'] = hashlib.sha256(NEW_ARCHIVE.read_bytes()).hexdigest()
         initial = php_json(STATUS)
         initial_active = initial['active']
-        if initial.get('version') not in (PREVIOUS_VERSION, CURRENT_VERSION):
-            raise RuntimeError('Sandbox must start at the previous or current Members version')
+        if initial.get('version') not in ALLOWED_INITIAL_VERSIONS:
+            raise RuntimeError('Sandbox must start at an approved baseline, previous or current Members version')
         report['initial_version'] = initial.get('version')
         protected_before = php_json(PROTECTED)
         original_digest, original_files = tree_digest(PLUGIN)
@@ -113,29 +135,29 @@ def main():
         reinstall = extract(NEW_ARCHIVE, temp_root / 'reinstall')
 
         php_json(DEACTIVATE)
-        shutil.move(PLUGIN, original)
+        move_same_volume(PLUGIN, original)
         original_moved = True
 
-        shutil.move(fresh, PLUGIN)
+        move_same_volume(fresh, PLUGIN)
         fresh_result = php_json(ACTIVATE)
         if fresh_result != {'active': True, 'version': CURRENT_VERSION}:
             raise RuntimeError('New installation activation failed')
 
         php_json(DEACTIVATE)
-        shutil.move(PLUGIN, temp_root / 'used-fresh')
-        shutil.move(old, PLUGIN)
+        move_same_volume(PLUGIN, temp_root / 'used-fresh')
+        move_same_volume(old, PLUGIN)
         old_result = php_json(ACTIVATE)
         if old_result != {'active': True, 'version': PREVIOUS_VERSION}:
             raise RuntimeError('Previous release setup for update failed')
-        shutil.move(PLUGIN, temp_root / 'used-old')
-        shutil.move(update, PLUGIN)
+        move_same_volume(PLUGIN, temp_root / 'used-old')
+        move_same_volume(update, PLUGIN)
         update_result = php_json(STATUS)
         if update_result != {'active': True, 'version': CURRENT_VERSION}:
             raise RuntimeError('Previous-to-current update failed')
 
         php_json(DEACTIVATE)
-        shutil.move(PLUGIN, temp_root / 'used-update')
-        shutil.move(reinstall, PLUGIN)
+        move_same_volume(PLUGIN, temp_root / 'used-update')
+        move_same_volume(reinstall, PLUGIN)
         reinstall_result = php_json(ACTIVATE)
         if reinstall_result != {'active': True, 'version': CURRENT_VERSION}:
             raise RuntimeError('Current-version reinstall failed')
@@ -170,9 +192,9 @@ def main():
                     php_json(DEACTIVATE)
                 except Exception:
                     pass
-                shutil.move(PLUGIN, temp_root / 'used-final')
+                move_same_volume(PLUGIN, temp_root / 'used-final')
             if original.exists():
-                shutil.move(original, PLUGIN)
+                move_same_volume(original, PLUGIN)
             if initial_active and PLUGIN.exists():
                 php_json(ACTIVATE)
             restored_digest, restored_files = tree_digest(PLUGIN)

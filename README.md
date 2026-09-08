@@ -2,7 +2,7 @@
 
 WordPress Core Auth 위에서 KKLIDI 서비스가 공유하는 회원·계정·인증 UX 계층.
 
-**현재 배포 후보: 0.7.1 검증판.** 0.7.1은 실제 LMS와 플러그인 설치·업데이트·재설치·비활성화 생명주기를 반복 실행 가능한 MAMP gate로 고정한다. 실제 운영 인증서·다중 서버·운영 migration 승인은 [0.7.1 릴리스 문서](docs/RELEASE-0.7.1.md)의 환경 gate를 따른다.
+**현재 배포 후보: 0.7.2 검증판.** 0.7.2는 0.7.1의 검증된 runtime을 유지하면서 Phase 0 문서의 역사적 snapshot과 현재 판정을 명확히 구분한다. 실제 운영 인증서·다중 서버·운영 migration 승인은 [0.7.2 릴리스 문서](docs/RELEASE-0.7.2.md)의 환경 gate를 따른다.
 
 이전 검증 기록: **첫 MVP runtime 0.2.0 구현 및 24개 MVP 계약의 합성 WordPress 실행 완료**. 최신 합성 실행은 24개 MVP 계약이 모두 PASS다. 실제 device-limit 1.1.3의 Members/Core 허용·차단·제거 경로, WooCommerce 11.1.0/WCI 1.0.3의 checkout·cart·주문 귀속, KKLIDI LMS의 주문→수강·진도·수료증·비공개 질문과 Members-off 폴백, KBoard 제거 전 호환성, TLS/browser gate를 통과했다. KBoard 권한 엔진 이전·복제와 content migration은 범위 밖이다. 제품 방향 판정은 **GREENFIELD_RECOMMENDED**다.
 

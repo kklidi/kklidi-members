@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.7.2 — 2026-09-09
+
+- Clarified that `AUTH-UI-002` is implemented and verified in MAMP and Chrome.
+- Separated historical synthetic/MAMP snapshots from the current release verdict in
+  the Phase 0 harness source of truth.
+- Added an executable documentation consistency guard and advanced the lifecycle gate
+  to the 0.7.1-to-0.7.2 update path.
+- Made lifecycle directory swaps same-volume atomic and added a write-access probe so
+  a denied MAMP mutation cannot fall back to a partial copy.
+- Confined OpenSSL random-state files to each disposable TLS certificate directory.
+- Kept the 0.7.1 Core-auth runtime behavior unchanged.
+
 ## 0.7.1 — 2026-09-09
 
 - Added a repeatable fixed-MAMP LMS runner that verifies WordPress user-ID continuity,

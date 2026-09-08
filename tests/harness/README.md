@@ -42,7 +42,7 @@ The runner has no option for an existing site URL, existing DB endpoint, existin
 | `mamp_woo_case.php` | CLI-only, fixed-sandbox Woo/WCI fixture with tagged user/product/orders, Members optional-dependency toggles, and exact cleanup |
 | `mamp_lms_case.php` | CLI-only, fixed-sandbox LMS fixture for identity/access/domain ownership, Members fallback, mail sink, and exact cleanup |
 | `mamp_lms_run.py` | Runs the actual fixed-sandbox LMS identity/access/on-off contract and writes a per-run JSON report |
-| `mamp_lifecycle_run.py` | Verifies ZIP install, 0.7.0→current update, reinstall, deactivate/reactivate, protected IDs/domain fingerprint, and exact source restoration |
+| `mamp_lifecycle_run.py` | Verifies ZIP install, previous→current update, reinstall, deactivate/reactivate, protected IDs/domain fingerprint, and exact source restoration |
 | `wordpress.lock.json` | Exact Core archive and checksum manifest provenance |
 | `database.php` | CLI-only, datadir-verified database provisioning |
 | `config.php` | Guarded temporary wp-config template; never deployed |
@@ -67,7 +67,7 @@ With the dedicated MAMP Apache and MySQL sandbox running, the repeatable LMS and
 & $Python tests/harness/mamp_lifecycle_run.py
 ```
 
-Both runners accept no alternate site path or URL, use a per-run token, write `.harness/reports/<run-id>.json`, and restore their owned data, plugin state, files, and temporary directories in `finally`.
+Both runners accept no alternate site path or URL, use a per-run token, write `.harness/reports/<run-id>.json`, and restore their owned data, plugin state, files, and temporary directories in `finally`. The lifecycle runner probes the fixed plugin parent before mutation and uses same-volume atomic directory moves so a permission failure cannot degrade into a partial copy.
 
 **Remaining environment gates:** local TLS/Core Secure-cookie and object-cache/storage-failure behavior have executable evidence. The actual production certificate/CDN/proxy, multiple application hosts, and production migration still require an explicitly identified staging/production environment, completed deployment manifest and owner handoff. KBoard permission-engine parity and content migration remain out of scope because KBoard is scheduled for removal.
 

@@ -89,6 +89,9 @@ class HarnessGuards(unittest.TestCase):
         builder = (repository / 'tests/harness/build_release.py').read_text(encoding='utf-8')
         self.assertIn("not path.startswith('docs/evidence/')", builder)
         self.assertNotIn('evidence_doc', builder)
+        exporter = (repository / 'tests/harness/export_release_evidence.py').read_text(encoding='utf-8')
+        self.assertIn("package_manifest['archive_sha256'] == package_sha256", exporter)
+        self.assertIn("lifecycle['new_archive_sha256'] == package_sha256", exporter)
 
     def test_auth_ui_001_covers_every_runtime_surface(self):
         repository = Path(__file__).resolve().parents[2]
@@ -184,6 +187,15 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('현재 판정은 최신 릴리스 문서', harness)
         self.assertNotIn('현재 실행 결과는 §5와 0.5.0 릴리스 문서', harness)
 
+    def test_tls_runner_confines_openssl_random_state_to_run_directory(self):
+        repository = Path(__file__).resolve().parents[2]
+        source = (repository / 'tests/harness/mamp_https_run.py').read_text(encoding='utf-8')
+
+        self.assertIn("openssl_env = dict(os.environ, RANDFILE=str(directory / '.rnd'))", source)
+        self.assertEqual(source.count('env=openssl_env'), 3)
+        self.assertEqual(source.count('cwd=directory'), 3)
+        self.assertIn("report['certificate_root_removed'] = not https_root.exists()", source)
+
     def test_mamp_woo_fixture_is_pinned_and_self_cleaning(self):
         repository = Path(__file__).resolve().parents[2]
         source = (repository / 'tests/harness/mamp_woo_case.php').read_text(encoding='utf-8')
@@ -243,13 +255,17 @@ class HarnessGuards(unittest.TestCase):
 
         lifecycle = (repository / 'tests/harness/mamp_lifecycle_run.py').read_text(encoding='utf-8')
         self.assertIn("SANDBOX = Path('C:/MAMP/htdocs/kklidi-members-mamp-sandbox')", lifecycle)
-        self.assertIn("PREVIOUS_VERSION = '0.7.0'", lifecycle)
+        self.assertIn("PREVIOUS_VERSION = '0.7.1'", lifecycle)
+        self.assertIn("ALLOWED_INITIAL_VERSIONS = ('0.7.0', PREVIOUS_VERSION, CURRENT_VERSION)", lifecycle)
         self.assertIn("CURRENT_VERSION = re.search(", lifecycle)
         self.assertIn("OLD_ARCHIVE = ROOT / ('dist/kklidi-members-' + PREVIOUS_VERSION + '.zip')", lifecycle)
         self.assertIn("NEW_ARCHIVE = ROOT / ('dist/kklidi-members-' + CURRENT_VERSION + '.zip')", lifecycle)
-        self.assertIn("not in (PREVIOUS_VERSION, CURRENT_VERSION)", lifecycle)
+        self.assertIn('not in ALLOWED_INITIAL_VERSIONS', lifecycle)
         self.assertNotIn('argparse', lifecycle)
-        self.assertIn("shutil.move(original, PLUGIN)", lifecycle)
+        self.assertIn('assert_plugin_parent_writable(token)', lifecycle)
+        self.assertIn('os.replace(source, destination)', lifecycle)
+        self.assertNotIn('shutil.move(', lifecycle)
+        self.assertIn('move_same_volume(original, PLUGIN)', lifecycle)
         self.assertIn('domain_fingerprint_preserved=True', lifecycle)
         self.assertIn('protected_table_count=', lifecycle)
         self.assertIn('woocommerce_sessions', lifecycle)
@@ -344,7 +360,7 @@ class HarnessGuards(unittest.TestCase):
         ready = json.loads(json.dumps(example))
         ready['environment']['base_url'] = 'https://staging.kklidi.com'
         ready['versions'].update(
-            wordpress='7.1', php='8.3', members='0.7.1', woocommerce='11.1.0')
+            wordpress='7.1', php='8.3', members='0.7.2', woocommerce='11.1.0')
         ready['owners'] = {key: 'approved-' + key for key in ready['owners']}
         ready['backup'].update(
             artifact_sha256='a' * 64,
