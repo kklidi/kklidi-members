@@ -67,7 +67,12 @@ PACKAGE_FILES = PRODUCTION_FILES + [
     'languages/kklidi-members-ko_KR.po',
     'languages/kklidi-members-ko_KR.mo',
 ]
-DEVICE_REFERENCE = Path('C:/MAMP/htdocs/ns_0727/wp-content/plugins/kklidi-device-limit')
+# The MVP contract is pinned to the 1.1.3 reference.  The ns_0727 site now
+# carries a newer 1.2.0 development copy, so use the dedicated read-only MAMP
+# sandbox that still contains the reviewed 1.1.3 fixture.
+DEVICE_REFERENCE = Path('C:/MAMP/htdocs/kklidi-members-mamp-sandbox/wp-content/plugins/kklidi-device-limit')
+DEVICE_REFERENCE_VERSION = '1.1.3'
+DEVICE_REFERENCE_MANIFEST_SHA256 = '2549b2ecf89008d5719526882c82a46c1978f129ce9225f41d446544db935168'
 
 
 class HarnessError(Exception):
@@ -189,7 +194,13 @@ def copy_device_reference(target):
             shutil.copyfile(item, destination)
             manifest[relative.as_posix()] = hashlib.sha256(item.read_bytes()).hexdigest()
     require('kklidi-device-limit.php' in manifest, 'Device plugin entry file missing')
-    return hashlib.sha256(json.dumps(manifest, sort_keys=True).encode()).hexdigest(), len(manifest)
+    entry = (source / 'kklidi-device-limit.php').read_text(encoding='utf-8', errors='replace')
+    require(re.search(r'(?m)^\s*\*\s*Version:\s*' + re.escape(DEVICE_REFERENCE_VERSION) + r'\s*$', entry),
+            'Pinned device-limit reference version mismatch')
+    manifest_hash = hashlib.sha256(json.dumps(manifest, sort_keys=True).encode()).hexdigest()
+    require(manifest_hash == DEVICE_REFERENCE_MANIFEST_SHA256,
+            'Pinned device-limit reference manifest mismatch')
+    return manifest_hash, len(manifest)
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):

@@ -217,6 +217,10 @@ class HarnessGuards(unittest.TestCase):
     def test_mamp_lms_fixture_is_pinned_and_self_cleaning(self):
         repository = Path(__file__).resolve().parents[2]
         source = (repository / 'tests/harness/mamp_lms_case.php').read_text(encoding='utf-8')
+        harness = (repository / 'tests/harness/run.py').read_text(encoding='utf-8')
+        self.assertIn("DEVICE_REFERENCE = Path('C:/MAMP/htdocs/kklidi-members-mamp-sandbox/wp-content/plugins/kklidi-device-limit')", harness)
+        self.assertIn("DEVICE_REFERENCE_VERSION = '1.1.3'", harness)
+        self.assertIn("DEVICE_REFERENCE_MANIFEST_SHA256 = '2549b2ecf89008d5719526882c82a46c1978f129ce9225f41d446544db935168'", harness)
         self.assertIn("$sandbox_root = 'C:/MAMP/htdocs/kklidi-members-mamp-sandbox';", source)
         self.assertNotIn('$argv[3]', source)
         self.assertNotIn('$action =', source)

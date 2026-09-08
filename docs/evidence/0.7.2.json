@@ -1,6 +1,6 @@
 {
   "release": "0.7.2",
-  "synthetic_run": "cd1084129e9e4875ae3d8c1cc245d5a0",
+  "synthetic_run": "c7dd52316fcb4275b70a210f0b56dbe4",
   "execution_status": "PASS",
   "production_acceptance": "PARTIAL",
   "package": {
@@ -209,8 +209,8 @@
     ]
   },
   "integration": {
-    "mamp-lms-9e104f625f17": {
-      "run_id": "mamp-lms-9e104f625f17",
+    "mamp-lms-5223036b04d4": {
+      "run_id": "mamp-lms-5223036b04d4",
       "contract": "AUTH-LMS-001",
       "status": "PASS",
       "environment": "fixed dedicated MAMP sandbox",
@@ -230,7 +230,7 @@
       "members_off_fatal_error": false,
       "cleanup": {
         "cleaned": true,
-        "run_token": "9e104f625f17",
+        "run_token": "5223036b04d4",
         "users_remaining": 0,
         "course_remaining": false,
         "lesson_remaining": false,
@@ -240,8 +240,8 @@
         "members_active": true
       }
     },
-    "mamp-lifecycle-4580523cae5b": {
-      "run_id": "mamp-lifecycle-4580523cae5b",
+    "mamp-lifecycle-4df7080fec1d": {
+      "run_id": "mamp-lifecycle-4df7080fec1d",
       "status": "PASS",
       "sandbox": "fixed dedicated MAMP sandbox",
       "old_archive_sha256": "ee89c952249e2df756ff8eed92007cdb77c1f2fc5a8a840bee6f8be195152867",
@@ -261,9 +261,9 @@
       "restored_files": 37,
       "temporary_directory_removed": true
     },
-    "mamp-kboard-6c2c2f366448": {
+    "mamp-kboard-fb4c4a1ff94d": {
       "contract": "AUTH-KBOARD-001",
-      "run_id": "mamp-kboard-6c2c2f366448",
+      "run_id": "mamp-kboard-fb4c4a1ff94d",
       "status": "PASS",
       "modes": {
         "on": {
@@ -300,8 +300,8 @@
         "members_restored": true
       }
     },
-    "mamp-woo-17526776ae98": {
-      "run_id": "mamp-woo-17526776ae98",
+    "mamp-woo-ae322d7a9661": {
+      "run_id": "mamp-woo-ae322d7a9661",
       "status": "PASS",
       "transport": "HTTP forms, no JavaScript engine",
       "checkout_login_post": true,
@@ -313,11 +313,11 @@
       "browser_javascript": "NOT_RUN",
       "cleanup": {
         "cleaned": true,
-        "run_token": "17526776ae98"
+        "run_token": "ae322d7a9661"
       }
     },
-    "mamp-race-3a2d28343c57": {
-      "run_id": "mamp-race-3a2d28343c57",
+    "mamp-race-3b400c94a185": {
+      "run_id": "mamp-race-3b400c94a185",
       "status": "PASS",
       "workers": 8,
       "registration": {
@@ -336,31 +336,31 @@
       },
       "cleanup": {
         "cleaned": true,
-        "run_token": "3a2d28343c57"
+        "run_token": "3b400c94a185"
       }
     },
-    "mamp-timing-b6e8a1afddaf": {
-      "run_id": "mamp-timing-b6e8a1afddaf",
+    "mamp-timing-30beda977c06": {
+      "run_id": "mamp-timing-30beda977c06",
       "status": "PASS",
       "samples_per_group": 9,
       "public_message_equal": true,
       "existing_ms": {
-        "median": 1234.795,
-        "p95": 1414.057
+        "median": 1193.817,
+        "p95": 1250.703
       },
       "missing_ms": {
-        "median": 1202.491,
-        "p95": 1286.613
+        "median": 1176.672,
+        "p95": 1212.962
       },
-      "median_ratio": 1.027,
+      "median_ratio": 1.015,
       "threshold_ratio": 2.0,
       "cleanup": {
         "cleaned": true,
-        "run_token": "b6e8a1afddaf"
+        "run_token": "30beda977c06"
       }
     },
-    "mamp-https-d66062b388a9": {
-      "run_id": "mamp-https-d66062b388a9",
+    "mamp-https-839f87c4c52a": {
+      "run_id": "mamp-https-839f87c4c52a",
       "status": "PASS",
       "transport": "MAMP behind local TLS proxy",
       "preflight": {
@@ -398,7 +398,7 @@
         "version": "TLSv1.3",
         "cipher": "TLS_AES_256_GCM_SHA384"
       },
-      "certificate_sha256": "f0289fa67d922bb05864f74471291ac5e64dd863057e024ffd5ed2bbda444070",
+      "certificate_sha256": "9792fcabdec1240168dd78fa4bf30d7b167367ce00c75124fefecd00b663ee01",
       "client_forwarded_for_stripped": true,
       "trusted_proxy_bootstrap": "loopback plus proxy-set forwarded proto",
       "cleanup": {
@@ -438,12 +438,12 @@
       "prefix": "wp_",
       "samples_per_block": 100,
       "blocks": 3,
-      "off_median_ms": 227.814,
-      "on_median_ms": 231.096,
-      "median_budget_ms": 11.391,
-      "off_p95_ms": 258.998,
-      "on_p95_ms": 254.796,
-      "p95_budget_ms": 12.95,
+      "off_median_ms": 236.371,
+      "on_median_ms": 236.706,
+      "median_budget_ms": 11.819,
+      "off_p95_ms": 259.087,
+      "on_p95_ms": 259.475,
+      "p95_budget_ms": 12.954,
       "off_query_median": 5.0,
       "on_query_median": 5.0,
       "off_memory_median": 37748736.0,

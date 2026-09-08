@@ -18,6 +18,13 @@ Set `$Python` to an installed Python 3.12+ executable first. On this workstation
 
 `--prepare` downloads the two exact official dependencies into `.harness/cache`; it is the only step requiring internet. Both SHA-256 pins and all 3,782 official Core file checksums are checked before execution. A missing or changed dependency fails closed. The behavior run uses the cache offline. Update pins only through a reviewed dependency update, not in response to a mismatch.
 
+The real device-limit contract is pinned to the read-only fixture at
+`C:/MAMP/htdocs/kklidi-members-mamp-sandbox/wp-content/plugins/kklidi-device-limit`.
+The runner requires version 1.1.3 and manifest SHA-256
+`2549b2ecf89008d5719526882c82a46c1978f129ce9225f41d446544db935168` before copying it.
+The `ns_0727` development site may contain a newer device-limit build and is not a valid
+source for this MVP contract.
+
 Sources: [WordPress release archive](https://wordpress.org/download/releases/) and [official Core checksum mechanism](https://developer.wordpress.org/reference/functions/get_core_checksums/). Upstream MD5 file checksums are used for consistency with WordPress; local SHA-256 pins additionally bind the exact downloaded archive and manifest.
 
 ## What executes
