@@ -96,7 +96,7 @@ final class RateLimiter {
 		foreach ($rows as $row) {
 			$data = json_decode($row->option_value, true);
 			if (!is_array($data) || (int) ($data['expires'] ?? 0) < time()) {
-				delete_option($row->option_name);
+				$wpdb->delete($wpdb->options, array('option_name' => $row->option_name), array('%s'));
 			}
 		}
 	}
@@ -111,15 +111,27 @@ final class RateLimiter {
 		}
 		try {
 			$now = time();
-			$data = get_option($option, null);
-			$data = is_string($data) ? json_decode($data, true) : $data;
+			$stored_value = $wpdb->get_var($wpdb->prepare(
+				"SELECT option_value FROM {$wpdb->options} WHERE option_name=%s LIMIT 1",
+				$option
+			));
+			if ($wpdb->last_error !== '') {
+				return self::unavailable();
+			}
+			$data = is_string($stored_value) ? json_decode($stored_value, true) : null;
 			if (!is_array($data) || (int) ($data['expires'] ?? 0) <= $now) {
 				$data = array('count' => 0, 'expires' => $now + $window);
 			}
 			$data['count'] = min($limit + 1, (int) $data['count'] + 1);
-			$stored = update_option($option, wp_json_encode($data), false);
-			if (!$stored && get_option($option, '') !== wp_json_encode($data)) {
-			return new \WP_Error('kklidi_members_limiter_unavailable', __('Please try again later.', 'kklidi-members'));
+			$encoded = wp_json_encode($data);
+			$stored = $wpdb->query($wpdb->prepare(
+				"INSERT INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %s, 'no')
+				ON DUPLICATE KEY UPDATE option_value=VALUES(option_value), autoload='no'",
+				$option,
+				$encoded
+			));
+			if ($stored === false) {
+				return self::unavailable();
 			}
 			return array(
 				'allowed' => $data['count'] <= $limit,
@@ -138,11 +150,20 @@ final class RateLimiter {
 			return;
 		}
 		try {
-			$data = get_option($option, null);
-			$data = is_string($data) ? json_decode($data, true) : $data;
+			$stored_value = $wpdb->get_var($wpdb->prepare(
+				"SELECT option_value FROM {$wpdb->options} WHERE option_name=%s LIMIT 1",
+				$option
+			));
+			$data = is_string($stored_value) ? json_decode($stored_value, true) : null;
 			if (is_array($data) && (int) ($data['count'] ?? 0) > 0) {
 				$data['count'] = (int) $data['count'] - 1;
-				update_option($option, wp_json_encode($data), false);
+				$wpdb->update(
+					$wpdb->options,
+					array('option_value' => wp_json_encode($data), 'autoload' => 'no'),
+					array('option_name' => $option),
+					array('%s', '%s'),
+					array('%s')
+				);
 			}
 		} finally {
 			$wpdb->get_var($wpdb->prepare('SELECT RELEASE_LOCK(%s)', $lock));
@@ -151,5 +172,12 @@ final class RateLimiter {
 
 	private static function digest(string $value): string {
 		return hash_hmac('sha256', $value, wp_salt('auth'));
+	}
+
+	private static function unavailable(): \WP_Error {
+		return new \WP_Error(
+			'kklidi_members_limiter_unavailable',
+			__('Please try again later.', 'kklidi-members')
+		);
 	}
 }

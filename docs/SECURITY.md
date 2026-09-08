@@ -101,6 +101,8 @@ Members 비활성 시 meta guard도 없어질 수 있다. 차단 계정 존재 �
 
 신뢰된 proxy 목록 외 X-Forwarded-For를 무시한다. IPv4/IPv6·IPv4-mapped 주소 정규화를 통일한다. cache가 없거나 재시작해도 counter가 조용히 무한 리셋되지 않게 ARCHITECTURE의 원자 저장 adapter를 사용한다. limiter 저장 실패 시 해당 인증 mutation은 일시 실패로 처리하고 read-only 일반 화면은 계속 제공한다. audit 장애는 일반 로그인 가용성과 분리해 최소 운영 경보를 내되, 동의·탈퇴 상태 저장 실패는 성공 처리하지 않는다.
 
+0.7.0의 limiter adapter는 WordPress object cache를 우회해 공유 MySQL options table을 직접 읽고 쓰며 DB advisory lock을 사용한다. cache adapter 호출이 실패하는 주입 시험에서도 제한은 유지되고, options storage가 사라진 주입 시험은 `kklidi_members_limiter_unavailable`로 fail-closed한다. 실제 여러 application node의 DB endpoint·salt 일치는 staging 배포 manifest와 분산 시험에서 다시 확인한다.
+
 ## 9. Threat → 방어 → Harness
 
 | Threat | 위험 | 핵심 방어 | 검증 ID |

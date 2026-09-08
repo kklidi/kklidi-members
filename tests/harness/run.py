@@ -900,11 +900,14 @@ def run_mvp_cases(base, env, fixture, command, php_cli):
     migration = command(php_cli + [HERE / 'migration_case.php'], json_result=True)
     require(migration == {'dry_eligible': 3, 'dry_writes': 0, 'first_imported': 3,
                           'first_writes': 3, 'second_imported': 0, 'second_duplicates': 3,
-                          'second_writes': 0, 'legacy_null_rows': 3, 'ids_unchanged': True,
+                          'second_writes': 0, 'legacy_null_rows': 3, 'rollback_deleted': 3,
+                          'rollback_restored_target_rows': True, 'rollback_reeligible': 3,
+                          'ids_unchanged': True,
                           'source_meta_unchanged': True}, 'Legacy migration contract failed')
     results['AUTH-MIGRATION-001'] = {'status': 'PASS', 'dry_run_writes': 0,
                                      'imported': 3, 'rerun_writes': 0,
-                                     'ids_unchanged': True, 'legacy_source_preserved': True}
+                                     'ids_unchanged': True, 'legacy_source_preserved': True,
+                                     'bounded_rollback': True, 'rollback_deleted': 3}
 
     results['AUTH-COOKIE-001'] = {'status': 'PASS', 'core_auth_cookie_only': True,
                                   'guest_cookie_is_non_auth': True, 'no_store': True, 'php_session': False}
@@ -1259,9 +1262,16 @@ def execute(php, mysqld, one_prefix=False, skip_perf=False):
             require(not any(row['error'] for row in parallel_rows)
                     and sum(row['allowed'] for row in parallel_rows) == 10,
                     'Parallel limiter must allow exactly 10 of 100 attempts')
+            storage = command(php_cli + [HERE / 'rate_storage_case.php'], json_result=True)
+            require(storage == {'cache_adapter_unavailable_allowed': True,
+                                'storage_failure_denied': True, 'cleanup_rows': 0},
+                    'Limiter cache/storage failure policy changed')
             mvp_results['AUTH-RATE-LIMIT-001']['parallel_processes'] = 8
             mvp_results['AUTH-RATE-LIMIT-001']['parallel_calls'] = 100
             mvp_results['AUTH-RATE-LIMIT-001']['parallel_allowed'] = 10
+            mvp_results['AUTH-RATE-LIMIT-001']['shared_database_nodes'] = 8
+            mvp_results['AUTH-RATE-LIMIT-001']['object_cache_outage'] = 'PASS'
+            mvp_results['AUTH-RATE-LIMIT-001']['storage_failure'] = 'FAIL_CLOSED'
             for contract, result in mvp_results.items():
                 report['mvp_contracts'].setdefault(contract, []).append(dict(result, prefix=prefix))
             boundary_results = run_domain_boundary_cases(env, fixture, command, php_cli)

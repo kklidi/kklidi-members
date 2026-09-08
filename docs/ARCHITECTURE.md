@@ -97,6 +97,8 @@ Members 내부 Repository나 Service class를 다른 플러그인의 import 대�
 
 일반 GET은 static route 판정·URL/auth guard 등록만 한다. Admin hook callback 등록과 Admin 객체 생성은 구분한다. 활성화/migration/cron 예약을 일반 init에서 반복 실행하지 않는다. CSS/JS는 page ID 사전 판정 또는 명시적 component 렌더 신호로 enqueue하며 shortcode 문자열 하나만 검사해 widget/block 삽입을 놓치지 않는다. 동적 삽입은 해당 요청에서만 필요한 자산을 제공한다. 인증·계정 화면은 cache bypass, no-store로 개인정보와 nonce 공유 캐시를 막는다.
 
+인증 rate limiter는 공유 MySQL options table을 bounded key/value 저장소로 사용하고 `GET_LOCK`으로 read-modify-write를 직렬화한다. 이 경로는 WordPress object-cache API를 통하지 않아 외부 cache adapter의 stale 값이나 outage가 제한 우회로 이어지지 않는다. DB read/write 또는 advisory lock이 실패하면 인증 mutation은 일시 거부한다. 성공 로그인 예약 감소도 같은 DB lock을 사용한다.
+
 ## 4. 상태성 usermeta와 호환 phone
 
 | 제안 key | 의미 | 쓰기 권한 |

@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.7.0 — 2026-09-08
+
+- Added an isolated MAMP TLS reverse-proxy harness with a per-run CA, normal hostname
+  verification, HSTS, `__Host-` guest-cookie and Core Secure-cookie checks.
+- Moved limiter counters onto direct shared-MySQL reads/writes under `GET_LOCK`, so an
+  unavailable WordPress object-cache adapter cannot bypass limits; storage failure
+  rejects the authentication mutation.
+- Added bounded legacy-consent rollback verification and a credential-free deployment
+  manifest validator for owners, backup/restore evidence and the observation window.
+- Re-ran MAMP signup/reset races, Woo checkout/cart/order/device-limit, and enumeration
+  timing after the storage change.
+
 ## 0.6.0 — 2026-09-08
 
 - Made WordPress `users_can_register` the only public-registration switch; required

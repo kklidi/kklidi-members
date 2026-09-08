@@ -17,17 +17,21 @@ def main():
     synthetic = json.loads((reports / 'latest.json').read_text(encoding='utf-8'))
     assert synthetic['status'] == 'PASS'
     contracts = {name: [{'status': row['status'], **{key: row[key] for key in
-        ('parallel_processes', 'parallel_calls', 'parallel_allowed') if key in row}}
+        ('parallel_processes', 'parallel_calls', 'parallel_allowed', 'shared_database_nodes',
+         'object_cache_outage', 'storage_failure', 'bounded_rollback', 'rollback_deleted') if key in row}}
         for row in rows] for name, rows in synthetic['mvp_contracts'].items()}
 
     integrations = {}
     for pattern in ('mamp-lms-*.json', 'mamp-kboard-*.json', 'mamp-woo-*.json',
-                    'mamp-race-*.json', 'mamp-timing-*.json', 'browser-chrome-*.json'):
+                    'mamp-race-*.json', 'mamp-timing-*.json', 'mamp-https-*.json',
+                    'browser-chrome-*.json'):
         data = newest(reports, pattern)
         assert data['status'] in ('PASS', 'PARTIAL')
         integrations[data['run_id']] = {key: value for key, value in data.items()
             if key != 'reset_bootstrap'}
-    preflight = json.loads((reports / 'mamp-deployment-preflight.json').read_text(encoding='utf-8'))
+    https = newest(reports, 'mamp-https-*.json')
+    assert https['status'] == 'PASS'
+    preflight = https['preflight']
     environment = json.loads((reports / 'mamp-environment-20260908.json').read_text(encoding='utf-8-sig'))
     d06 = json.loads((reports / 'reference-d06-20260908.json').read_text(encoding='utf-8-sig'))
     output = {
@@ -41,7 +45,7 @@ def main():
         'deployment_preflight': preflight,
         'local_environment': environment,
         'd06_reference_audit': d06,
-        'scope_note': 'Local behavior/browser gates passed; production TLS, persistent cache/proxy outage, and production migration need an identified deployment environment.'
+        'scope_note': 'Local behavior, TLS and storage-failure gates passed; the actual production certificate/proxy, multiple application hosts and production migration need an identified deployment environment and approved manifest.'
     }
     destination = ROOT / ('docs/evidence/' + version + '.json')
     destination.parent.mkdir(exist_ok=True)

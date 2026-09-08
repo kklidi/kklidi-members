@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "environment": {
+    "kind": "staging",
+    "base_url": "https://staging.example.invalid",
+    "single_site": true
+  },
+  "versions": {
+    "wordpress": "VERSION_REQUIRED",
+    "php": "VERSION_REQUIRED",
+    "members": "VERSION_REQUIRED",
+    "woocommerce": "OPTIONAL_VERSION_OR_DISABLED"
+  },
+  "owners": {
+    "members_runtime": "ROLE_REQUIRED",
+    "wordpress_privacy": "ROLE_REQUIRED",
+    "woocommerce": "ROLE_REQUIRED",
+    "lms": "ROLE_REQUIRED",
+    "payout": "ROLE_REQUIRED",
+    "site_content": "ROLE_REQUIRED",
+    "rollback": "ROLE_REQUIRED"
+  },
+  "route_owners": {
+    "members_account": "members_runtime",
+    "woocommerce_orders": "woocommerce",
+    "lms_learning": "lms",
+    "payout_settlement": "payout",
+    "site_application_pages": "site_content",
+    "kboard_temporary": "site_content"
+  },
+  "backup": {
+    "artifact_sha256": "SHA256_REQUIRED",
+    "created_at_utc": "UTC_TIMESTAMP_REQUIRED",
+    "restore_tested": false,
+    "restore_test_evidence": "EVIDENCE_REFERENCE_REQUIRED"
+  },
+  "rollback": {
+    "members_enabled": "restore_previous_release",
+    "registration_mutations_blocked_if_policy_guard_absent": true,
+    "full_database_restore_for_feature_rollback": false
+  },
+  "observation": {
+    "minimum_days": 14,
+    "actual_order_required": true,
+    "actual_recovery_required": true
+  },
+  "policy_decisions": {
+    "marketing_collection": "disabled_until_purpose_and_withdrawal_are_approved",
+    "display_name_uniqueness": "duplicates_allowed",
+    "legacy_email_state": "legacy_unknown"
+  }
+}

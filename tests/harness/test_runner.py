@@ -9,6 +9,7 @@ from unittest.mock import patch
 
 from run import (Browser, HarnessError, LOCK, archive_name, assert_identity,
                  assert_production_shape, hidden_input, owned_cleanup, verified_archive)
+from validate_deployment_manifest import inspect as inspect_deployment_manifest
 
 
 class HarnessGuards(unittest.TestCase):
@@ -259,7 +260,58 @@ class HarnessGuards(unittest.TestCase):
         preflight = (repository / 'tests/harness/deployment_preflight.py').read_text(encoding='utf-8')
         self.assertIn("parsed.scheme != 'https'", preflight)
         self.assertIn("'network_request_sent': False", preflight)
+        self.assertIn("'__Host-kklidi_members_guest'", preflight)
+        self.assertIn("'guest_cookie_host_only'", preflight)
         self.assertNotIn('password', preflight.split('def inspect', 1)[0])
+
+        https_runner = (repository / 'tests/harness/mamp_https_run.py').read_text(encoding='utf-8')
+        https_fixture = (repository / 'tests/harness/mamp_https_case.php').read_text(encoding='utf-8')
+        tls_proxy = (repository / 'tests/harness/local_tls_proxy.py').read_text(encoding='utf-8')
+        self.assertIn("BASE = 'https://localhost:9443/kklidi-members-mamp-sandbox/'", https_runner)
+        self.assertIn("'core_cookies_secure'", https_runner)
+        self.assertIn("'core_cookies_httponly'", https_runner)
+        self.assertIn("'php_session_absent'", https_runner)
+        self.assertIn("$sandbox_root = 'C:/MAMP/htdocs/kklidi-members-mamp-sandbox';", https_fixture)
+        self.assertIn("'_kklidi_members_https_test_run'", https_fixture)
+        self.assertIn("Strict-Transport-Security", tls_proxy)
+        self.assertIn("context.minimum_version = ssl.TLSVersion.TLSv1_2", tls_proxy)
+
+    def test_limiter_storage_bypasses_object_cache_and_fails_closed(self):
+        repository = Path(__file__).resolve().parents[2]
+        limiter = (repository / 'includes/Security/RateLimiter.php').read_text(encoding='utf-8')
+        fixture = (repository / 'tests/harness/rate_storage_case.php').read_text(encoding='utf-8')
+
+        self.assertIn('SELECT option_value FROM {$wpdb->options}', limiter)
+        self.assertIn('ON DUPLICATE KEY UPDATE option_value=VALUES(option_value)', limiter)
+        self.assertNotIn('get_option($option', limiter)
+        self.assertNotIn('update_option($option', limiter)
+        self.assertIn("$wpdb->options = $wpdb->prefix . 'missing_limiter_storage';", fixture)
+        self.assertIn("'storage_failure_denied'", fixture)
+        self.assertIn("'cache_adapter_unavailable_allowed'", fixture)
+
+    def test_deployment_manifest_requires_real_owners_backup_and_bounded_rollback(self):
+        repository = Path(__file__).resolve().parents[2]
+        example = json.loads((repository / 'tests/harness/deployment_manifest.example.json')
+                             .read_text(encoding='utf-8'))
+        self.assertEqual(inspect_deployment_manifest(example)['status'], 'BLOCKED')
+
+        ready = json.loads(json.dumps(example))
+        ready['versions'].update(wordpress='7.1', php='8.3', members='0.7.0')
+        ready['owners'] = {key: 'approved-' + key for key in ready['owners']}
+        ready['backup'].update(
+            artifact_sha256='a' * 64,
+            created_at_utc='2026-09-08T00:00:00Z',
+            restore_tested=True,
+            restore_test_evidence='staging-restore-run-001',
+        )
+        report = inspect_deployment_manifest(ready)
+        self.assertEqual(report['status'], 'READY')
+        self.assertEqual(report['failed'], [])
+
+        ready['database_password'] = 'must-never-be-accepted'
+        report = inspect_deployment_manifest(ready)
+        self.assertEqual(report['status'], 'BLOCKED')
+        self.assertIn('no_credentials', report['failed'])
 
 
 if __name__ == '__main__':

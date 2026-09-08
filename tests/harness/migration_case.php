@@ -24,12 +24,18 @@ $after_first_rows = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table}");
 $second = LegacyConsentImporter::import(0, 100);
 $after_second_rows = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table}");
 $legacy_nulls = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE action='legacy_import' AND document_version IS NULL AND document_hash IS NULL AND occurred_at_utc IS NULL");
+$rolled_back = $wpdb->query("DELETE FROM {$table} WHERE action='legacy_import' AND source='legacy_wpmembers'");
+$after_rollback_rows = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table}");
+$after_rollback_dry = LegacyConsentImporter::dry_run(0, 100);
 echo wp_json_encode(array(
     'dry_eligible' => $dry['eligible'], 'dry_writes' => $after_dry_rows - $before_rows,
     'first_imported' => $first['imported'], 'first_writes' => $after_first_rows - $after_dry_rows,
     'second_imported' => $second['imported'], 'second_duplicates' => $second['duplicates'],
     'second_writes' => $after_second_rows - $after_first_rows,
     'legacy_null_rows' => $legacy_nulls,
+	'rollback_deleted' => (int) $rolled_back,
+	'rollback_restored_target_rows' => $after_rollback_rows === $before_rows,
+	'rollback_reeligible' => $after_rollback_dry['eligible'],
     'ids_unchanged' => $before_ids === get_users(array('fields' => 'ID', 'orderby' => 'ID', 'order' => 'ASC')),
     'source_meta_unchanged' => get_user_meta($users[0]->ID, 'policy_service', true) === 'agree'
         && get_user_meta($users[0]->ID, 'policy_privacy', true) === ''
