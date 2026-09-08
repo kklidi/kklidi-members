@@ -6,6 +6,11 @@ from pathlib import Path
 import re
 import urllib.parse
 
+ROOT = Path(__file__).resolve().parents[2]
+CURRENT_MEMBERS_VERSION = re.search(
+    r'\* Version: (\d+\.\d+\.\d+)',
+    (ROOT / 'kklidi-members.php').read_text(encoding='utf-8'),
+).group(1)
 
 OWNER_KEYS = {
     'members_runtime', 'wordpress_privacy', 'woocommerce', 'lms',
@@ -56,10 +61,15 @@ def inspect(manifest):
         'no_credentials': not contains_sensitive_key(manifest),
         'environment_kind': environment.get('kind') in ('staging', 'production'),
         'trusted_https_url': parsed.scheme == 'https' and bool(parsed.hostname)
+            and not parsed.hostname.endswith('.invalid')
             and not parsed.username and not parsed.password and not parsed.query and not parsed.fragment,
         'single_site': environment.get('single_site') is True,
         'versions_recorded': all(present(versions.get(key))
             for key in ('wordpress', 'php', 'members')),
+        'supported_runtime': versions.get('wordpress') == '7.1'
+            and versions.get('php') == '8.3'
+            and versions.get('woocommerce') in ('11.1.0', 'disabled'),
+        'current_members_version': versions.get('members') == CURRENT_MEMBERS_VERSION,
         'owners_assigned': set(owners) == OWNER_KEYS and all(present(value) for value in owners.values()),
         'route_owners_match_contract': routes == ROUTE_OWNERS,
         'backup_hash': bool(re.fullmatch(r'[a-f0-9]{64}', str(backup.get('artifact_sha256', '')))),

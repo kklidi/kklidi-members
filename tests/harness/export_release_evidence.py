@@ -22,11 +22,12 @@ def main():
         for row in rows] for name, rows in synthetic['mvp_contracts'].items()}
 
     integrations = {}
-    for pattern in ('mamp-lms-*.json', 'mamp-kboard-*.json', 'mamp-woo-*.json',
+    for pattern in ('mamp-lms-*.json', 'mamp-lifecycle-*.json',
+                    'mamp-kboard-*.json', 'mamp-woo-*.json',
                     'mamp-race-*.json', 'mamp-timing-*.json', 'mamp-https-*.json',
                     'browser-chrome-*.json'):
         data = newest(reports, pattern)
-        assert data['status'] in ('PASS', 'PARTIAL')
+        assert data['status'] == 'PASS'
         integrations[data['run_id']] = {key: value for key, value in data.items()
             if key != 'reset_bootstrap'}
     https = newest(reports, 'mamp-https-*.json')

@@ -3,7 +3,7 @@ Contributors: kklidi
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.7.0
+Stable tag: 0.7.1
 
 Core-based member accounts with scoped UI, consent records and safe withdrawal handling.
 
@@ -14,9 +14,9 @@ KKLIDI Members adds login, registration, profile, consent and account management
 WooCommerce orders and LMS enrollment/progress stay with their respective plugins.
 Korean UI uses WordPress gettext translation catalogs.
 
-0.7.0 adds a trusted local-TLS MAMP gate, Core Secure-cookie evidence,
-object-cache-independent atomic rate limiting, bounded migration rollback, and an
-executable production owner/backup manifest. See docs/RELEASE-0.7.0.md.
+0.7.1 adds repeatable actual-LMS and plugin lifecycle gates for fresh install,
+0.7.0-to-0.7.1 update, reinstall, deactivation fallback, exact cleanup and source
+restoration. See docs/RELEASE-0.7.1.md.
 
 == Installation ==
 
@@ -25,6 +25,12 @@ executable production owner/backup manifest. See docs/RELEASE-0.7.0.md.
 3. Review registration and consent policy before changing the closed defaults.
 
 == Changelog ==
+
+= 0.7.1 =
+* Repeatable actual-LMS identity, access, fallback and cleanup verification.
+* Fresh install, 0.7.0-to-0.7.1 update, reinstall and deactivate/reactivate gate.
+* Release evidence now includes both executable gates.
+* Korean translation catalogs are included in the installable ZIP.
 
 = 0.7.0 =
 * Local TLS, HSTS, host-only guest-cookie and Core Secure-cookie verification.

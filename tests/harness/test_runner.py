@@ -7,7 +7,7 @@ import stat
 import tempfile
 from unittest.mock import patch
 
-from run import (Browser, HarnessError, LOCK, archive_name, assert_identity,
+from run import (Browser, HarnessError, LOCK, PACKAGE_FILES, archive_name, assert_identity,
                  assert_production_shape, hidden_input, owned_cleanup, verified_archive)
 from validate_deployment_manifest import inspect as inspect_deployment_manifest
 
@@ -78,6 +78,17 @@ class HarnessGuards(unittest.TestCase):
 
     def test_production_runtime_stays_bounded(self):
         assert_production_shape()
+
+    def test_release_package_includes_translation_catalogs(self):
+        self.assertTrue({
+            'languages/kklidi-members.pot',
+            'languages/kklidi-members-ko_KR.po',
+            'languages/kklidi-members-ko_KR.mo',
+        }.issubset(PACKAGE_FILES))
+        repository = Path(__file__).resolve().parents[2]
+        builder = (repository / 'tests/harness/build_release.py').read_text(encoding='utf-8')
+        self.assertIn("not path.startswith('docs/evidence/')", builder)
+        self.assertNotIn('evidence_doc', builder)
 
     def test_auth_ui_001_covers_every_runtime_surface(self):
         repository = Path(__file__).resolve().parents[2]
@@ -208,6 +219,29 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('KKLIDI_LMS_Enrollments::get_by_order(', source)
         self.assertIn("$order->delete(true);", source)
         self.assertIn("$product->delete(true);", source)
+        self.assertIn("'kklidi_lms_allow_hard_delete'", source)
+        self.assertIn("'_kklidi_members_lms_test_run'", source)
+
+        runner = (repository / 'tests/harness/mamp_lms_run.py').read_text(encoding='utf-8')
+        self.assertIn("BASE = 'http://localhost:8888/kklidi-members-mamp-sandbox/'", runner)
+        self.assertNotIn('argparse', runner)
+        self.assertIn("call('cleanup')", runner)
+        self.assertIn("'.harness/reports'", runner)
+        self.assertIn('wordpress_user_id_preserved=True', runner)
+
+        lifecycle = (repository / 'tests/harness/mamp_lifecycle_run.py').read_text(encoding='utf-8')
+        self.assertIn("SANDBOX = Path('C:/MAMP/htdocs/kklidi-members-mamp-sandbox')", lifecycle)
+        self.assertIn("PREVIOUS_VERSION = '0.7.0'", lifecycle)
+        self.assertIn("CURRENT_VERSION = re.search(", lifecycle)
+        self.assertIn("OLD_ARCHIVE = ROOT / ('dist/kklidi-members-' + PREVIOUS_VERSION + '.zip')", lifecycle)
+        self.assertIn("NEW_ARCHIVE = ROOT / ('dist/kklidi-members-' + CURRENT_VERSION + '.zip')", lifecycle)
+        self.assertIn("not in (PREVIOUS_VERSION, CURRENT_VERSION)", lifecycle)
+        self.assertNotIn('argparse', lifecycle)
+        self.assertIn("shutil.move(original, PLUGIN)", lifecycle)
+        self.assertIn('domain_fingerprint_preserved=True', lifecycle)
+        self.assertIn('protected_table_count=', lifecycle)
+        self.assertIn('woocommerce_sessions', lifecycle)
+        self.assertIn("'.harness/reports'", lifecycle)
 
     def test_lms_profile_delegation_is_route_scoped(self):
         repository = Path(__file__).resolve().parents[2]
@@ -296,7 +330,9 @@ class HarnessGuards(unittest.TestCase):
         self.assertEqual(inspect_deployment_manifest(example)['status'], 'BLOCKED')
 
         ready = json.loads(json.dumps(example))
-        ready['versions'].update(wordpress='7.1', php='8.3', members='0.7.0')
+        ready['environment']['base_url'] = 'https://staging.kklidi.com'
+        ready['versions'].update(
+            wordpress='7.1', php='8.3', members='0.7.1', woocommerce='11.1.0')
         ready['owners'] = {key: 'approved-' + key for key in ready['owners']}
         ready['backup'].update(
             artifact_sha256='a' * 64,
@@ -307,6 +343,16 @@ class HarnessGuards(unittest.TestCase):
         report = inspect_deployment_manifest(ready)
         self.assertEqual(report['status'], 'READY')
         self.assertEqual(report['failed'], [])
+
+        wrong_release = json.loads(json.dumps(ready))
+        wrong_release['versions']['members'] = '0.7.0'
+        self.assertIn('current_members_version',
+                      inspect_deployment_manifest(wrong_release)['failed'])
+
+        unsupported_runtime = json.loads(json.dumps(ready))
+        unsupported_runtime['versions']['php'] = '8.2'
+        self.assertIn('supported_runtime',
+                      inspect_deployment_manifest(unsupported_runtime)['failed'])
 
         ready['database_password'] = 'must-never-be-accepted'
         report = inspect_deployment_manifest(ready)

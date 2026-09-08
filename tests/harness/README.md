@@ -41,6 +41,8 @@ The runner has no option for an existing site URL, existing DB endpoint, existin
 | `ui_contract.json` | `AUTH-UI-001` screen/state/translation/accessibility/asset contract manifest |
 | `mamp_woo_case.php` | CLI-only, fixed-sandbox Woo/WCI fixture with tagged user/product/orders, Members optional-dependency toggles, and exact cleanup |
 | `mamp_lms_case.php` | CLI-only, fixed-sandbox LMS fixture for identity/access/domain ownership, Members fallback, mail sink, and exact cleanup |
+| `mamp_lms_run.py` | Runs the actual fixed-sandbox LMS identity/access/on-off contract and writes a per-run JSON report |
+| `mamp_lifecycle_run.py` | Verifies ZIP install, 0.7.0→current update, reinstall, deactivate/reactivate, protected IDs/domain fingerprint, and exact source restoration |
 | `wordpress.lock.json` | Exact Core archive and checksum manifest provenance |
 | `database.php` | CLI-only, datadir-verified database provisioning |
 | `config.php` | Guarded temporary wp-config template; never deployed |
@@ -57,6 +59,15 @@ The fixed MAMP LMS fixture exercises actual Woo order reconciliation into KKLIDI
 0.5.0 adds `concurrency_case.php`: 100 calls across eight PHP workers must allow exactly ten under the same limiter key, under both prefixes. `mamp_woo_run.py` submits actual Members/Woo forms and checks same-session Store API cart, rendered member-order link, guest-order separation and device-limit allow/deny. `mamp_kboard_run.py` checks actual post/comment HTML and KBoard write permissions with Members on/off. Both fixed-sandbox scripts clean up in `finally`; Woo requires WCI files in the sandbox. `build_release.py` packages only the production allowlist and validates the Korean MO catalog.
 
 `mamp_race_run.py` exercises eight simultaneous registration submissions and eight pre-opened Core reset forms against Apache workers. `mamp_timing_run.py` records bounded existing/missing-identifier timing distributions without retaining identifiers. `mamp_https_run.py` places the fixed sandbox behind a per-run local CA/TLS proxy and verifies HSTS, host-only guest cookies, Core Secure cookies and cleanup. `reference_d06_audit.php` reads only structural metadata inside a rolled-back read-only transaction. `deployment_preflight.py` refuses HTTP and credentials, then checks trusted HTTPS, HSTS, private/no-store headers, and guest-cookie flags. `validate_deployment_manifest.py` rejects credentials and incomplete owner, backup, rollback or observation evidence.
+
+With the dedicated MAMP Apache and MySQL sandbox running, the repeatable LMS and plugin lifecycle gates are:
+
+```powershell
+& $Python tests/harness/mamp_lms_run.py
+& $Python tests/harness/mamp_lifecycle_run.py
+```
+
+Both runners accept no alternate site path or URL, use a per-run token, write `.harness/reports/<run-id>.json`, and restore their owned data, plugin state, files, and temporary directories in `finally`.
 
 **Remaining environment gates:** local TLS/Core Secure-cookie and object-cache/storage-failure behavior have executable evidence. The actual production certificate/CDN/proxy, multiple application hosts, and production migration still require an explicitly identified staging/production environment, completed deployment manifest and owner handoff. KBoard permission-engine parity and content migration remain out of scope because KBoard is scheduled for removal.
 

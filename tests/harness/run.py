@@ -62,6 +62,11 @@ PRODUCTION_FILES = [
     'templates/register.php',
     'templates/withdrawal.php',
 ]
+PACKAGE_FILES = PRODUCTION_FILES + [
+    'languages/kklidi-members.pot',
+    'languages/kklidi-members-ko_KR.po',
+    'languages/kklidi-members-ko_KR.mo',
+]
 DEVICE_REFERENCE = Path('C:/MAMP/htdocs/ns_0727/wp-content/plugins/kklidi-device-limit')
 
 

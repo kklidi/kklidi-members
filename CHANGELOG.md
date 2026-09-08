@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.7.1 — 2026-09-09
+
+- Added a repeatable fixed-MAMP LMS runner that verifies WordPress user-ID continuity,
+  Woo order reconciliation, learning access, profile delegation, Members-off fallback,
+  and exact synthetic cleanup.
+- Added a bounded plugin lifecycle runner for fresh installation, 0.7.0-to-0.7.1
+  update, same-version reinstall, deactivation fallback, reactivation, protected-domain
+  fingerprints and exact source restoration.
+- Added harness guards and operating instructions for both release gates.
+- Fixed the release allowlist so the Korean PO/MO catalog and source POT are present
+  in the installable ZIP, with a unit guard preventing another untranslated package.
+- Kept aggregate evidence outside the installable archive so lifecycle evidence can
+  bind the final ZIP hash without a self-referential rebuild.
+- Bound deployment manifests to Members 0.7.1 and the executed WordPress 7.1/PHP 8.3
+  support matrix, with WooCommerce 11.1.0 or an explicit disabled state.
+- Scoped lifecycle domain fingerprints to WordPress content and Woo/LMS/KBoard-owned
+  tables so unrelated background scheduler/session writes cannot create a false failure.
+
 ## 0.7.0 — 2026-09-08
 
 - Added an isolated MAMP TLS reverse-proxy harness with a per-run CA, normal hostname

@@ -2,9 +2,9 @@
 
 WordPress Core Auth 위에서 KKLIDI 서비스가 공유하는 회원·계정·인증 UX 계층.
 
-**현재 배포 버전: 0.7.0 검증판.** 0.7.0은 MAMP 로컬 TLS·HSTS·Core Secure 쿠키, object-cache 장애와 분리된 공유 DB limiter, 제한된 migration rollback, 운영 담당자/백업 manifest 검사를 추가했다. 실제 운영 인증서·다중 서버·운영 migration 승인은 [0.7.0 릴리스 문서](docs/RELEASE-0.7.0.md)의 환경 gate를 따른다.
+**현재 배포 후보: 0.7.1 검증판.** 0.7.1은 실제 LMS와 플러그인 설치·업데이트·재설치·비활성화 생명주기를 반복 실행 가능한 MAMP gate로 고정한다. 실제 운영 인증서·다중 서버·운영 migration 승인은 [0.7.1 릴리스 문서](docs/RELEASE-0.7.1.md)의 환경 gate를 따른다.
 
-이전 검증 기록: **첫 MVP runtime 0.2.0 구현 및 24개 MVP 계약의 합성 WordPress 실행 완료**. 최신 합성 실행은 19개 PASS, 3개 SYNTHETIC_PASS, 2개 PARTIAL이다. 실제 device-limit 1.1.3의 Members/Core 허용·차단·제거 경로는 통과했다. MAMP의 WooCommerce 11.1.0/WCI 1.0.3에서는 익명 checkout 로그인 이동, 주문 소유권 분리, Members-off Core fallback/no-fatal을 확인했으며 브라우저 로그인 제출 뒤 cart 유지와 렌더링된 주문 목록은 남아 있다. 실제 KKLIDI LMS 1.1.1에서는 Woo 주문→수강 등록, 같은 WordPress user ID의 진도·수료증·비공개 질문, 수강자/비수강자 접근 분리, Members 프로필 위임과 Members-off 폴백을 통과했다. KBoard 제거 전 호환성 smoke, device-limit의 Woo 로그인 입구, TLS/browser, D01/D02/D06/D07 정책 결정도 배포 gate다. KBoard 권한 엔진 이전·복제와 content migration은 범위 밖이다. 제품 방향 판정은 **GREENFIELD_RECOMMENDED**다.
+이전 검증 기록: **첫 MVP runtime 0.2.0 구현 및 24개 MVP 계약의 합성 WordPress 실행 완료**. 최신 합성 실행은 24개 MVP 계약이 모두 PASS다. 실제 device-limit 1.1.3의 Members/Core 허용·차단·제거 경로, WooCommerce 11.1.0/WCI 1.0.3의 checkout·cart·주문 귀속, KKLIDI LMS의 주문→수강·진도·수료증·비공개 질문과 Members-off 폴백, KBoard 제거 전 호환성, TLS/browser gate를 통과했다. KBoard 권한 엔진 이전·복제와 content migration은 범위 밖이다. 제품 방향 판정은 **GREENFIELD_RECOMMENDED**다.
 
 ## 문서의 기준 역할
 

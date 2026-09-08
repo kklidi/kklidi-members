@@ -10,7 +10,15 @@
 
 ```powershell
 python tests/harness/mamp_https_run.py
+python tests/harness/mamp_lms_run.py
+python tests/harness/mamp_lifecycle_run.py
 ```
+
+LMS 검사는 실제 Woo 주문·수강·진도·수료증·비공개 질문의 동일 WordPress user ID와 Members 비활성 fallback을 확인한다. lifecycle 검사는 배포 ZIP의 신규 설치, 0.7.0→현재 버전 업데이트, 현재 버전 재설치, 비활성·재활성, 보호된 ID/domain 지문과 원본 파일 복원을 확인한다. 두 runner는 다른 site path/URL을 받지 않고 실행별 JSON을 `.harness/reports`에 기록한다.
+
+lifecycle domain 지문은 WordPress posts/comments와 Woo/LMS/KBoard 소유 테이블만 포함한다.
+Action Scheduler와 익명 Woo session처럼 일반 HTTP 요청으로 변하는 기반 테이블은 Members
+소유권 판정에서 제외하며, 선택된 보호 테이블의 비식별 CHECKSUM만 비교한다.
 
 로컬 CA는 운영 신뢰 증거가 아니다. 실제 인증서, CDN 또는 load balancer, 브라우저 신뢰 저장소는 실제 staging URL에서 `deployment_preflight.py`로 다시 확인한다.
 
@@ -38,6 +46,12 @@ python tests/harness/validate_deployment_manifest.py --manifest path/to/deployme
 ```
 
 검사 결과가 `READY`이고 실제 HTTPS preflight가 PASS일 때만 production acceptance를 완료한다.
+manifest validator는 현재 Members 버전과 D07의 WordPress 7.1/PHP 8.3 조합을 요구하며,
+WooCommerce는 검증한 11.1.0 또는 명시적 `disabled`만 허용한다.
+
+릴리스 evidence JSON과 ZIP manifest는 설치 ZIP 밖의 sidecar로 보관한다. lifecycle
+보고서가 최종 ZIP의 SHA-256을 기록하므로 evidence를 ZIP 안에 넣어 다시 빌드하는
+순환 절차를 사용하지 않는다.
 
 ## 4. 1.0 보수적 정책
 

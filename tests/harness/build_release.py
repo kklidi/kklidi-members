@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 import re
 import zipfile
-from run import PRODUCTION_FILES
+from run import PACKAGE_FILES
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -27,11 +27,11 @@ def build():
         if message != 'KKLIDI Members' and translation.gettext(message) == message)
     assert not missing, 'Missing Korean translations: ' + repr(missing)
     release_doc = 'docs/RELEASE-' + version + '.md'
-    evidence_doc = 'docs/evidence/' + version + '.json'
-    files = sorted(set(PRODUCTION_FILES + ['README.md', 'readme.txt', 'CHANGELOG.md',
+    files = sorted(set(PACKAGE_FILES + ['README.md', 'readme.txt', 'CHANGELOG.md',
         'docs/PRODUCT.md', 'docs/ARCHITECTURE.md', 'docs/SECURITY.md', 'docs/MIGRATION.md',
-        'docs/HARNESS_PLAN.md', 'docs/UI_UX.md', 'docs/OPERATIONS.md', release_doc, evidence_doc]))
+        'docs/HARNESS_PLAN.md', 'docs/UI_UX.md', 'docs/OPERATIONS.md', release_doc]))
     assert all(not path.startswith(('tests/', '.harness/')) for path in files)
+    assert all(not path.startswith('docs/evidence/') for path in files)
     assert all((ROOT / path).is_file() for path in files)
     destination = ROOT / 'dist'
     destination.mkdir(exist_ok=True)

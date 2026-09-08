@@ -6,10 +6,10 @@
     "single_site": true
   },
   "versions": {
-    "wordpress": "VERSION_REQUIRED",
-    "php": "VERSION_REQUIRED",
-    "members": "VERSION_REQUIRED",
-    "woocommerce": "OPTIONAL_VERSION_OR_DISABLED"
+    "wordpress": "7.1",
+    "php": "8.3",
+    "members": "0.7.1",
+    "woocommerce": "11.1.0"
   },
   "owners": {
     "members_runtime": "ROLE_REQUIRED",

@@ -409,11 +409,33 @@ if ($course_id && $synthetic_user_ids) {
 		array_merge(array($course_id), $synthetic_user_ids)
 	));
 }
+$allow_owned_hard_delete = static function ($allowed, WP_Post $post) use ($run_token): bool {
+	return get_post_meta($post->ID, '_kklidi_members_lms_test_run', true) === $run_token
+		? true
+		: (bool) $allowed;
+};
+add_filter('kklidi_lms_allow_hard_delete', $allow_owned_hard_delete, PHP_INT_MAX, 2);
 foreach (array('lesson_id', 'course_id') as $post_key) {
+	if (!isset($cleanup_previous_user_id)) {
+		$cleanup_previous_user_id = get_current_user_id();
+		$cleanup_admin_ids = get_users(array(
+			'role' => 'administrator',
+			'number' => 1,
+			'fields' => 'ids',
+		));
+		if ($cleanup_admin_ids === array()) {
+			exit('A sandbox administrator is required for LMS fixture cleanup.');
+		}
+		wp_set_current_user((int) $cleanup_admin_ids[0]);
+	}
 	$post_id = (int) ($state[$post_key] ?? 0);
 	if ($post_id) {
 		wp_delete_post($post_id, true);
 	}
+}
+remove_filter('kklidi_lms_allow_hard_delete', $allow_owned_hard_delete, PHP_INT_MAX);
+if (isset($cleanup_previous_user_id)) {
+	wp_set_current_user((int) $cleanup_previous_user_id);
 }
 require_once ABSPATH . 'wp-admin/includes/user.php';
 if (defined('KKLIDI_DL_TABLE') && $synthetic_user_ids) {
@@ -438,6 +460,19 @@ if (!empty($state['members_was_active']) && !is_plugin_active($members_plugin)) 
 KKLIDI_LMS_Enrollments::clear_all_cache();
 KKLIDI_LMS_Post_Types::clear_lesson_cache();
 delete_option($state_key);
+$owned_postmeta_remaining = (int) $wpdb->get_var($wpdb->prepare(
+	"SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = %s AND meta_value = %s",
+	'_kklidi_members_lms_test_run',
+	$run_token
+));
+$device_remaining = 0;
+if (defined('KKLIDI_DL_TABLE') && $synthetic_user_ids) {
+	$device_placeholders = implode(',', array_fill(0, count($synthetic_user_ids), '%d'));
+	$device_remaining = (int) $wpdb->get_var($wpdb->prepare(
+		'SELECT COUNT(*) FROM ' . $wpdb->prefix . KKLIDI_DL_TABLE . " WHERE user_id IN ($device_placeholders)",
+		$synthetic_user_ids
+	));
+}
 
 echo wp_json_encode(array(
 	'cleaned' => true,
@@ -446,5 +481,9 @@ echo wp_json_encode(array(
 		return (bool) get_user_by('id', $user_id);
 	})),
 	'course_remaining' => $course_id ? (bool) get_post($course_id) : false,
+	'lesson_remaining' => !empty($state['lesson_id']) ? (bool) get_post((int) $state['lesson_id']) : false,
+	'owned_postmeta_remaining' => $owned_postmeta_remaining,
+	'device_remaining' => $device_remaining,
+	'state_remaining' => get_option($state_key, false) !== false,
 	'members_active' => is_plugin_active($members_plugin),
 ), JSON_UNESCAPED_SLASHES);
