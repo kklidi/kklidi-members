@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.11 — 2026-09-09
+
+- Clarified that withdrawal blocks sign-in immediately and proceeds through administrator review before finalization; no WordPress user or service record is deleted.
+- Added explicit notification-settings guidance and field placeholders for translated defaults selected at send time for the recipient locale.
+- Kept the AUTH-NOTIFY-002 fallback, plain-text transport, and WordPress Core identity/authentication boundaries unchanged.
+
 ## 0.7.10 — 2026-09-09
 
 - Added a Users-area notification section backed by the WordPress Settings API and

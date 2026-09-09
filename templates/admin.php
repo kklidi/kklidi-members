@@ -104,7 +104,7 @@
 	<?php elseif ($section === 'withdrawals') : ?>
 		<section class="kklidi-members-admin-card">
 			<h2><?php esc_html_e('Pending withdrawals', 'kklidi-members'); ?></h2>
-			<p><?php esc_html_e('Finalizing keeps the account blocked. Restoring requires a reason and does not revive any previous WordPress session.', 'kklidi-members'); ?></p>
+			<p><?php esc_html_e('A request blocks sign-in immediately. Finalization records review completion and keeps the account disabled; it does not delete the WordPress user or service records. Restoration requires a reason and never revives an existing session.', 'kklidi-members'); ?></p>
 			<table class="widefat striped kklidi-members-admin-table"><thead><tr><th scope="col"><?php esc_html_e('User ID', 'kklidi-members'); ?></th><th scope="col"><?php esc_html_e('Display name', 'kklidi-members'); ?></th><th scope="col"><?php esc_html_e('Requested at (UTC)', 'kklidi-members'); ?></th><th scope="col"><?php esc_html_e('Review actions', 'kklidi-members'); ?></th></tr></thead><tbody>
 			<?php foreach ($queue as $queued_user) : ?>
 				<tr>

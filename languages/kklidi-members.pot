@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the KKLIDI Members plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: KKLIDI Members 0.7.10\n"
+"Project-Id-Version: KKLIDI Members 0.7.11\n"
 "Report-Msgid-Bugs-To: https://kklidi.com/\n"
 "POT-Creation-Date: 2026-09-07 00:00+0000\n"
 "MIME-Version: 1.0\n"
@@ -866,4 +866,22 @@ msgid "Administrator updated notification messages"
 msgstr ""
 
 msgid "Notification settings updated"
+msgstr ""
+
+msgid "Submitting this request blocks sign-in immediately. It does not delete your WordPress account or service records. Administrators review retained records before finalizing the withdrawal."
+msgstr ""
+
+msgid "Submit request and block sign-in"
+msgstr ""
+
+msgid "A request blocks sign-in immediately. Finalization records review completion and keeps the account disabled; it does not delete the WordPress user or service records. Restoration requires a reason and never revives an existing session."
+msgstr ""
+
+msgid "Empty fields use the translated default at send time for the recipient locale. Leaving a field empty does not disable the notice."
+msgstr ""
+
+msgid "Leave empty to use the translated default subject."
+msgstr ""
+
+msgid "Leave empty to use the translated default message for the recipient locale."
 msgstr ""

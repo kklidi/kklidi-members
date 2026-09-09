@@ -2,7 +2,7 @@
 
 WordPress Core Auth 위에서 KKLIDI 서비스가 공유하는 회원·계정·인증 UX 계층.
 
-**현재 개발 후보: 0.7.10.** 0.7.10은 `AUTH-NOTIFY-002`에 따라 기존 네 계정 알림의 plain-text 제목과 본문을 WordPress Settings API로 관리한다. 발신자·SMTP/provider·queue는 사이트 메일 전송 계층에 남고 WordPress Core 인증과 사용자 ID는 변경하지 않는다. 실제 운영 인증서·다중 서버·운영 migration 승인은 [운영 계약](docs/OPERATIONS.md)의 환경 gate를 따른다.
+**현재 개발 후보: 0.7.11.** 0.7.11은 탈퇴의 즉시 로그인 차단·검토·처리 단계를 화면에 명확히 표시하고, 계정 알림 설정의 공란이 수신자 언어별 기본 문구를 사용한다는 점을 안내한다. `AUTH-NOTIFY-002`의 plain-text 제목·본문 설정, WordPress Core 인증과 사용자 ID 경계, 사이트 메일 전송 계층 소유권은 그대로 유지한다. 실제 운영 인증서·다중 서버·운영 migration 승인은 [운영 계약](docs/OPERATIONS.md)의 환경 gate를 따른다.
 
 이전 검증 기록: **첫 MVP runtime 0.2.0 구현 및 24개 MVP 계약의 합성 WordPress 실행 완료**. 최신 합성 실행은 24개 MVP 계약이 모두 PASS다. 실제 device-limit 1.1.3의 Members/Core 허용·차단·제거 경로, WooCommerce 11.1.0/WCI 1.0.3의 checkout·cart·주문 귀속, KKLIDI LMS의 주문→수강·진도·수료증·비공개 질문과 Members-off 폴백, KBoard 제거 전 호환성, TLS/browser gate를 통과했다. KBoard 권한 엔진 이전·복제와 content migration은 범위 밖이다. 제품 방향 판정은 **GREENFIELD_RECOMMENDED**다.
 

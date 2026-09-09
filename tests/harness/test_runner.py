@@ -675,6 +675,9 @@ class HarnessGuards(unittest.TestCase):
         self.assertNotIn('WC_', settings)
         self.assertNotIn('kklidi_lms', settings)
         self.assertIn("add_option(self::OPTION_NAME, self::empty_settings(), '', false)", settings)
+        self.assertIn('Empty fields use the translated default at send time for the recipient locale.', settings)
+        self.assertIn('placeholder="<?php echo esc_attr__(\'Leave empty to use the translated default subject.', settings)
+        self.assertIn('placeholder="<?php echo esc_attr__(\'Leave empty to use the translated default message for the recipient locale.', settings)
         self.assertIn("add_option('kklidi_members_notification_templates'", installer)
         self.assertIn("), '', false);", installer)
         self.assertIn("'notifications'", admin_source)
@@ -689,6 +692,10 @@ class HarnessGuards(unittest.TestCase):
             admin_template,
         )
         self.assertIn("NotificationTemplates::content($event)", mailer)
+        self.assertIn('A request blocks sign-in immediately. Finalization records review completion', admin_template)
+        withdrawal_template = (repository / 'templates/withdrawal.php').read_text(encoding='utf-8')
+        self.assertIn('Submitting this request blocks sign-in immediately.', withdrawal_template)
+        self.assertIn('Submit request and block sign-in', withdrawal_template)
         self.assertIn("'includes/Notifications/NotificationTemplates.php'", package)
         self.assertIn("results['AUTH-NOTIFY-002']", package)
         self.assertIn("'extension_contracts_total': 2", package)
@@ -794,7 +801,7 @@ class HarnessGuards(unittest.TestCase):
 
         lifecycle = (repository / 'tests/harness/mamp_lifecycle_run.py').read_text(encoding='utf-8')
         self.assertIn("SANDBOX = Path('C:/MAMP/htdocs/kklidi-members-mamp-sandbox')", lifecycle)
-        self.assertIn("PREVIOUS_VERSION = '0.7.9'", lifecycle)
+        self.assertIn("PREVIOUS_VERSION = '0.7.10'", lifecycle)
         self.assertIn("ALLOWED_INITIAL_VERSIONS = ('0.7.0', PREVIOUS_VERSION, CURRENT_VERSION)", lifecycle)
         self.assertIn("CURRENT_VERSION = re.search(", lifecycle)
         self.assertIn("OLD_ARCHIVE = ROOT / ('dist/kklidi-members-' + PREVIOUS_VERSION + '.zip')", lifecycle)
@@ -899,7 +906,7 @@ class HarnessGuards(unittest.TestCase):
         ready = json.loads(json.dumps(example))
         ready['environment']['base_url'] = 'https://staging.kklidi.com'
         ready['versions'].update(
-            wordpress='7.1', php='8.3', members='0.7.10', woocommerce='11.1.0')
+            wordpress='7.1', php='8.3', members='0.7.11', woocommerce='11.1.0')
         ready['owners'] = {key: 'approved-' + key for key in ready['owners']}
         ready['backup'].update(
             artifact_sha256='a' * 64,

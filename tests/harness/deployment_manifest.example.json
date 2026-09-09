@@ -8,7 +8,7 @@
   "versions": {
     "wordpress": "7.1",
     "php": "8.3",
-    "members": "0.7.10",
+    "members": "0.7.11",
     "woocommerce": "11.1.0"
   },
   "owners": {

@@ -126,7 +126,7 @@ final class NotificationTemplates {
 		?>
 		<p><?php esc_html_e('Messages use WordPress wp_mail() as plain text. The active WordPress or site mail transport controls the sender name and address.', 'kklidi-members'); ?></p>
 		<p><strong><?php esc_html_e('Sender policy', 'kklidi-members'); ?>:</strong> <?php esc_html_e('Inherited from the WordPress or site mail transport (read only)', 'kklidi-members'); ?></p>
-		<p><?php esc_html_e('Leave a field empty to use the translated default message for the recipient locale.', 'kklidi-members'); ?></p>
+		<p><?php esc_html_e('Empty fields use the translated default at send time for the recipient locale. Leaving a field empty does not disable the notice.', 'kklidi-members'); ?></p>
 		<?php
 	}
 
@@ -147,9 +147,9 @@ final class NotificationTemplates {
 		?>
 		<div class="kklidi-members-notification-fields">
 			<label for="kklidi-members-<?php echo esc_attr($event); ?>-subject"><?php esc_html_e('Subject', 'kklidi-members'); ?></label>
-			<input class="large-text" id="kklidi-members-<?php echo esc_attr($event); ?>-subject" maxlength="<?php echo (int) self::SUBJECT_MAX; ?>" name="<?php echo esc_attr($name); ?>[subject]" type="text" value="<?php echo esc_attr($subject); ?>">
+			<input class="large-text" id="kklidi-members-<?php echo esc_attr($event); ?>-subject" maxlength="<?php echo (int) self::SUBJECT_MAX; ?>" name="<?php echo esc_attr($name); ?>[subject]" placeholder="<?php echo esc_attr__('Leave empty to use the translated default subject.', 'kklidi-members'); ?>" type="text" value="<?php echo esc_attr($subject); ?>">
 			<label for="kklidi-members-<?php echo esc_attr($event); ?>-body"><?php esc_html_e('Message body', 'kklidi-members'); ?></label>
-			<textarea class="large-text code" id="kklidi-members-<?php echo esc_attr($event); ?>-body" maxlength="<?php echo (int) self::BODY_MAX; ?>" name="<?php echo esc_attr($name); ?>[body]" rows="7"><?php echo esc_textarea($body); ?></textarea>
+			<textarea class="large-text code" id="kklidi-members-<?php echo esc_attr($event); ?>-body" maxlength="<?php echo (int) self::BODY_MAX; ?>" name="<?php echo esc_attr($name); ?>[body]" placeholder="<?php echo esc_attr__('Leave empty to use the translated default message for the recipient locale.', 'kklidi-members'); ?>" rows="7"><?php echo esc_textarea($body); ?></textarea>
 			<p class="description"><?php printf(esc_html__('Allowed placeholders: %s', 'kklidi-members'), esc_html($placeholder_list)); ?></p>
 		</div>
 		<?php

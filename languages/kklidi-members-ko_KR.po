@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the KKLIDI Members plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: KKLIDI Members 0.7.10\n"
+"Project-Id-Version: KKLIDI Members 0.7.11\n"
 "Language: ko_KR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -768,3 +768,21 @@ msgstr "관리자가 알림 문구를 변경함"
 
 msgid "Notification settings updated"
 msgstr "알림 설정 변경"
+
+msgid "Submitting this request blocks sign-in immediately. It does not delete your WordPress account or service records. Administrators review retained records before finalizing the withdrawal."
+msgstr "이 요청을 제출하면 즉시 로그인이 차단됩니다. WordPress 계정이나 서비스 기록이 삭제되는 것은 아닙니다. 관리자가 보존 대상 기록을 검토한 후 탈퇴 처리를 완료합니다."
+
+msgid "Submit request and block sign-in"
+msgstr "요청 제출 및 로그인 차단"
+
+msgid "A request blocks sign-in immediately. Finalization records review completion and keeps the account disabled; it does not delete the WordPress user or service records. Restoration requires a reason and never revives an existing session."
+msgstr "요청을 제출하면 즉시 로그인이 차단됩니다. 처리를 완료해도 계정은 비활성 상태로 유지되며 WordPress 사용자나 서비스 기록은 삭제되지 않습니다. 복구에는 사유가 필요하고 기존 세션은 다시 활성화되지 않습니다."
+
+msgid "Empty fields use the translated default at send time for the recipient locale. Leaving a field empty does not disable the notice."
+msgstr "입력란을 비워 두면 발송 시 수신자 언어에 맞는 기본 번역 문구를 사용합니다. 입력란을 비워도 알림이 비활성화되지는 않습니다."
+
+msgid "Leave empty to use the translated default subject."
+msgstr "비워 두면 수신자 언어에 맞는 기본 번역 제목을 사용합니다."
+
+msgid "Leave empty to use the translated default message for the recipient locale."
+msgstr "비워 두면 수신자 언어에 맞는 기본 번역 본문을 사용합니다."
