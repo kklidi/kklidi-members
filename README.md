@@ -17,6 +17,7 @@ WordPress Core Auth 위에서 KKLIDI 서비스가 공유하는 회원·계정·�
 | [OPERATIONS](docs/OPERATIONS.md) | MAMP TLS, 배포 담당자·백업·복구·관찰기간 인수 기준 |
 | [HARNESS_PLAN](docs/HARNESS_PLAN.md) | 사용자 행동 검증, 성능 budget·측정 절차, release gate |
 | [UI_UX](docs/UI_UX.md) | Members 화면 상태, 접근성, 번역, route 전용 자산 계약 |
+| [NOTIFICATIONS](docs/NOTIFICATIONS.md) | 승인된 계정 알림 사건, 전달·보안 경계, 후속 구현 합격 기준 |
 
 중복 사양보다 위 소유 문서를 우선한다. runtime과 승인된 두 테이블은 합성 fixture에서만 실행했으며 현재 reference 사이트에 적용하지 않았다.
 

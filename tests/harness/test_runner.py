@@ -187,6 +187,87 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('현재 판정은 최신 릴리스 문서', harness)
         self.assertNotIn('현재 실행 결과는 §5와 0.5.0 릴리스 문서', harness)
 
+    def test_auth_notify_001_is_bounded_and_not_yet_implemented(self):
+        repository = Path(__file__).resolve().parents[2]
+        contract = json.loads(
+            (repository / 'tests/harness/notification_contract.json').read_text(encoding='utf-8')
+        )
+
+        self.assertEqual(contract['contract'], 'AUTH-NOTIFY-001')
+        self.assertEqual(contract['version'], 1)
+        self.assertEqual(contract['status'], 'SPECIFIED')
+        self.assertEqual(contract['implementation_status'], 'NOT_IMPLEMENTED')
+        self.assertEqual(contract['implementation_phase'], 'P0-2')
+        self.assertEqual(contract['transport'], {
+            'api': 'wp_mail',
+            'format': 'text/plain',
+            'sender': 'wordpress_default',
+            'smtp_owned_by_members': False,
+        })
+
+        events = contract['events']
+        self.assertEqual(set(events), {
+            'registration_completed',
+            'password_changed',
+            'withdrawal_requested',
+            'withdrawal_finalized',
+        })
+        self.assertEqual(events['registration_completed']['transition'],
+                         ['registration_pending', 'active'])
+        self.assertEqual(events['withdrawal_requested']['transition'],
+                         ['active', 'withdrawal_pending'])
+        self.assertEqual(events['withdrawal_finalized']['transition'],
+                         ['withdrawal_pending', 'disabled'])
+        self.assertEqual(events['password_changed']['trigger'],
+                         'core_password_changed_and_sessions_revoked')
+
+        secrets = {'password', 'reset_key', 'auth_cookie', 'nonce'}
+        for event_name, event in events.items():
+            with self.subTest(event=event_name):
+                self.assertEqual(event['recipient'], 'wordpress_user_email')
+                self.assertTrue(event['after'])
+                self.assertTrue(event['required_content'])
+                self.assertTrue(secrets.issubset(set(event['forbidden_content'])))
+
+        delivery = contract['delivery']
+        self.assertTrue(delivery['after_state_commit'])
+        self.assertEqual(delivery['logical_idempotency'], 'event_type_plus_event_id')
+        self.assertTrue(delivery['duplicate_request_must_not_duplicate_logical_notification'])
+        self.assertFalse(delivery['exactly_once_delivery_claimed'])
+        self.assertTrue(delivery['mail_failure_must_not_rollback_security_state'])
+        self.assertTrue(delivery['mail_failure_must_not_be_reported_as_delivered'])
+
+        boundaries = contract['boundaries']
+        self.assertTrue(boundaries['wordpress_core_auth_preserved'])
+        self.assertTrue(boundaries['wordpress_user_ids_preserved'])
+        self.assertEqual(boundaries['woocommerce_order_mail_owned_by'], 'woocommerce')
+        self.assertEqual(boundaries['lms_learning_mail_owned_by'], 'lms')
+        self.assertTrue(boundaries['members_optional_dependency'])
+        self.assertFalse(boundaries['global_frontend_bootstrap'])
+
+        required_exclusions = {
+            'email_verification', 'email_change_verification', 'otp', 'two_factor',
+            'marketing_campaigns', 'admin_notification_recipients',
+            'editable_templates', 'template_preview', 'test_send', 'retry_queue',
+            'delivery_log', 'smtp_provider', 'woocommerce_order_mail',
+            'lms_learning_mail', 'kboard_mail',
+        }
+        self.assertTrue(required_exclusions.issubset(set(contract['out_of_scope'])))
+
+        notification_doc = (repository / 'docs/NOTIFICATIONS.md').read_text(encoding='utf-8')
+        product_doc = (repository / 'docs/PRODUCT.md').read_text(encoding='utf-8')
+        self.assertIn('AUTH-NOTIFY-001', notification_doc)
+        self.assertIn('Runtime 상태 | **NOT_IMPLEMENTED**', notification_doc)
+        self.assertIn('| D08 | **DECIDED 2026-09-09**', product_doc)
+
+        production_files = [repository / 'kklidi-members.php']
+        production_files.extend((repository / 'includes').rglob('*.php'))
+        production_files.extend((repository / 'templates').rglob('*.php'))
+        production_source = '\n'.join(
+            path.read_text(encoding='utf-8') for path in production_files
+        )
+        self.assertNotIn('wp_mail(', production_source)
+
     def test_tls_runner_confines_openssl_random_state_to_run_directory(self):
         repository = Path(__file__).resolve().parents[2]
         source = (repository / 'tests/harness/mamp_https_run.py').read_text(encoding='utf-8')

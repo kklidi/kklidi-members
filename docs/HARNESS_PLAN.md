@@ -35,6 +35,7 @@ reference와 독립된 WP DB/filesystem에 synthetic 사용자 A/B, subscriber/a
 | AUTH-PROFILE-001 / MVP | A가 이름·표시명·전화 수정; B user_id/role/state/meta/script 주입 | A allowlist만 변경, B/role/verified/과거 주문 불변; 한글 보존·출력 escape·invalid email/phone 거부; 1.0 email read-only |
 | AUTH-CONSENT-001 / MVP | 신규 version 동의/선택 marketing 미선택/legacy agree import/철회/중복 POST | 문서 snapshot/hash/version과 서버 시각 일치; legacy version/time NULL; 빈값 동의 생성 없음; idempotency; consent 저장 실패 성공 금지 |
 | AUTH-WITHDRAW-001 / MVP | A 최근 재인증 후 탈퇴, 반복 요청·타인 ID·잘못된 nonce·domain 작업 실패 | 즉시 차단·Core session/application password 철회; ID·주문·학습 참조 유지; queue 상태 정확; 실패 시 완료 표시 금지; 승인 전 PII 자동 삭제 없음 |
+| AUTH-NOTIFY-001 / MVP extension (SPECIFIED) | 가입 완료·비밀번호 변경·탈퇴 접수·관리자 처리 완료, 중복 요청·상태 저장 실패·메일 실패 | 성공 상태 확정 뒤 현재 Core 이메일에 고정 안내 1건; 비밀·주문·LMS 정보 없음; mail 실패가 보안 상태를 rollback하지 않음; P0-2 전 runtime 미구현 |
 | AUTH-EMAIL-VERIFY-001 / OPTIONAL | valid/expired/revoked/replayed token, GET scanner, resend, concurrent POST, email change | GET 미소비; POST 한 번만 성공; 목적/email binding; resend 이전 token 거부; mail 실패 미검증; legacy 계정 일괄 차단 없음 |
 | AUTH-2FA-001 / FUTURE | password만 성공·정상/오류 TOTP·코드 replay·challenge theft·recovery·모든 login 입구 | 최종 검증 전 auth cookie/current user 없음; browser binding·원자 소비; recovery 1회; Woo/Core/social/XML-RPC/application password 우회 없음 |
 | AUTH-SOCIAL-001 / FUTURE | provider mock 정상·잘못된 issuer/aud/signature/state/nonce/PKCE/redirect, 동일 callback race | provider subject로 동일 WP ID, 실패 cookie 없음, 중복 생성 없음, Core lifecycle/2FA/DL 정책 거부 보존 |
@@ -59,6 +60,12 @@ reference와 독립된 WP DB/filesystem에 synthetic 사용자 A/B, subscriber/a
 `AUTH-UI-001`은 [UI_UX.md](UI_UX.md)와 `tests/harness/ui_contract.json`에서 로그인·가입·계정·프로필·비밀번호·동의·탈퇴·로그아웃·관리자 화면의 상태, 접근성, 번역, route 전용 자산 기준을 고정한다. executable guard는 현재 route와 template surface가 계약에서 빠지거나 이름이 어긋나면 실패한다.
 
 이 항목은 기존 Phase 0의 24개 runtime behavior contract 집계에 추가하지 않는다. 상태는 **SPECIFIED**이며 `AUTH-UI-002` 구현은 완료했다. 2026-09-07 MAMP smoke에서 가입·로그인 오류·로그인 회원의 6개 계정 화면·관리자 화면, 360px reflow, keyboard focus, Members route CSS와 일반 페이지의 Members CSS 0을 확인했다. 모든 보안 상태 전이의 UI 회귀는 기존 MVP behavior harness와 후속 통합 gate가 소유한다.
+
+### 2.2 계정 알림 계약
+
+`AUTH-NOTIFY-001`은 [NOTIFICATIONS.md](NOTIFICATIONS.md)와 `tests/harness/notification_contract.json`에서 가입 완료·비밀번호 변경·탈퇴 접수·탈퇴 처리 완료의 사용자 알림을 고정한다. 기존 24개 MVP runtime 계약 집계에는 추가하지 않는다. 상태는 **SPECIFIED**, runtime은 **NOT_IMPLEMENTED**이며 P0-2가 구현과 합성 WordPress 검증을 소유한다.
+
+WooCommerce 주문·결제 메일과 LMS 수강·진도·수료증 알림은 각 domain owner에 남는다. 이메일 가입 인증, 관리자 알림, 마케팅, 편집 가능한 template, SMTP/provider, 재시도 queue는 이 계약 범위가 아니다. P0-3은 gettext/한국어 catalog, P0-4는 메일 실패 주입과 보안 상태 보존을 별도 검증한다.
 
 가입 동시성은 단순 재클릭과 다르다. 동일 normalized email의 병렬 요청·다른 case·동일 idempotency key·서로 다른 key를 각각 검사한다. 사용자 생성 후 consent 저장 실패, mail 송신 실패, usermeta finalize 실패를 따로 주입한다. account pending 상태의 fail-closed를 검사하고 고아 계정 재사용·완료 절차를 검증한다.
 

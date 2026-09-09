@@ -110,6 +110,7 @@ KBoard는 12개 board 중 author/roles 제한을 갖는 board가 있고 412개 c
 | 탈퇴 요청·로그인 차단·세션 철회, 관리자 처리 상태 | MVP_REQUIRED | 곧바로 전체 삭제하지 않는 최소 안전 기능 |
 | 최소 로그인 audit, route rate limiting, 최소 관리자 설정 | MVP_REQUIRED | 인증 공격 대응·운영 가능성 |
 | Woo/LMS URL·사용자 ID·device-limit 호환 | MVP_REQUIRED | 강결합 없이 기존 기능 유지 |
+| 가입 완료·비밀번호 변경·탈퇴 접수/처리 사용자 알림 | MVP_EXTENSION_APPROVED | `AUTH-NOTIFY-001` 고정 preset. 주문/LMS 메일과 이메일 인증은 제외 |
 | 이메일 가입 인증 | MVP_OPTIONAL | 현재 꺼져 있음; 필요 정책이면 release gate 승격 |
 | 가입 후 자동 로그인 | MVP_OPTIONAL | D01에서 1.0 제외로 확정; 명시적 로그인 유지 |
 | 기존 소개(description) 편집 | MVP_OPTIONAL | LMS 화면 있으나 populated 0명 |
@@ -157,5 +158,6 @@ KBoard는 12개 board 중 author/roles 제한을 갖는 board가 있고 412개 c
 | D05 | 과거 계정의 email state와 재동의 조건 | legacy_unknown 유지, 전원 강제 차단/검증 완료 처리 금지 |
 | D06 | **DECIDED 2026-09-08** | 정산 2페이지/메뉴는 payout, 강의실 메뉴는 LMS/LearnDash, 정적 가입신청 2페이지는 사이트 콘텐츠 운영 owner. Members는 이 접근 엔진을 소유하지 않음 |
 | D07 | **DECIDED FOR 0.7.2 2026-09-09** | 지원 판정은 single-site WordPress 7.1/PHP 8.3/Woo 11.1.0 조합. PHP 7.4~8.3 syntax 통과는 runtime 지원 주장으로 확대하지 않음 |
+| D08 | **DECIDED 2026-09-09** | 가입 완료·비밀번호 변경·탈퇴 접수·탈퇴 처리 완료의 사용자 안내 메일을 후속 MVP 확장으로 승인. WordPress `wp_mail()`과 고정 plain-text preset을 사용하며 관리자·마케팅·주문·LMS 메일, 이메일 인증, template UI는 포함하지 않음 |
 
 D03~D05는 해당 선택 기능이나 legacy 전환을 실제로 시작할 때까지 기존 보수적 기본값을 유지한다. FUTURE/OPTIONAL 기능은 별도 승인 없이 구현하지 않는다.

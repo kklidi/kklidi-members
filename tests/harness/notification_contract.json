@@ -1,0 +1,83 @@
+{
+  "contract": "AUTH-NOTIFY-001",
+  "version": 1,
+  "status": "SPECIFIED",
+  "implementation_status": "NOT_IMPLEMENTED",
+  "implementation_phase": "P0-2",
+  "transport": {
+    "api": "wp_mail",
+    "format": "text/plain",
+    "sender": "wordpress_default",
+    "smtp_owned_by_members": false
+  },
+  "events": {
+    "registration_completed": {
+      "transition": ["registration_pending", "active"],
+      "recipient": "wordpress_user_email",
+      "after": ["required_consents_persisted", "account_state_persisted"],
+      "required_content": ["site_name", "registration_completed", "login_or_account_url"],
+      "forbidden_content": ["password", "reset_key", "auth_cookie", "nonce", "user_id", "role", "order_data", "lms_data"]
+    },
+    "password_changed": {
+      "trigger": "core_password_changed_and_sessions_revoked",
+      "recipient": "wordpress_user_email",
+      "after": ["core_password_changed", "session_tokens_revoked"],
+      "required_content": ["site_name", "password_changed", "core_recovery_url"],
+      "forbidden_content": ["password", "reset_key", "auth_cookie", "nonce", "user_id", "role", "order_data", "lms_data"]
+    },
+    "withdrawal_requested": {
+      "transition": ["active", "withdrawal_pending"],
+      "recipient": "wordpress_user_email",
+      "after": ["account_state_persisted", "session_tokens_revoked"],
+      "required_content": ["site_name", "withdrawal_requested", "access_blocked", "manual_domain_review"],
+      "prohibited_claims": ["all_personal_data_deleted", "orders_deleted", "learning_data_deleted"],
+      "forbidden_content": ["password", "reset_key", "auth_cookie", "nonce", "user_id", "role", "order_data", "lms_data"]
+    },
+    "withdrawal_finalized": {
+      "transition": ["withdrawal_pending", "disabled"],
+      "recipient": "wordpress_user_email",
+      "after": ["account_state_persisted", "access_revoked"],
+      "required_content": ["site_name", "withdrawal_finalized", "access_remains_blocked", "retention_may_apply"],
+      "prohibited_claims": ["all_personal_data_deleted", "orders_deleted", "learning_data_deleted"],
+      "forbidden_content": ["password", "reset_key", "auth_cookie", "nonce", "user_id", "role", "order_data", "lms_data"]
+    }
+  },
+  "delivery": {
+    "after_state_commit": true,
+    "logical_idempotency": "event_type_plus_event_id",
+    "duplicate_request_must_not_duplicate_logical_notification": true,
+    "exactly_once_delivery_claimed": false,
+    "mail_failure_must_not_rollback_security_state": true,
+    "mail_failure_must_not_be_reported_as_delivered": true
+  },
+  "localization": {
+    "source_strings": "english_gettext",
+    "korean_catalog": "languages/kklidi-members-ko_KR.po",
+    "recipient_locale": "wordpress_user_locale_with_site_fallback"
+  },
+  "boundaries": {
+    "wordpress_core_auth_preserved": true,
+    "wordpress_user_ids_preserved": true,
+    "woocommerce_order_mail_owned_by": "woocommerce",
+    "lms_learning_mail_owned_by": "lms",
+    "members_optional_dependency": true,
+    "global_frontend_bootstrap": false
+  },
+  "out_of_scope": [
+    "email_verification",
+    "email_change_verification",
+    "otp",
+    "two_factor",
+    "marketing_campaigns",
+    "admin_notification_recipients",
+    "editable_templates",
+    "template_preview",
+    "test_send",
+    "retry_queue",
+    "delivery_log",
+    "smtp_provider",
+    "woocommerce_order_mail",
+    "lms_learning_mail",
+    "kboard_mail"
+  ]
+}
