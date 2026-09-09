@@ -7,7 +7,7 @@
     "archive": "dist/kklidi-members-0.7.16.zip",
     "manifest": "dist/kklidi-members-0.7.16.manifest.json",
     "files": 51,
-    "archive_sha256": "b25f89d5cdb70bd3642c0f69387d61882a45338ea566a7dc2cc7269a6ad10f88"
+    "archive_sha256": "22888aad605621dbe3a42f44dc962b677a1f60cf0e0c7b6306b0efdb7249a09a"
   },
   "checks": {
     "unit_contracts": "30/30 PASS",
@@ -22,9 +22,36 @@
       "release_acceptance": "PARTIAL"
     },
     "php_lint": "33/33 PASS",
+    "javascript_syntax": "PASS",
     "python_compile": "PASS",
     "catalog": "296 messages compiled; Korean translation PASS",
-    "diff_check": "PASS"
+    "diff_check": "PASS",
+    "sol_high_review": "PASS; no remaining findings",
+    "mamp_lifecycle": {
+      "status": "PASS",
+      "run_id": "mamp-lifecycle-32d13851bc1b",
+      "new_install": "0.7.16",
+      "update": "0.7.12->0.7.16",
+      "reinstall": "0.7.16",
+      "inactive_http": 200,
+      "wordpress_user_ids_preserved": true,
+      "domain_fingerprint_preserved": true,
+      "original_plugin_restored": true
+    },
+    "browser": {
+      "status": "PASS",
+      "viewport": "360x900",
+      "horizontal_overflow": false,
+      "body_and_input_font_px": 16,
+      "heading_font_px": 28,
+      "minimum_control_height_px": 46,
+      "password_toggle_aria_state": "PASS",
+      "keyboard_focus_visible": "PASS",
+      "no_javascript_form_and_submit_present": true,
+      "no_javascript_inert_toggle_absent": true,
+      "non_members_route_assets": 0,
+      "non_members_route_fatal": false
+    }
   },
-  "remaining_gate": "Sol High review and production/staging deployment gates remain outstanding."
+  "remaining_gate": "Studio01 deployment, real mailbox delivery, and production observation gates remain outstanding."
 }

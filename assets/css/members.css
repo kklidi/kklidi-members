@@ -113,6 +113,10 @@
 }
 
 .kklidi-members-password-control {
+	display: block;
+}
+
+.kklidi-members-has-js .kklidi-members-password-control {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) auto;
 	gap: 8px;
@@ -125,7 +129,7 @@
 
 .kklidi-members-password-toggle {
 	align-items: center;
-	display: inline-flex;
+	display: none;
 	justify-content: center;
 	min-height: 46px;
 	min-width: 46px;
@@ -146,6 +150,7 @@
 }
 
 .kklidi-members-has-js .kklidi-members-password-toggle {
+	display: inline-flex;
 	font-size: 0;
 }
 

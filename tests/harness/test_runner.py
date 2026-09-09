@@ -258,6 +258,18 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('<details', register_template)
         self.assertIn('data-kklidi-members-password-toggle', register_template)
         self.assertIn('aria-describedby', register_template)
+        self.assertIn('.kklidi-members-password-toggle {\n\talign-items: center;\n\tdisplay: none;',
+                      frontend_css)
+        self.assertIn('.kklidi-members-has-js .kklidi-members-password-toggle {',
+                      frontend_css)
+        self.assertIn('display: inline-flex;', frontend_css)
+
+        entry = (repository / 'kklidi-members.php').read_text(encoding='utf-8')
+        version = re.search(r'\* Version: (\d+\.\d+\.\d+)', entry).group(1)
+        plugin_readme = (repository / 'readme.txt').read_text(encoding='utf-8')
+        self.assertIn('Stable tag: ' + version, plugin_readme)
+        self.assertIn('= ' + version + ' =', plugin_readme)
+        self.assertIn('docs/RELEASE-' + version + '.md', plugin_readme)
 
     def test_auth_ux_004_typography_contract_is_scoped_and_bounded(self):
         repository = Path(__file__).resolve().parents[2]

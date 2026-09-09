@@ -6,13 +6,14 @@ remain at least 46px, and the 360px layout reflows to one column without changin
 theme, LMS, WooCommerce, or KBoard styles.
 
 The 0.7.14 password enhancement keeps Core form submission and no-JavaScript
-behavior intact. The icon controls are route-scoped and use gettext labels.
+behavior intact. The icon controls are route-scoped, use gettext labels, and
+are hidden when JavaScript is unavailable so no inert control remains.
 
 Local evidence is recorded in `docs/evidence/0.7.16.json`: 30 unit contracts,
 the disposable WordPress run, PHP/JavaScript syntax checks, Korean catalog
-compilation, and a 51-file allowlisted ZIP all pass. The synthetic release
-acceptance remains partial until the separate Sol High review and deployment
-environment gates are completed.
+compilation, and a 51-file allowlisted ZIP all pass. Sol High review and the
+fixed MAMP lifecycle/browser gates pass. Production acceptance remains partial
+until the Studio01, real-mailbox, and observation gates are completed.
 
 Verification is local only. Studio01 and the existing live 0.7.13 deployment
 were not modified.

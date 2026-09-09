@@ -3,7 +3,7 @@ Contributors: kklidi
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.7.13
+Stable tag: 0.7.16
 
 Core-based member accounts with scoped UI, consent records and safe withdrawal handling.
 
@@ -14,9 +14,10 @@ KKLIDI Members adds login, registration, profile, consent and account management
 WooCommerce orders and LMS enrollment/progress stay with their respective plugins.
 Korean UI uses WordPress gettext translation catalogs.
 
-0.7.13 clarifies password-reset and post-registration sign-in guidance while
-preserving WordPress Core ownership of users, passwords, sessions, reset keys,
-and mail delivery. See docs/RELEASE-0.7.13.md.
+0.7.16 adds accessible password visibility icons, clearer account-link hierarchy,
+and a denser responsive Members shell while preserving WordPress Core ownership
+of users, passwords, sessions, reset keys, and mail delivery. See
+docs/RELEASE-0.7.16.md.
 
 == Installation ==
 
@@ -25,6 +26,15 @@ and mail delivery. See docs/RELEASE-0.7.13.md.
 3. Review registration and consent policy before changing the closed defaults.
 
 == Changelog ==
+
+= 0.7.16 =
+* Refined Members-only typography, spacing, and narrow-screen density.
+
+= 0.7.15 =
+* Clarified branded shell and account-link hierarchy across authentication screens.
+
+= 0.7.14 =
+* Replaced password visibility text controls with accessible eye icons while keeping no-JavaScript forms usable.
 
 = 0.7.13 =
 * Clarified the generic WordPress Core password-reset request guidance and kept account-existence responses generic.
