@@ -48,6 +48,8 @@ PRODUCTION_FILES = [
     'includes/Frontend/AccountController.php',
     'includes/Migration/LegacyConsentImporter.php',
     'includes/Notifications/AccountMailer.php',
+	'includes/Notifications/AdminNotificationSettings.php',
+	'includes/Notifications/AdminRegistrationMailer.php',
     'includes/Notifications/NotificationTemplates.php',
     'includes/Profile/ProfileController.php',
     'includes/Registration/RegistrationController.php',
@@ -657,6 +659,7 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
         'locale': 'ko_KR', 'determined_locale': 'ko_KR', 'catalog_exists': True,
         'registration_subject': '[Synthetic Members Harness] 회원가입이 완료되었습니다',
         'password_changed_notice': '비밀번호가 변경되었습니다. 다시 로그인하세요.',
+        'admin_registration_subject': '[Synthetic Members Harness] 신규 회원가입',
     }, 'Korean catalog was not loaded by WordPress: ' + repr(translation_check))
     registration = Browser(base)
     status, headers, form = registration.request('/?kklidi_members_register=1')
@@ -1089,6 +1092,163 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
         'unknown_placeholder_rejected': True, 'empty_uses_gettext_default': True,
         'metadata_only_audit': True, 'plain_text': True,
         'sender_and_transport_inherited': True,
+    }
+
+    core_admin_email = command(
+        php_cli + [HERE / 'mvp_probe.php', 'set-core-admin-email'], json_result=True)
+    require(core_admin_email == {'admin_email': env['KKH_CORE_ADMIN_EMAIL']},
+            'Synthetic WordPress administration email setup failed')
+    admin_notice_page_status, _, notification_page = admin.request(notification_path)
+    admin_notice_forms = [form for form in re.findall(
+        r'<form\b.*?</form>', notification_page, flags=re.IGNORECASE | re.DOTALL)
+        if 'kklidi_members_admin_notifications[registration_enabled]' in form]
+    require(admin_notice_page_status == 200 and len(admin_notice_forms) == 1
+            and env['KKH_CORE_ADMIN_EMAIL'] in notification_page
+            and 'name="kklidi_members_admin_notifications[registration_enabled]"'
+            in admin_notice_forms[0],
+            'Administrator registration notice Settings API form is unavailable: ' + repr({
+                'status': admin_notice_page_status,
+                'form_count': len(admin_notice_forms),
+                'has_option_group': 'kklidi_members_admin_notifications' in notification_page,
+                'has_admin_email': env['KKH_CORE_ADMIN_EMAIL'] in notification_page,
+                'has_checkbox': 'registration_enabled' in notification_page,
+            }))
+    admin_notice_nonce = hidden_input(admin_notice_forms[0], '_wpnonce')
+
+    def admin_notification_fields(enabled=True, extra=False):
+        fields = {
+            'option_page': 'kklidi_members_admin_notifications',
+            'action': 'update',
+            '_wpnonce': admin_notice_nonce,
+            '_wp_http_referer': notification_path,
+            'kklidi_members_admin_notifications[version]': '1',
+        }
+        if enabled:
+            fields['kklidi_members_admin_notifications[registration_enabled]'] = '1'
+        if extra:
+            fields['kklidi_members_admin_notifications[recipient]'] = 'attacker@example.invalid'
+        return fields
+
+    admin_notice_default = command(
+        php_cli + [HERE / 'mvp_probe.php', 'admin-notification-summary'], json_result=True)
+    require(admin_notice_default['autoload'] in ('no', 'off')
+            and admin_notice_default['stored'] == {
+                'version': 1, 'registration_enabled': False}
+            and admin_notice_default['effective'] == admin_notice_default['stored']
+            and admin_notice_default['settings_audit_count'] == 0
+            and admin_notice_default['user'] is None,
+            'Administrator notification default is not a non-autoload opt-in')
+
+    invalid_admin_notice_status, _, _ = admin.request(
+        '/wp-admin/options.php', data=admin_notification_fields(extra=True))
+    invalid_admin_notice = command(
+        php_cli + [HERE / 'mvp_probe.php', 'admin-notification-summary'], json_result=True)
+    require(invalid_admin_notice_status == 302 and invalid_admin_notice == admin_notice_default,
+            'Administrator notification accepted a custom recipient or unknown field')
+    denied_admin_notice_status, _, _ = profile_browser.request(
+        '/wp-admin/options.php', data=admin_notification_fields())
+    require(denied_admin_notice_status == 403,
+            'Subscriber changed the administrator notification setting')
+
+    enabled_admin_notice_status, _, _ = admin.request(
+        '/wp-admin/options.php', data=admin_notification_fields())
+    enabled_admin_notice = command(
+        php_cli + [HERE / 'mvp_probe.php', 'admin-notification-summary'], json_result=True)
+    require(enabled_admin_notice_status == 302
+            and enabled_admin_notice['stored'] == {
+                'version': 1, 'registration_enabled': True}
+            and enabled_admin_notice['settings_audit_count'] == 1,
+            'Administrator notification opt-in was not saved safely')
+
+    admin_notice_mail_count = len(read_mailbox(mailbox_path))
+    admin_notice_registration = Browser(base)
+    status, _, admin_notice_form = admin_notice_registration.request(
+        '/?kklidi_members_register=1')
+    admin_notice_request_id = hidden_input(admin_notice_form, 'request_id')
+    admin_notice_registration_fields = {
+        'kklidi_members_register': '1',
+        'request_id': admin_notice_request_id,
+        '_kklidi_members_register_nonce': hidden_input(
+            admin_notice_form, '_kklidi_members_register_nonce'),
+        '_kklidi_members_guest_exp': hidden_input(
+            admin_notice_form, '_kklidi_members_guest_exp'),
+        '_kklidi_members_guest_token': hidden_input(
+            admin_notice_form, '_kklidi_members_guest_token'),
+        'email': env['KKH_ADMIN_NOTICE_EMAIL'],
+        'password': env['KKH_USER_PASSWORD'],
+        'password_confirm': env['KKH_USER_PASSWORD'],
+        'first_name': 'Admin',
+        'last_name': 'Notice',
+        'display_name': 'Synthetic Admin Notice',
+        'phone': '',
+        'consent_service': '1',
+        'consent_privacy': '1',
+    }
+    status, headers, _ = admin_notice_registration.request(
+        '/?kklidi_members_register=1', data=admin_notice_registration_fields)
+    admin_notice_mail = read_mailbox(mailbox_path)
+    admin_notice_summary = command(
+        php_cli + [HERE / 'mvp_probe.php', 'admin-notification-summary'], json_result=True)
+    user_notices = [row for row in admin_notice_mail[admin_notice_mail_count:]
+                    if row['to'] == [env['KKH_ADMIN_NOTICE_EMAIL']]]
+    admin_notices = [row for row in admin_notice_mail[admin_notice_mail_count:]
+                     if row['to'] == [env['KKH_CORE_ADMIN_EMAIL']]]
+    require(status == 302 and 'registered=1' in headers.get('Location', '')
+            and len(admin_notice_mail) == admin_notice_mail_count + 2
+            and len(user_notices) == 1 and len(admin_notices) == 1
+            and admin_notice_summary['user']['state'] == 'active'
+            and admin_notice_summary['user']['roles'] == ['subscriber']
+            and admin_notice_summary['user']['required_consents'] == 2
+            and admin_notice_summary['user']['mail_audit'] == [{
+                'event_type': 'mail_admin_registration', 'result': 'success',
+                'reason_code': 'wp_mail_accepted'}],
+            'Opted-in administrator registration notice did not follow active registration')
+    admin_notice = admin_notices[0]
+    require('New member registration' in admin_notice['subject']
+            and 'A new member registration is complete.' in admin_notice['message']
+            and 'Synthetic Admin Notice' in admin_notice['message']
+            and env['KKH_ADMIN_NOTICE_EMAIL'] in admin_notice['message']
+            and 'Registered at (UTC):' in admin_notice['message']
+            and admin_notice['headers'] == ['Content-Type: text/plain; charset=UTF-8']
+            and admin_notice.get('locale') == 'en_US'
+            and admin_notice.get('site_locale_option') == 'en_US'
+            and all(value not in admin_notice['subject'] + admin_notice['message']
+                    for value in (env['KKH_USER_PASSWORD'], admin_notice_request_id,
+                                  'user_id', 'role=', 'billing_phone', 'consent_')),
+            'Administrator registration notice content or plain-text boundary changed: ' + repr({
+                'subject': admin_notice['subject'],
+                'message': admin_notice['message'],
+                'headers': admin_notice['headers'],
+                'locale': admin_notice.get('locale'),
+                'determined_locale': admin_notice.get('determined_locale'),
+                'site_locale_option': admin_notice.get('site_locale_option'),
+            }))
+    replay_admin_notice = command(
+        php_cli + [HERE / 'mvp_probe.php', 'replay-admin-registration-notification'],
+        json_result=True)
+    invalid_admin_recipient = command(
+        php_cli + [HERE / 'mvp_probe.php', 'admin-notification-invalid-recipient'],
+        json_result=True)
+    require(replay_admin_notice == {'sent': False}
+            and invalid_admin_recipient == {
+                'sent': False,
+                'audit': {'result': 'failure', 'reason_code': 'invalid_recipient'},
+                'state': 'active', 'admin_email_restored': True}
+            and len(read_mailbox(mailbox_path)) == admin_notice_mail_count + 2,
+            'Administrator notification replay or invalid-recipient boundary failed')
+    admin_notice_cleanup = command(
+        php_cli + [HERE / 'mvp_probe.php', 'cleanup-admin-notification-user'],
+        json_result=True)
+    require(admin_notice_cleanup == {'deleted': True, 'remaining': 0},
+            'Synthetic administrator-notification user cleanup failed')
+    results['AUTH-ADMIN-NOTIFY-001'] = {
+        'status': 'PASS', 'default_enabled': False, 'settings_api': True,
+        'capability_and_nonce': True, 'non_autoload_option': True,
+        'recipient': 'wordpress_admin_email', 'custom_recipient': False,
+        'post_active_only': True, 'plain_text': True,
+        'logical_replay_idempotent': True, 'invalid_recipient_audited': True,
+        'forbidden_data_absent': True, 'administrator_approval': False,
+        'mail_failure_checked_with_account_failure_suite': True,
     }
     status, _, profile_form = profile_browser.request('/?kklidi_members_profile=1')
     require(status == 200, 'Profile form missing')
@@ -1546,12 +1706,12 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
                 and finalized_failure_probe['state'] == 'disabled'
                 and finalized_failure_probe['session_count'] == 0
                 and [row['event_type'] for row in failed_mail_audit] == [
-                    'mail_registration_completed', 'mail_password_changed',
+                    'mail_registration_completed', 'mail_admin_registration', 'mail_password_changed',
                     'mail_withdrawal_requested', 'mail_withdrawal_finalized']
                 and all(row['result'] == 'failure'
                         and row['reason_code'] == 'wp_mail_failed'
                         for row in failed_mail_audit)
-                and injected_failure_events == 4
+                and injected_failure_events == 5
                 and len(read_mailbox(mailbox_path)) == failure_mail_count,
                 'Failed account mail was reported as delivered or final state rolled back')
     finally:
@@ -1563,7 +1723,13 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
                                     'admin_queue': 'PASS', 'admin_replay_idempotent': True,
                                     'admin_restore_with_reason': True,
                                     'restored_sessions': False,
-                                    'automatic_pii_deletion': False}
+                                     'automatic_pii_deletion': False}
+    results['AUTH-ADMIN-NOTIFY-001'].update({
+        'mail_failure_attempts': 1,
+        'mail_failure_audit_result': 'failure/wp_mail_failed',
+        'mail_failure_registration_preserved': True,
+        'mail_failure_retry_attempts': 0,
+    })
     results['AUTH-NOTIFY-001'] = {
         'status': 'PASS', 'account_notice_events': 4,
         'current_core_recipient': True, 'fixed_plain_text_presets': True,
@@ -1834,6 +2000,8 @@ def execute(php, mysqld, one_prefix=False, skip_perf=False):
                KKH_RESET_PASSWORD=secrets.token_urlsafe(38),
                KKH_MVP_EMAIL='mvp-' + run_id[:12] + '@example.invalid',
                KKH_FIELDS_EMAIL='fields-' + run_id[:12] + '@example.invalid',
+			   KKH_ADMIN_NOTICE_EMAIL='admin-notice-' + run_id[:12] + '@example.invalid',
+			   KKH_CORE_ADMIN_EMAIL='site-admin-' + run_id[:12] + '@example.invalid',
                KKH_FAILURE_EMAIL='notify-failure-' + run_id[:12] + '@example.invalid',
                KKH_FAILURE_PASSWORD=secrets.token_urlsafe(40),
                KKH_SALT=secrets.token_hex(48), KKH_PROBE_KEY=secrets.token_hex(32),
@@ -1847,7 +2015,7 @@ def execute(php, mysqld, one_prefix=False, skip_perf=False):
               'modes': {'core_baseline': {'status': 'FAIL', 'variants': []},
                         'members_on': {'status': 'FAIL', 'variants': []}},
               'contracts_total': 24, 'contracts_exercised': 24,
-               'extension_contracts_total': 4, 'extension_contracts_exercised': 4,
+               'extension_contracts_total': 5, 'extension_contracts_exercised': 5,
               'not_run': ['actual WooCommerce/LMS full-stack browser regression',
                           'KBoard removal-period compatibility smoke/no-fatal',
                           'device-limit WooCommerce login entry', 'TLS/Secure cookie deployment',
@@ -1861,7 +2029,8 @@ def execute(php, mysqld, one_prefix=False, skip_perf=False):
             message = (completed.stderr + completed.stdout).decode('utf-8', errors='replace')
             for name in ('KKH_DB_PASSWORD', 'KKH_USER_PASSWORD', 'KKH_NEW_PASSWORD',
                          'KKH_RESET_PASSWORD', 'KKH_FAILURE_PASSWORD', 'KKH_SALT', 'KKH_PROBE_KEY',
-                         'KKH_MVP_EMAIL', 'KKH_FIELDS_EMAIL', 'KKH_FAILURE_EMAIL'):
+                         'KKH_MVP_EMAIL', 'KKH_FIELDS_EMAIL', 'KKH_ADMIN_NOTICE_EMAIL',
+						 'KKH_CORE_ADMIN_EMAIL', 'KKH_FAILURE_EMAIL'):
                 message = message.replace(env[name], '[redacted]')
             return message[-2500:]
         require(completed.returncode == 0, 'Isolated subprocess failed: ' + diagnostic())
@@ -2099,7 +2268,7 @@ def execute(php, mysqld, one_prefix=False, skip_perf=False):
         (output / 'latest.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
     core_total = sum(len(v['cases']) for v in report['modes']['core_baseline']['variants'])
     members_total = sum(len(v['cases']) for v in report['modes']['members_on']['variants'])
-    print(f'{report["status"]}: MVP contracts=24 + extension contracts=4, '
+    print(f'{report["status"]}: MVP contracts=24 + extension contracts=5, '
           f'AUTH-LOGIN-001 Core={core_total}, '
           f'Members={members_total}; release evidence PARTIAL. Report: .harness/reports/latest.json')
     if 'error' in report:

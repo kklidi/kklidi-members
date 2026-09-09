@@ -1,6 +1,6 @@
 # Administrator registration notification
 
-`AUTH-ADMIN-NOTIFY-001` 상태: **SPECIFIED_NOT_IMPLEMENTED**
+`AUTH-ADMIN-NOTIFY-001` 상태: **IMPLEMENTED_AND_SYNTHETIC_VERIFIED**
 
 대상 버전: **0.7.20**
 
@@ -34,3 +34,5 @@ WooCommerce 주문 메일, LMS 학습 메일과 KBoard 알림은 각 플러그�
 4. 재실행은 같은 가입 요청의 관리자 알림을 중복 발송하지 않는다.
 5. 잘못된 수신 주소와 `wp_mail()` 실패가 가입·로그인 가능 상태·사용자 알림을 rollback하지 않는다.
 6. 메일과 감사에 금지 정보가 없고, frontend 일반 요청에 설정·메일 class 또는 새 자산을 로드하지 않는다.
+
+2026-09-10 합성 실행 `b83fd4753406440a874f0e50e55d0860`에서 기본/임의 DB prefix 모두 기본 꺼짐, 관리자 Settings API, custom recipient 거부, Core `admin_email`, 활성 가입 뒤 사용자·관리자 메일 분리, 중복 방지, invalid recipient와 `wp_mail()` 실패 감사, 가입 상태 보존, 합성 사용자와 root 정리를 PASS했다. 같은 실행의 일반 요청 성능 budget과 무자산 경계도 PASS했다.

@@ -56,7 +56,8 @@ if ($action === 'translation-check') {
         'determined_locale' => determine_locale(),
         'catalog_exists' => file_exists($catalog),
         'registration_subject' => sprintf(__('[%s] Registration complete', 'kklidi-members'), get_bloginfo('name')),
-		'password_changed_notice' => __('Your password was changed. Please sign in again.', 'kklidi-members'),
+        'password_changed_notice' => __('Your password was changed. Please sign in again.', 'kklidi-members'),
+		'admin_registration_subject' => sprintf(__('[%s] New member registration', 'kklidi-members'), get_bloginfo('name')),
     ));
     exit;
 }
@@ -141,6 +142,106 @@ if ($action === 'cleanup-registration-fields-user') {
 		'deleted' => (bool) $deleted,
 		'remaining' => get_user_by('email', $field_email) ? 1 : 0,
 	));
+	exit;
+}
+if ($action === 'set-core-admin-email') {
+	$admin_email = getenv('KKH_CORE_ADMIN_EMAIL') ?: '';
+	if (!is_email($admin_email)) { exit('Invalid synthetic administrator email.'); }
+	update_option('admin_email', $admin_email, false);
+	echo wp_json_encode(array('admin_email' => get_option('admin_email')));
+	exit;
+}
+if ($action === 'admin-notification-summary') {
+	require_once KKLIDI_MEMBERS_DIR . 'includes/Notifications/AdminNotificationSettings.php';
+	$option_name = \KKLIDI\Members\Notifications\AdminNotificationSettings::OPTION_NAME;
+	$stored = get_option($option_name, array());
+	$autoload = $wpdb->get_var($wpdb->prepare(
+		"SELECT autoload FROM {$wpdb->options} WHERE option_name = %s",
+		$option_name
+	));
+	$admin_notice_email = getenv('KKH_ADMIN_NOTICE_EMAIL') ?: '';
+	$admin_notice_user = $admin_notice_email !== '' ? get_user_by('email', $admin_notice_email) : false;
+	$audit_table = $wpdb->prefix . 'kklidi_mem_login_audit';
+	$consent_table = $wpdb->prefix . 'kklidi_mem_consents';
+	echo wp_json_encode(array(
+		'autoload' => $autoload,
+		'stored' => $stored,
+		'effective' => \KKLIDI\Members\Notifications\AdminNotificationSettings::settings(),
+		'core_admin_email' => get_option('admin_email'),
+		'settings_audit_count' => (int) $wpdb->get_var($wpdb->prepare(
+			"SELECT COUNT(*) FROM {$audit_table} WHERE event_type = %s",
+			'admin_notification_settings_update'
+		)),
+		'user' => $admin_notice_user ? array(
+			'id' => (int) $admin_notice_user->ID,
+			'state' => \KKLIDI\Members\Security\AccountState::get((int) $admin_notice_user->ID),
+			'roles' => array_values($admin_notice_user->roles),
+			'required_consents' => (int) $wpdb->get_var($wpdb->prepare(
+				"SELECT COUNT(*) FROM {$consent_table} WHERE user_id = %d
+				 AND consent_type IN ('service','privacy') AND action = 'accept'",
+				$admin_notice_user->ID
+			)),
+			'mail_audit' => $wpdb->get_results($wpdb->prepare(
+				"SELECT event_type, result, reason_code FROM {$audit_table}
+				 WHERE user_id = %d AND event_type = 'mail_admin_registration' ORDER BY id",
+				$admin_notice_user->ID
+			), ARRAY_A),
+		) : null,
+	));
+	exit;
+}
+if ($action === 'replay-admin-registration-notification') {
+	$target = get_user_by('email', getenv('KKH_ADMIN_NOTICE_EMAIL') ?: '');
+	if (!$target) { exit('Missing synthetic administrator-notice user.'); }
+	$request_id = (string) get_user_meta($target->ID, '_kklidi_members_registration_request_id', true);
+	require_once KKLIDI_MEMBERS_DIR . 'includes/Notifications/AdminRegistrationMailer.php';
+	echo wp_json_encode(array(
+		'sent' => \KKLIDI\Members\Notifications\AdminRegistrationMailer::send(
+			(int) $target->ID,
+			$request_id
+		),
+	));
+	exit;
+}
+if ($action === 'admin-notification-invalid-recipient') {
+	$target = get_user_by('email', getenv('KKH_ADMIN_NOTICE_EMAIL') ?: '');
+	if (!$target) { exit('Missing synthetic administrator-notice user.'); }
+	$original = (string) get_option('admin_email', '');
+	$request_id = wp_generate_uuid4();
+	$wpdb->update($wpdb->options, array('option_value' => 'invalid-address'),
+		array('option_name' => 'admin_email'), array('%s'), array('%s'));
+	wp_cache_delete('admin_email', 'options');
+	wp_cache_delete('alloptions', 'options');
+	require_once KKLIDI_MEMBERS_DIR . 'includes/Notifications/AdminRegistrationMailer.php';
+	$sent = \KKLIDI\Members\Notifications\AdminRegistrationMailer::send(
+		(int) $target->ID,
+		$request_id
+	);
+	$invalid_audit = $wpdb->get_row($wpdb->prepare(
+		"SELECT result, reason_code FROM {$wpdb->prefix}kklidi_mem_login_audit
+		 WHERE request_id = %s AND event_type = 'mail_admin_registration'",
+		$request_id
+	), ARRAY_A);
+	$wpdb->update($wpdb->options, array('option_value' => $original),
+		array('option_name' => 'admin_email'), array('%s'), array('%s'));
+	wp_cache_delete('admin_email', 'options');
+	wp_cache_delete('alloptions', 'options');
+	echo wp_json_encode(array('sent' => $sent, 'audit' => $invalid_audit,
+		'state' => \KKLIDI\Members\Security\AccountState::get((int) $target->ID),
+		'admin_email_restored' => get_option('admin_email') === $original));
+	exit;
+}
+if ($action === 'cleanup-admin-notification-user') {
+	$target = get_user_by('email', getenv('KKH_ADMIN_NOTICE_EMAIL') ?: '');
+	if (!$target) { exit('Missing synthetic administrator-notice user.'); }
+	$consent_table = $wpdb->prefix . 'kklidi_mem_consents';
+	$audit_table = $wpdb->prefix . 'kklidi_mem_login_audit';
+	$wpdb->delete($consent_table, array('user_id' => $target->ID), array('%d'));
+	$wpdb->delete($audit_table, array('user_id' => $target->ID), array('%d'));
+	require_once ABSPATH . 'wp-admin/includes/user.php';
+	$deleted = wp_delete_user($target->ID);
+	echo wp_json_encode(array('deleted' => (bool) $deleted,
+		'remaining' => get_user_by('email', getenv('KKH_ADMIN_NOTICE_EMAIL') ?: '') ? 1 : 0));
 	exit;
 }
 if ($action === 'expire-audit') {

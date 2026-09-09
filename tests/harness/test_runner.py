@@ -624,7 +624,7 @@ class HarnessGuards(unittest.TestCase):
         for secret in ('password', 'key', 'user_id', 'email'):
             self.assertNotIn("add_query_arg('" + secret + "'", password)
         self.assertIn("results['AUTH-MESSAGE-UX-001']", runtime_harness)
-        self.assertIn("'extension_contracts_total': 4", runtime_harness)
+        self.assertIn("'extension_contracts_total': 5", runtime_harness)
 
     def test_auth_admin_notify_001_design_is_default_off_and_core_owned(self):
         repository = Path(__file__).resolve().parents[2]
@@ -633,7 +633,7 @@ class HarnessGuards(unittest.TestCase):
         ).read_text(encoding='utf-8'))
         self.assertEqual(contract['contract'], 'AUTH-ADMIN-NOTIFY-001')
         self.assertEqual(contract['version'], 1)
-        self.assertEqual(contract['status'], 'SPECIFIED_NOT_IMPLEMENTED')
+        self.assertEqual(contract['status'], 'IMPLEMENTED_AND_SYNTHETIC_VERIFIED')
         self.assertEqual(contract['target_release'], '0.7.20')
         setting = contract['setting']
         self.assertFalse(setting['default_registration_enabled'])
@@ -661,12 +661,45 @@ class HarnessGuards(unittest.TestCase):
         document = (repository / 'docs/ADMIN_NOTIFICATIONS.md').read_text(encoding='utf-8')
         product = (repository / 'docs/PRODUCT.md').read_text(encoding='utf-8')
         harness = (repository / 'docs/HARNESS_PLAN.md').read_text(encoding='utf-8')
-        self.assertIn('SPECIFIED_NOT_IMPLEMENTED', document)
-        self.assertIn('| D13 | **SPECIFIED FOR 0.7.20', product)
-        self.assertIn('AUTH-ADMIN-NOTIFY-001 / 0.7.20 extension (SPECIFIED)', harness)
+        self.assertIn('IMPLEMENTED_AND_SYNTHETIC_VERIFIED', document)
+        self.assertIn('| D13 | **IMPLEMENTED FOR 0.7.20', product)
+        self.assertIn('AUTH-ADMIN-NOTIFY-001 / 0.7.20 extension (IMPLEMENTED)', harness)
         self.assertIn("'docs/ADMIN_NOTIFICATIONS.md'", (
             repository / 'tests/harness/build_release.py'
         ).read_text(encoding='utf-8'))
+
+    def test_auth_admin_notify_001_implementation_is_bounded(self):
+        repository = Path(__file__).resolve().parents[2]
+        settings = (repository / 'includes/Notifications/AdminNotificationSettings.php').read_text(
+            encoding='utf-8')
+        mailer = (repository / 'includes/Notifications/AdminRegistrationMailer.php').read_text(
+            encoding='utf-8')
+        registration = (repository / 'includes/Registration/RegistrationController.php').read_text(
+            encoding='utf-8')
+        admin = (repository / 'includes/Admin/AdminController.php').read_text(encoding='utf-8')
+        template = (repository / 'templates/admin.php').read_text(encoding='utf-8')
+        installer = (repository / 'includes/Core/Installer.php').read_text(encoding='utf-8')
+        runtime_harness = (repository / 'tests/harness/run.py').read_text(encoding='utf-8')
+
+        self.assertIn("public const OPTION_NAME = 'kklidi_members_admin_notifications'", settings)
+        self.assertIn("'registration_enabled' => false", settings)
+        self.assertIn("add_option(self::OPTION_NAME, self::defaults(), '', false)", settings)
+        self.assertIn("return 'manage_kklidi_members';", settings)
+        self.assertIn("array_diff(array_keys($input), array('version', 'registration_enabled'))", settings)
+        self.assertNotIn('admin_email', settings)
+        self.assertIn("get_option('admin_email', '')", mailer)
+        self.assertIn("Recorder::claim_notification(self::EVENT", mailer)
+        self.assertIn("Content-Type: text/plain", mailer)
+        self.assertIn("get_option('WPLANG', '')", mailer)
+        for prohibited in ('wp_mail_from', 'wp_mail_from_name', 'wp_set_auth_cookie',
+                           'session_start(', 'wp_remote_', 'WooCommerce', 'KKLIDI_LMS'):
+            self.assertNotIn(prohibited, settings + mailer)
+        self.assertIn('AdminRegistrationMailer::send($completed_user_id, $request_id)', registration)
+        self.assertIn('AdminNotificationSettings::register_settings()', admin)
+        self.assertIn('AdminNotificationSettings::OPTION_GROUP', template)
+        self.assertIn("AdminNotificationSettings::defaults()", installer)
+        self.assertIn("results['AUTH-ADMIN-NOTIFY-001']", runtime_harness)
+        self.assertIn("'extension_contracts_total': 5", runtime_harness)
 
     def test_auth_ux_003_078_withdrawal_and_audit_operations_are_bounded(self):
         repository = Path(__file__).resolve().parents[2]
@@ -1023,7 +1056,7 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('If an account matches, WordPress will send a password reset link.', reset_template)
         self.assertIn("'includes/Notifications/NotificationTemplates.php'", package)
         self.assertIn("results['AUTH-NOTIFY-002']", package)
-        self.assertIn("'extension_contracts_total': 4", package)
+        self.assertIn("'extension_contracts_total': 5", package)
 
     def test_auth_notify_001_catalog_covers_mail_presets(self):
         repository = Path(__file__).resolve().parents[2]
@@ -1126,7 +1159,7 @@ class HarnessGuards(unittest.TestCase):
 
         lifecycle = (repository / 'tests/harness/mamp_lifecycle_run.py').read_text(encoding='utf-8')
         self.assertIn("SANDBOX = Path('C:/MAMP/htdocs/kklidi-members-mamp-sandbox')", lifecycle)
-        self.assertIn("PREVIOUS_VERSION = '0.7.12'", lifecycle)
+        self.assertIn("PREVIOUS_VERSION = '0.7.19'", lifecycle)
         self.assertIn("ALLOWED_INITIAL_VERSIONS = ('0.7.0', PREVIOUS_VERSION, CURRENT_VERSION)", lifecycle)
         self.assertIn("CURRENT_VERSION = re.search(", lifecycle)
         self.assertIn("OLD_ARCHIVE = ROOT / ('dist/kklidi-members-' + PREVIOUS_VERSION + '.zip')", lifecycle)
@@ -1231,7 +1264,7 @@ class HarnessGuards(unittest.TestCase):
         ready = json.loads(json.dumps(example))
         ready['environment']['base_url'] = 'https://staging.kklidi.com'
         ready['versions'].update(
-            wordpress='7.1', php='8.3', members='0.7.19', woocommerce='11.1.0')
+            wordpress='7.1', php='8.3', members='0.7.20', woocommerce='11.1.0')
         ready['owners'] = {key: 'approved-' + key for key in ready['owners']}
         ready['backup'].update(
             artifact_sha256='a' * 64,

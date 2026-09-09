@@ -25,6 +25,13 @@ final class Installer {
 			'version' => 1,
 			'events' => array(),
 		), '', false);
+		require_once KKLIDI_MEMBERS_DIR . 'includes/Notifications/AdminNotificationSettings.php';
+		add_option(
+			\KKLIDI\Members\Notifications\AdminNotificationSettings::OPTION_NAME,
+			\KKLIDI\Members\Notifications\AdminNotificationSettings::defaults(),
+			'',
+			false
+		);
 		require_once KKLIDI_MEMBERS_DIR . 'includes/Registration/RegistrationFields.php';
 		add_option(
 			\KKLIDI\Members\Registration\RegistrationFields::OPTION_NAME,

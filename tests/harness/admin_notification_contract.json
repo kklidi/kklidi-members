@@ -1,7 +1,7 @@
 {
   "contract": "AUTH-ADMIN-NOTIFY-001",
   "version": 1,
-  "status": "SPECIFIED_NOT_IMPLEMENTED",
+  "status": "IMPLEMENTED_AND_SYNTHETIC_VERIFIED",
   "target_release": "0.7.20",
   "depends_on": ["AUTH-REGISTER-001", "AUTH-NOTIFY-001", "AUTH-NOTIFY-002"],
   "setting": {
@@ -38,6 +38,14 @@
     "audit_event": "mail_admin_registration",
     "audit_success": "success/wp_mail_accepted",
     "audit_failure": "failure/wp_mail_failed"
+  },
+  "verification": {
+    "status": "PASS",
+    "scope": "synthetic_wordpress_with_performance",
+    "prefixes": ["wp_", "non_default"],
+    "evidence_id": "b83fd4753406440a874f0e50e55d0860",
+    "mvp_contracts": 24,
+    "extension_contracts": 5
   },
   "boundaries": {
     "administrator_approval": false,

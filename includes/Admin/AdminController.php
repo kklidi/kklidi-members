@@ -21,6 +21,10 @@ final class AdminController {
 			'\KKLIDI\Members\Notifications\NotificationTemplates',
 			'settings_capability',
 		));
+		add_filter('option_page_capability_kklidi_members_admin_notifications', array(
+			'\KKLIDI\Members\Notifications\AdminNotificationSettings',
+			'settings_capability',
+		));
 		add_filter('option_page_capability_kklidi_members_registration_fields', array(
 			'\KKLIDI\Members\Registration\RegistrationFields',
 			'settings_capability',
@@ -31,6 +35,10 @@ final class AdminController {
 		), 10, 2);
 		add_action('update_option_kklidi_members_notification_templates', array(
 			'\KKLIDI\Members\Notifications\NotificationTemplates',
+			'audit_update',
+		), 10, 2);
+		add_action('update_option_kklidi_members_admin_notifications', array(
+			'\KKLIDI\Members\Notifications\AdminNotificationSettings',
 			'audit_update',
 		), 10, 2);
 		add_filter('manage_users_columns', array(__CLASS__, 'user_columns'));
@@ -47,7 +55,9 @@ final class AdminController {
 
 	public static function register_notification_settings(): void {
 		require_once KKLIDI_MEMBERS_DIR . 'includes/Notifications/NotificationTemplates.php';
+		require_once KKLIDI_MEMBERS_DIR . 'includes/Notifications/AdminNotificationSettings.php';
 		\KKLIDI\Members\Notifications\NotificationTemplates::register_settings();
+		\KKLIDI\Members\Notifications\AdminNotificationSettings::register_settings();
 	}
 
 	public static function enqueue_assets(string $hook_suffix): void {
@@ -465,6 +475,8 @@ final class AdminController {
 			'mail_withdrawal_requested' => __('Withdrawal-request notice', 'kklidi-members'),
 			'mail_withdrawal_finalized' => __('Withdrawal-finalized notice', 'kklidi-members'),
 			'notification_settings_update' => __('Notification settings updated', 'kklidi-members'),
+			'admin_notification_settings_update' => __('Administrator notification settings updated', 'kklidi-members'),
+			'mail_admin_registration' => __('Administrator registration notice', 'kklidi-members'),
 			'registration_fields_update' => __('Registration field settings updated', 'kklidi-members'),
 		);
 	}

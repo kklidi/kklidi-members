@@ -40,6 +40,9 @@ add_filter('pre_wp_mail', function ($return, $attributes) {
 			'headers' => $headers,
             'subject' => (string) ($attributes['subject'] ?? ''),
             'message' => (string) ($attributes['message'] ?? ''),
+			'locale' => get_locale(),
+			'determined_locale' => determine_locale(),
+			'site_locale_option' => (string) get_option('WPLANG', ''),
         )) . "\n", FILE_APPEND | LOCK_EX);
     }
     return true;

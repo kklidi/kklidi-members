@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.20 — 2026-09-10
+
+- Added `AUTH-ADMIN-NOTIFY-001`, a default-off Settings API checkbox for one administrator notice after a registration becomes active.
+- Read the recipient from WordPress Core `admin_email` at send time and kept plain-text `wp_mail()` delivery.
+- Added request-level deduplication and metadata-only success, failure, and invalid-recipient audit evidence without rolling back registration.
+- Kept administrator approval, custom recipients/templates, HTML email, sender/SMTP controls, retries, and external service data outside the contract.
+
 ## 0.7.19 — 2026-09-10
 
 - Added `AUTH-MESSAGE-UX-001` with a read-only administrator catalog of 16 translated account and security messages.

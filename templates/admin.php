@@ -144,6 +144,17 @@
 				<?php submit_button(__('Save notification messages', 'kklidi-members')); ?>
 			</form>
 		</section>
+		<section class="kklidi-members-admin-card">
+			<h2><?php esc_html_e('Administrator registration notice', 'kklidi-members'); ?></h2>
+			<p><?php esc_html_e('The recipient is the current WordPress administration email address. Members does not store a separate recipient.', 'kklidi-members'); ?></p>
+			<p><strong><?php esc_html_e('WordPress administration email', 'kklidi-members'); ?>:</strong> <code><?php echo esc_html((string) get_option('admin_email', '')); ?></code> <a href="<?php echo esc_url(admin_url('options-general.php')); ?>"><?php esc_html_e('Open General Settings', 'kklidi-members'); ?></a></p>
+			<?php settings_errors(\KKLIDI\Members\Notifications\AdminNotificationSettings::OPTION_NAME); ?>
+			<form action="<?php echo esc_url(admin_url('options.php')); ?>" method="post">
+				<?php settings_fields(\KKLIDI\Members\Notifications\AdminNotificationSettings::OPTION_GROUP); ?>
+				<?php do_settings_sections(\KKLIDI\Members\Notifications\AdminNotificationSettings::SETTINGS_PAGE); ?>
+				<?php submit_button(__('Save administrator notification', 'kklidi-members')); ?>
+			</form>
+		</section>
 	<?php elseif ($section === 'withdrawals') : ?>
 		<section class="kklidi-members-admin-card">
 			<h2><?php esc_html_e('Pending withdrawals', 'kklidi-members'); ?></h2>

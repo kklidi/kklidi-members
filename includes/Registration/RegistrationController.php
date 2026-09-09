@@ -193,6 +193,8 @@ final class RegistrationController {
 
 		require_once KKLIDI_MEMBERS_DIR . 'includes/Notifications/AccountMailer.php';
 		\KKLIDI\Members\Notifications\AccountMailer::send('registration_completed', $completed_user_id, $request_id);
+		require_once KKLIDI_MEMBERS_DIR . 'includes/Notifications/AdminRegistrationMailer.php';
+		\KKLIDI\Members\Notifications\AdminRegistrationMailer::send($completed_user_id, $request_id);
 		return $completed_user_id;
 	}
 
