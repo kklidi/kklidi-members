@@ -3,7 +3,7 @@ Contributors: kklidi
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.7.5
+Stable tag: 0.7.6
 
 Core-based member accounts with scoped UI, consent records and safe withdrawal handling.
 
@@ -14,8 +14,9 @@ KKLIDI Members adds login, registration, profile, consent and account management
 WooCommerce orders and LMS enrollment/progress stay with their respective plugins.
 Korean UI uses WordPress gettext translation catalogs.
 
-0.7.5 implements the approved login and registration UX contract on top of the
-verified Core-auth runtime. See docs/RELEASE-0.7.5.md.
+0.7.6 implements the account, profile, consent and password UX, a WordPress Core
+password-reset wrapper, and plugin-owned link-only account navigation slots. See
+docs/RELEASE-0.7.6.md.
 
 == Installation ==
 
@@ -24,6 +25,11 @@ verified Core-auth runtime. See docs/RELEASE-0.7.5.md.
 3. Review registration and consent policy before changing the closed defaults.
 
 == Changelog ==
+
+= 0.7.6 =
+* Added the account, profile, consent and password UX states with linked validation errors and route-scoped password controls.
+* Added a branded reset wrapper that uses only WordPress Core reset-key APIs and returns a generic request response.
+* Added local link-only account navigation slots registered by optional plugins without reading WooCommerce or LMS data.
 
 = 0.7.5 =
 * Implemented the server-rendered login and registration shell with safe input recovery, field-level errors, consent details, and Core password visibility enhancement.

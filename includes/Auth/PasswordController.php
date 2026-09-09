@@ -15,6 +15,7 @@ final class PasswordController {
 			exit;
 		}
 		$message = '';
+		$field_errors = array();
 		if (strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 			$nonce = self::text('_kklidi_members_password_nonce');
 			$current = self::raw('current_password');
@@ -25,8 +26,11 @@ final class PasswordController {
 				$message = __('We could not verify this request.', 'kklidi-members');
 			} elseif (!wp_check_password($current, $user->user_pass, $user->ID)) {
 				$message = __('Please check your current password.', 'kklidi-members');
+				$field_errors['current_password'] = __('Enter your current password again.', 'kklidi-members');
 			} elseif ($new !== $confirm || strlen($new) < 12 || strlen($new) > 1024) {
 				$message = __('The new password must be at least 12 characters and match the confirmation.', 'kklidi-members');
+				$field_errors['new_password'] = __('Use at least 12 characters.', 'kklidi-members');
+				$field_errors['new_password_confirm'] = __('Enter the same password again.', 'kklidi-members');
 			} else {
 				$request_id = wp_generate_uuid4();
 				wp_set_password($new, $user->ID);
@@ -40,6 +44,7 @@ final class PasswordController {
 				exit;
 			}
 		}
+		$account_url = kklidi_members_account_url();
 		require KKLIDI_MEMBERS_DIR . 'templates/password.php';
 		exit;
 	}

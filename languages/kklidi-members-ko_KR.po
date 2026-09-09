@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the KKLIDI Members plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: KKLIDI Members 0.7.5\n"
+"Project-Id-Version: KKLIDI Members 0.7.6\n"
 "Language: ko_KR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -318,3 +318,96 @@ msgstr "계정이 생성되었습니다. 계속하려면 로그인하세요."
 
 msgid "Your withdrawal request was submitted. Access is blocked while it is reviewed."
 msgstr "탈퇴 요청이 접수되었습니다. 검토하는 동안 접근이 차단됩니다."
+
+msgid "Your password has been reset. Please log in with your new password."
+msgstr "비밀번호가 재설정되었습니다. 새 비밀번호로 로그인하세요."
+
+msgid "There have been too many password reset requests. Please try again later."
+msgstr "비밀번호 재설정 요청이 많습니다. 잠시 후 다시 시도해 주세요."
+
+msgid "If an account matches that information, WordPress will send a password reset link."
+msgstr "입력한 정보와 일치하는 계정이 있으면 WordPress가 비밀번호 재설정 링크를 보냅니다."
+
+msgid "This password reset link is invalid or has expired. Request a new link."
+msgstr "비밀번호 재설정 링크가 올바르지 않거나 만료되었습니다. 새 링크를 요청하세요."
+
+msgid "We could not verify this request. Please reload the page and try again."
+msgstr "요청을 확인할 수 없습니다. 페이지를 새로 열어 다시 시도해 주세요."
+
+msgid "Someone requested a password reset for your account."
+msgstr "회원 계정의 비밀번호 재설정이 요청되었습니다."
+
+msgid "Reset your password: %s"
+msgstr "비밀번호 재설정: %s"
+
+msgid "If this was not you, you can ignore this message."
+msgstr "본인이 요청하지 않았다면 이 메시지를 무시해도 됩니다."
+
+msgid "Reset password"
+msgstr "비밀번호 재설정"
+
+msgid "WordPress Core securely issues and verifies each reset link."
+msgstr "각 재설정 링크는 WordPress Core가 안전하게 발급하고 검증합니다."
+
+msgid "Use at least 12 characters and enter the same password twice."
+msgstr "12자 이상을 사용하고 같은 비밀번호를 두 번 입력하세요."
+
+msgid "Send password reset link"
+msgstr "비밀번호 재설정 링크 보내기"
+
+msgid "Password reset help"
+msgstr "비밀번호 재설정 도움말"
+
+msgid "Request a new reset link"
+msgstr "새 재설정 링크 요청"
+
+msgid "Back to login"
+msgstr "로그인으로 돌아가기"
+
+msgid "Manage the account details owned by KKLIDI Members."
+msgstr "KKLIDI Members가 관리하는 계정 정보를 확인하고 변경하세요."
+
+msgid "Log in to manage your profile, password, and consent settings."
+msgstr "프로필, 비밀번호, 동의 설정을 관리하려면 로그인하세요."
+
+msgid "Connected services"
+msgstr "연결된 서비스"
+
+msgid "Open account areas provided by the connected service."
+msgstr "연결된 서비스가 제공하는 계정 화면을 엽니다."
+
+msgid "Connected service navigation"
+msgstr "연결된 서비스 탐색"
+
+msgid "Update your account profile. Your login email is read-only."
+msgstr "계정 프로필을 변경하세요. 로그인 이메일은 읽기 전용입니다."
+
+msgid "Profile navigation"
+msgstr "프로필 탐색"
+
+msgid "Back to account"
+msgstr "계정으로 돌아가기"
+
+msgid "Enter your current password again."
+msgstr "현재 비밀번호를 다시 입력하세요."
+
+msgid "Confirm your current password before choosing a new one."
+msgstr "새 비밀번호를 정하기 전에 현재 비밀번호를 확인합니다."
+
+msgid "Password navigation"
+msgstr "비밀번호 탐색"
+
+msgid "Review the current document versions and manage your consent."
+msgstr "현재 문서 버전을 확인하고 동의 상태를 관리하세요."
+
+msgid "Current version: %s"
+msgstr "현재 버전: %s"
+
+msgid "Read the full document"
+msgstr "전문 읽기"
+
+msgid "Show document"
+msgstr "문서 보기"
+
+msgid "Consent navigation"
+msgstr "동의 탐색"

@@ -1,6 +1,6 @@
 {
   "contract": "AUTH-UI-001",
-  "version": 1,
+  "version": 2,
   "status": "SPECIFIED",
   "implementation_contract": "AUTH-UI-002",
   "strategy_contract": "AUTH-UX-003",
@@ -40,6 +40,13 @@
       "audiences": ["member"],
       "states": ["guest_redirect", "default", "invalid_request", "current_password_error", "new_password_error", "success_reauthentication"],
       "requirements": ["core_password", "current_password_check", "session_revocation"]
+    },
+    "password_reset": {
+      "template": "templates/password-reset.php",
+      "route": "kklidi_members_password_reset",
+      "audiences": ["guest", "member"],
+      "states": ["request", "generic_request_complete", "rate_limited", "invalid_request", "invalid_or_expired_key", "new_password_error", "success_reauthentication"],
+      "requirements": ["core_reset_key", "generic_public_response", "no_custom_token", "no_auto_login", "no_referrer"]
     },
     "consent": {
       "template": "templates/consent.php",

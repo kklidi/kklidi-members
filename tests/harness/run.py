@@ -36,6 +36,7 @@ PRODUCTION_FILES = [
     'includes/Auth/LoginController.php',
     'includes/Auth/LogoutController.php',
     'includes/Auth/PasswordController.php',
+    'includes/Auth/PasswordResetController.php',
     'includes/Consent/ConsentController.php',
     'includes/Consent/Documents.php',
     'includes/Consent/Repository.php',
@@ -60,6 +61,7 @@ PRODUCTION_FILES = [
     'templates/login.php',
     'templates/logout.php',
     'templates/password.php',
+    'templates/password-reset.php',
     'templates/profile.php',
     'templates/register.php',
     'templates/withdrawal.php',
@@ -1394,8 +1396,8 @@ def assert_production_shape():
             and 'is_frontend_route' in plugin_source,
             'Frontend stylesheet must stay scoped to a Members route')
     require('members-auth.js' in plugin_source
-            and 'is_auth_route' in plugin_source
-            and 'if (self::is_auth_route())' in plugin_source,
+            and 'is_password_enhancement_route' in plugin_source
+			and 'if (self::is_password_enhancement_route())' in plugin_source,
             'Authentication script must stay scoped to login and registration routes')
     require("add_action('admin_enqueue_scripts'" in admin_source
             and "tools_page_kklidi-members" in admin_source

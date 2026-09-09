@@ -18,6 +18,8 @@ final class ConsentController {
 		}
 		$user_id = get_current_user_id();
 		$message = '';
+		$message_type = 'error';
+		$field_errors = array();
 		$documents = array(
 			'service' => Documents::current('service'),
 			'privacy' => Documents::current('privacy'),
@@ -31,6 +33,12 @@ final class ConsentController {
 			} elseif ($documents['service'] === array() || $documents['privacy'] === array()
 				|| !isset($_POST['consent_service'], $_POST['consent_privacy'])) {
 				$message = __('Please review and accept the required consent documents.', 'kklidi-members');
+				if (!isset($_POST['consent_service'])) {
+					$field_errors['service'] = __('You must accept the service terms.', 'kklidi-members');
+				}
+				if (!isset($_POST['consent_privacy'])) {
+					$field_errors['privacy'] = __('You must accept the privacy policy.', 'kklidi-members');
+				}
 			} else {
 				$changed = array();
 				foreach (array('service', 'privacy') as $type) {
@@ -65,6 +73,7 @@ final class ConsentController {
 						\KKLIDI\Members\Audit\Recorder::record('consent_update', 'success', implode('_', $changed), $user_id, '', $request_id);
 					}
 					$message = __('Your consent settings have been saved.', 'kklidi-members');
+					$message_type = 'success';
 				}
 			}
 		}
@@ -74,6 +83,7 @@ final class ConsentController {
 			'marketing' => Repository::has_current($user_id, 'marketing'),
 		);
 		$request_id = wp_generate_uuid4();
+		$account_url = kklidi_members_account_url();
 		require KKLIDI_MEMBERS_DIR . 'templates/consent.php';
 		exit;
 	}

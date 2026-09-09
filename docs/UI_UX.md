@@ -7,14 +7,14 @@
 - 계약 ID: `AUTH-UI-001`
 - `AUTH-UI-001` 상태: **SPECIFIED**
 - `AUTH-UI-002` 상태: **IMPLEMENTED_AND_VERIFIED**
-- `AUTH-UX-003` 상태: **STRATEGY_SPECIFIED; 0.7.5_LOGIN_REGISTER_IMPLEMENTED**
+- `AUTH-UX-003` 상태: **0.7.6_ACCOUNT_RESET_NAVIGATION_IMPLEMENTED**
 - 범위: 로그인, 가입, 계정 홈, 프로필, 비밀번호 변경, 동의, 탈퇴 요청, 로그아웃 확인, Members 관리자 화면
 
 `AUTH-UI-001`은 화면 구현 전에 사용자에게 보이는 상태와 완료 기준을 고정한다. 현재 템플릿이 HTTP에서 렌더링된 사실만으로 이 계약이 구현되었다고 판정하지 않는다. CSS 적용, 반응형 브라우저 검증, 키보드 조작 검증은 `AUTH-UI-002`에서 수행한다.
 
-`AUTH-UI-002`는 2026-09-07에 구현했다. 공통 frontend stylesheet, 관리자 전용 stylesheet, 8개 frontend page shell, route 전용 asset hook을 추가했으며 JavaScript는 추가하지 않았다. MAMP sandbox에서 가입·로그인 오류·로그인 회원의 6개 계정 화면·관리자 화면을 확인했고, 2026-09-09의 0.7.1 패키지를 Chrome 360px viewport에서 다시 확인해 한국어 번역 적용, route 전용 0.7.1 자산, focus 규칙과 가로 overflow 부재를 검증했다. 이 smoke는 화면 구조·자산 격리·반응형·focus의 증거이며, 모든 보안 상태 전이의 UI 회귀는 기존 MVP behavior harness와 후속 통합 gate가 계속 소유한다.
+`AUTH-UI-002`는 2026-09-07에 구현했다. 당시 공통 frontend stylesheet, 관리자 전용 stylesheet, 8개 frontend page shell, route 전용 asset hook을 추가했으며 JavaScript는 없었다. MAMP sandbox에서 가입·로그인 오류·로그인 회원의 6개 계정 화면·관리자 화면을 확인했고, 2026-09-09의 0.7.1 패키지를 Chrome 360px viewport에서 다시 확인해 한국어 번역 적용, route 전용 0.7.1 자산, focus 규칙과 가로 overflow 부재를 검증했다. 0.7.5는 로그인·가입 route 전용 password enhancement를, 0.7.6은 아홉 번째 frontend reset shell과 변경·reset route의 같은 enhancement를 추가했다. 후속 화면의 브라우저 회귀는 0.7.9 gate가 소유한다.
 
-`AUTH-UX-003`은 0.7.4에서 승인한 다음 UI·운영 구현의 전략 계약이다. 0.7.5는 이 계약의 로그인·회원가입 화면 단계만 구현했으며, 계정 홈·비밀번호 재설정·관리자 처리 기능이 이미 구현됐다고 주장하지 않는다. 실행 가능한 manifest는 `tests/harness/ux_strategy_contract.json`이다.
+`AUTH-UX-003`은 0.7.4에서 승인한 UI·운영 구현의 전략 계약이다. 0.7.5의 로그인·회원가입 단계에 이어 0.7.6은 계정 홈·프로필·동의·비밀번호 UX, Core 재설정 래퍼와 plugin-owned link-only navigation slot을 구현했다. 관리자 정보 구조와 처리 workflow는 아직 구현하지 않았다. 실행 가능한 manifest는 `tests/harness/ux_strategy_contract.json`이다.
 
 ## 2. 공통 원칙
 
@@ -124,7 +124,20 @@
 
 검증은 하네스 단위 계약 25개, 번역 포함 ZIP 빌드, 합성 WordPress 전체 회귀 및 MAMP lifecycle gate로 갱신한다. 실제 HTTPS staging의 backup/restore와 관찰 기간이 없는 한 production acceptance는 계속 `PARTIAL`이다.
 
-## 9. 범위 밖
+## 10. 0.7.6 구현 상태
+
+0.7.6은 8.3의 두 번째 단계를 구현한다.
+
+- 계정 홈은 회원 소유 화면과 외부 plugin이 등록한 link-only 영역을 구분한다. 등록값은 라벨·로컬 URL·순서만 허용하며 Members는 Woo/LMS API나 데이터를 읽지 않는다.
+- 프로필은 현재 사용자와 기존 allowlist만 수정하고, email read-only와 안전한 같은-request 값 복구, field 오류 연결을 제공한다.
+- 동의 화면은 현재 document version, 서버 렌더링 전문, 필수 동의 오류 연결, 선택 동의 철회를 표시한다. 기존 snapshot이나 legacy 사건은 수정하지 않는다.
+- 로그인 회원의 비밀번호 변경은 현재 비밀번호 확인, Core password 변경, 기존 Core session 철회와 재로그인을 유지하며 비밀번호 필드를 오류와 연결한다.
+- 공개 재설정 화면은 `retrieve_password()`, `check_password_reset_key()`, `reset_password()`를 사용한다. 자체 token·password store·auth cookie·PHP session을 만들지 않고 계정 존재 여부와 무관한 요청 완료 문구를 사용한다. key 화면은 no-store/no-referrer다.
+- route 전용 password enhancement는 변경·재설정 화면으로 확장되지만 JavaScript 없이 제출과 서버 검증이 동작한다.
+
+단위 계약, PHP lint, 번역/package 검사를 이번 단계의 로컬 증거로 남긴다. MAMP/브라우저의 실제 메일 링크, 키보드, no-JS, 모바일 반복 검증은 계획된 0.7.9 gate이며 이 구현 완료 주장에 포함하지 않는다.
+
+## 11. 범위 밖
 
 - site theme 전체 redesign과 page builder 통합
 - WooCommerce 주문/결제 화면 및 LMS 학습 화면 UI

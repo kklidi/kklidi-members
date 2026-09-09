@@ -1,7 +1,7 @@
 {
   "contract": "AUTH-UX-003",
-  "version": 1,
-  "status": "SPECIFIED_FOR_0.7.4_NOT_IMPLEMENTED",
+  "version": 2,
+  "status": "IMPLEMENTED_THROUGH_0.7.6",
   "decision_date": "2026-09-09",
   "frontend": {
     "surface": "standalone_branded_members_shell",
@@ -41,11 +41,17 @@
     },
     "password_reset": {
       "branded_wrapper_planned": true,
+      "branded_wrapper_implemented": true,
       "wordpress_core_keys_and_apis_only": true,
-      "custom_token_or_auth_system": false
+      "custom_token_or_auth_system": false,
+      "generic_request_response": true,
+      "token_response_headers": ["no-store", "no-referrer"]
     },
     "account_navigation": {
       "integration_mode": "plugin_registered_link_only_slots",
+      "slot_hook": "kklidi_members_account_navigation_links",
+      "registered_fields": ["label", "url", "priority"],
+      "local_urls_only": true,
       "members_queries_woocommerce_or_lms_domain_data": false,
       "integrations_optional": true
     }
@@ -107,5 +113,9 @@
     "0.7.7": "admin_information_architecture",
     "0.7.8": "withdrawal_and_audit_operations",
     "0.7.9": "browser_accessibility_and_release_gate"
+  },
+  "implementation": {
+    "completed": ["0.7.5", "0.7.6"],
+    "remaining": ["0.7.7", "0.7.8", "0.7.9"]
   }
 }

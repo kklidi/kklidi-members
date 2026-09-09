@@ -40,7 +40,23 @@ final class Url {
 	}
 
 	public static function passwordReset(string $redirect_to = ''): string {
-		$url = site_url('wp-login.php?action=lostpassword', 'login');
+		$url = add_query_arg('kklidi_members_password_reset', '1', home_url('/'));
+		if ($redirect_to !== '') {
+			$url = add_query_arg('redirect_to', self::local($redirect_to), $url);
+		}
+		return $url;
+	}
+
+	public static function passwordResetForKey(string $key, string $login,
+		string $redirect_to = ''): string {
+		$url = add_query_arg(
+			array(
+				'kklidi_members_password_reset' => '1',
+				'key' => $key,
+				'login' => $login,
+			),
+			home_url('/')
+		);
 		if ($redirect_to !== '') {
 			$url = add_query_arg('redirect_to', self::local($redirect_to), $url);
 		}
@@ -58,6 +74,7 @@ final class Url {
 			'account' => 'members/account',
 			'profile' => 'members/account/profile',
 			'password' => 'members/account/password',
+			'password_reset' => 'members/password-reset',
 			'consent' => 'members/account/consent',
 			'withdrawal' => 'members/account/withdrawal',
 			'logout' => 'members/logout',
@@ -110,6 +127,19 @@ final class Url {
 			&& !self::has_nested_redirect($validated)
 			? $validated
 			: $safe_fallback;
+	}
+
+	/**
+	 * Validate an optional local navigation URL without inventing a fallback link.
+	 */
+	public static function optionalLocal(string $candidate): string {
+		if ($candidate === '' || self::dangerous_encoding($candidate)) {
+			return '';
+		}
+		$validated = wp_validate_redirect(wp_sanitize_redirect($candidate), '');
+		return $validated !== '' && self::same_origin($validated)
+			&& !self::is_auth_loop($validated) && !self::has_nested_redirect($validated)
+			? $validated : '';
 	}
 
 	private static function dangerous_encoding(string $candidate): bool {
@@ -192,7 +222,8 @@ final class Url {
 
 		parse_str($parts['query'] ?? '', $query);
 		foreach (array('kklidi_members_login', 'kklidi_members_register',
-			'kklidi_members_logout', 'kklidi_members_password') as $route) {
+			'kklidi_members_logout', 'kklidi_members_password',
+			'kklidi_members_password_reset') as $route) {
 			if (isset($query[$route])) {
 				return true;
 			}

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.7.6 — 2026-09-09
+
+- Implemented the approved account, profile, consent, and password UX slice with
+  linked validation errors, clear success/error states, versioned document details,
+  and route-scoped password visibility controls.
+- Added a branded password reset request and completion wrapper using only WordPress
+  Core reset-key APIs, generic identifier responses, and no-store/no-referrer headers.
+- Added a validated local link-only account navigation filter for optional plugins;
+  Members does not call WooCommerce or LMS APIs or read their domain data.
+
 ## 0.7.5 — 2026-09-09
 
 - Implemented the approved login and registration UX contract with a standalone

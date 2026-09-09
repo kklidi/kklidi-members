@@ -14,6 +14,7 @@ final class Plugin {
 		'kklidi_members_account'    => array('includes/Frontend/AccountController.php', '\\KKLIDI\\Members\\Frontend\\AccountController'),
 		'kklidi_members_profile'    => array('includes/Profile/ProfileController.php', '\\KKLIDI\\Members\\Profile\\ProfileController'),
 		'kklidi_members_password'   => array('includes/Auth/PasswordController.php', '\\KKLIDI\\Members\\Auth\\PasswordController'),
+		'kklidi_members_password_reset' => array('includes/Auth/PasswordResetController.php', '\\KKLIDI\\Members\\Auth\\PasswordResetController'),
 		'kklidi_members_consent'    => array('includes/Consent/ConsentController.php', '\\KKLIDI\\Members\\Consent\\ConsentController'),
 		'kklidi_members_withdrawal' => array('includes/Withdrawal/WithdrawalController.php', '\\KKLIDI\\Members\\Withdrawal\\WithdrawalController'),
 	);
@@ -111,7 +112,7 @@ final class Plugin {
 			KKLIDI_MEMBERS_VERSION
 		);
 
-		if (self::is_auth_route()) {
+		if (self::is_password_enhancement_route()) {
 			wp_enqueue_script(
 				'kklidi-members-auth',
 				plugins_url('assets/js/members-auth.js', KKLIDI_MEMBERS_FILE),
@@ -122,9 +123,11 @@ final class Plugin {
 		}
 	}
 
-	private static function is_auth_route(): bool {
+	private static function is_password_enhancement_route(): bool {
 		return isset($_GET['kklidi_members_login']) || isset($_POST['kklidi_members_login'])
-			|| isset($_GET['kklidi_members_register']) || isset($_POST['kklidi_members_register']);
+			|| isset($_GET['kklidi_members_register']) || isset($_POST['kklidi_members_register'])
+			|| isset($_GET['kklidi_members_password']) || isset($_POST['kklidi_members_password'])
+			|| isset($_GET['kklidi_members_password_reset']) || isset($_POST['kklidi_members_password_reset']);
 	}
 
 	private static function is_frontend_route(): bool {

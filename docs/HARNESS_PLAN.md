@@ -63,6 +63,8 @@ reference와 독립된 WP DB/filesystem에 synthetic 사용자 A/B, subscriber/a
 
 0.7.5는 `AUTH-UX-003`의 첫 번째 runtime slice인 로그인·회원가입 shell, 안전한 입력 복원, field 오류 연결, 약관 상세 표시, route 전용 password visibility enhancement와 clean-route preflight를 구현했다. 단위 계약 25개, 0.7.5 ZIP 번역/package gate, 합성 WordPress 전체 실행 `618b1354f1484a4b96d4bd319feef581`, MAMP lifecycle `mamp-lifecycle-1d042c936753`가 PASS했다. 실제 브라우저 JavaScript·키보드·no-JS 화면 검증은 0.7.9 gate에 남아 있고, production acceptance는 staging backup/restore와 관찰 기간 전까지 `PARTIAL`이다.
 
+0.7.6은 두 번째 runtime slice인 account/profile/consent/password UX, Core reset wrapper와 plugin-owned link-only navigation slot을 구현했다. executable unit guard는 Core reset API 세 개 사용, 일반화된 reset request 응답, reset limiter 연결, token 화면의 no-store/no-referrer, 자체 token/cookie/session 부재, optional local link validation과 Woo/LMS domain read 부재를 검사한다. 이번 Sol 구현 turn에서는 반복 MAMP/browser 실행을 하지 않으며 실제 reset mail link·키보드·no-JS·mobile browser 검증은 0.7.9 gate에 남긴다.
+
 ### 2.2 계정 알림 계약
 
 `AUTH-NOTIFY-001`은 [NOTIFICATIONS.md](NOTIFICATIONS.md)와 `tests/harness/notification_contract.json`에서 가입 완료·비밀번호 변경·탈퇴 접수·탈퇴 처리 완료의 사용자 알림을 고정한다. 기존 24개 MVP runtime 계약 집계에는 추가하지 않는다. 상태는 **SPECIFIED**, runtime은 **IMPLEMENTED_AND_SYNTHETIC_VERIFIED**다.

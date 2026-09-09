@@ -16,6 +16,15 @@ final class ProfileController {
 		}
 		$user = wp_get_current_user();
 		$message = '';
+		$message_type = 'error';
+		$field_errors = array();
+		$values = array(
+			'first_name' => (string) $user->first_name,
+			'last_name' => (string) $user->last_name,
+			'display_name' => (string) $user->display_name,
+			'phone' => (string) get_user_meta($user->ID, 'billing_phone', true),
+			'description' => (string) $user->description,
+		);
 		if (strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 			$nonce = self::text('_kklidi_members_profile_nonce');
 			$first = self::text('first_name');
@@ -23,10 +32,23 @@ final class ProfileController {
 			$display = self::text('display_name');
 			$description = self::textarea('description');
 			$phone = self::text('phone');
+			$values = array(
+				'first_name' => $first,
+				'last_name' => $last,
+				'display_name' => $display,
+				'phone' => $phone,
+				'description' => $description,
+			);
 			if ($nonce === '' || !wp_verify_nonce($nonce, 'kklidi_members_profile')) {
 				$message = __('We could not verify this request.', 'kklidi-members');
 			} elseif ($display === '' || strlen($display) > 200 || !self::valid_phone($phone)) {
-				$message = __('Please check the display name or phone number format.', 'kklidi-members');
+				$message = __('Please correct the highlighted fields.', 'kklidi-members');
+				if ($display === '' || strlen($display) > 200) {
+					$field_errors['display_name'] = __('Enter a display name of 200 characters or fewer.', 'kklidi-members');
+				}
+				if (!self::valid_phone($phone)) {
+					$field_errors['phone'] = __('Enter a valid phone number or leave this field blank.', 'kklidi-members');
+				}
 			} else {
 				$changed = array();
 				$old_phone = (string) get_user_meta($user->ID, 'billing_phone', true);
@@ -48,19 +70,27 @@ final class ProfileController {
 				} else {
 					if ($old_phone !== $phone) {
 						$changed[] = 'phone';
+						delete_user_meta($user->ID, '_kklidi_members_phone_verified_at');
 					}
-					delete_user_meta($user->ID, '_kklidi_members_phone_verified_at');
 					$changed = array_values(array_unique($changed));
 					if ($changed) {
 						do_action('kklidi_members_profile_updated', (int) $user->ID, $changed);
 						\KKLIDI\Members\Audit\Recorder::record('profile_update', 'success', implode('_', $changed), (int) $user->ID);
 					}
 					$message = __('Your profile has been saved.', 'kklidi-members');
+					$message_type = 'success';
 					$user = wp_get_current_user();
+					$values = array(
+						'first_name' => (string) $user->first_name,
+						'last_name' => (string) $user->last_name,
+						'display_name' => (string) $user->display_name,
+						'phone' => (string) get_user_meta($user->ID, 'billing_phone', true),
+						'description' => (string) $user->description,
+					);
 				}
 			}
 		}
-		$phone = (string) get_user_meta($user->ID, 'billing_phone', true);
+		$account_url = kklidi_members_account_url();
 		require KKLIDI_MEMBERS_DIR . 'templates/profile.php';
 		exit;
 	}

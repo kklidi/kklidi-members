@@ -170,14 +170,16 @@ meta 없는 기존 회원은 active + legacy_unknown으로 해석한다. 이것�
 | --- | --- | --- |
 | `kklidi_members_login_url(string $redirect_to = ''): string` | 검증한 목적지를 포함한 로그인 URL | `wp_login_url($redirect_to)` |
 | `kklidi_members_register_url(string $redirect_to = ''): string` | 가입 URL. disabled 상태는 화면에서 안내하며 URL 호출로 활성화 안 함 | `wp_registration_url()`; Core 가입 금지 존중 |
-| `kklidi_members_account_url(): string` | 공통 account landing | Woo 사용 가능 시 My Account, 아니면 Core profile URL |
-| `kklidi_members_profile_url(): string` | 현재 사용자 profile 화면 | Core `get_edit_profile_url()` 또는 기존 LMS profile |
+| `kklidi_members_account_url(): string` | 공통 account landing | Core profile URL. Woo/LMS 등 consumer가 자신의 link와 fallback을 소유 |
+| `kklidi_members_profile_url(): string` | 현재 사용자 profile 화면 | Core `get_edit_profile_url()` |
 | `kklidi_members_password_reset_url(string $redirect_to = ''): string` | 분실/reset 시작 URL; token을 인자로 노출 안 함 | `wp_lostpassword_url($redirect_to)` |
 | `kklidi_members_safe_redirect_url(string $candidate, string $fallback = ''): string` | side effect 없는 검증된 local URL; fallback도 검증, 최종 home | Core safe validation + safe redirect |
 
 2026-09-08 Phase 0 최소 정정: 공개 가입 활성화에는 WordPress Core의 `users_can_register`만 운영 스위치로 사용한다. 초기 구현에 들어간 `kklidi_members_registration_enabled` 이중 스위치는 Core 중심 원칙과 모순되어 제거했다. 기존 option 값은 런타임에서 무시하고 재활성화 또는 Members 설정 저장 시 삭제한다. 서비스 약관과 개인정보 처리방침의 현재 문서가 없으면 `users_can_register=1`이어도 가입은 fail-closed한다. D01은 선택 전화, 이메일 가입 인증 없음, 가입 후 자동 로그인 없음으로 확정했다.
 
 Consumer는 `function_exists()`로 helper 사용 여부를 결정한다. Members helper가 자신의 login_url filter를 다시 부르는 순환을 만들지 않는다. Core login/register/lostpassword URL filter는 전환 소유권이 Members인 경우에만 적용하고, wp-admin 재인증과 Core fallback 경로를 유지한다. 기존 WCI checkout redirect의 소유자는 WCI로 유지한다.
+
+0.7.6의 `kklidi_members_account_navigation_links` filter는 optional consumer가 `label`, local `url`, 선택 `priority`만 등록하는 link-only slot이다. Members는 등록값을 검증·escape해 표시하지만 Woo 주문이나 LMS 수강 데이터를 조회하지 않고, consumer 존재 여부도 전제하지 않는다. Members가 비활성일 때 각 consumer는 Core 또는 자신의 화면 fallback을 직접 유지한다.
 
 redirect helper는 host만 같은지를 넘어 scheme·port·userinfo·CRLF·protocol-relative·backslash·중첩 redirect·auth route loop를 검사한다. 최종 이동은 `wp_safe_redirect()` 후 exit. home/base path/subdirectory 배치를 고려하고, 전달한 목적지가 허용되어도 목적지 resource 권한은 별도 확인한다.
 
