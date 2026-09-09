@@ -19,7 +19,13 @@ def main():
     assert synthetic['status'] == 'PASS'
     contracts = {name: [{'status': row['status'], **{key: row[key] for key in
         ('parallel_processes', 'parallel_calls', 'parallel_allowed', 'shared_database_nodes',
-         'object_cache_outage', 'storage_failure', 'bounded_rollback', 'rollback_deleted') if key in row}}
+         'object_cache_outage', 'storage_failure', 'bounded_rollback', 'rollback_deleted',
+         'account_notice_events', 'korean_site_fallback', 'korean_user_locale',
+         'catalog_rendered', 'mail_failure_events', 'mail_failure_injected_attempts',
+         'mail_failure_delivery_records', 'mail_failure_audit_result',
+         'mail_failure_committed_state_preserved', 'mail_failure_sessions_remain_revoked',
+         'mail_failure_user_response', 'mail_failure_retry_attempts',
+         'members_off_no_hard_dependency') if key in row}}
         for row in rows] for name, rows in synthetic['mvp_contracts'].items()}
 
     integrations = {}

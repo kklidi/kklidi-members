@@ -1,0 +1,28 @@
+{
+  "status": "BLOCKED",
+  "checks": {
+    "schema_version": true,
+    "no_credentials": true,
+    "environment_kind": true,
+    "trusted_https_url": false,
+    "single_site": true,
+    "versions_recorded": true,
+    "supported_runtime": true,
+    "current_members_version": true,
+    "owners_assigned": true,
+    "route_owners_match_contract": true,
+    "backup_hash": false,
+    "backup_time": false,
+    "restore_tested": false,
+    "bounded_rollback": true,
+    "observation_window": true,
+    "conservative_policies": true
+  },
+  "failed": [
+    "trusted_https_url",
+    "backup_hash",
+    "backup_time",
+    "restore_tested"
+  ],
+  "environment": "staging"
+}

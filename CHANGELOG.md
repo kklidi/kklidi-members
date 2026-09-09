@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — next 0.7.3
+## 0.7.3 — 2026-09-09
 
 - Added route-scoped account notices for completed registration, self-service password
   changes, withdrawal requests, and administrator-finalized withdrawals.

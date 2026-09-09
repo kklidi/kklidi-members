@@ -157,7 +157,7 @@ KBoard는 12개 board 중 author/roles 제한을 갖는 board가 있고 412개 c
 | D04 | display_name 중복 금지 지속 여부 | nickname은 identity 아님. 1.0 제안은 중복 허용, 기존 이름 변경 안 함; UI 확정 전 결정 |
 | D05 | 과거 계정의 email state와 재동의 조건 | legacy_unknown 유지, 전원 강제 차단/검증 완료 처리 금지 |
 | D06 | **DECIDED 2026-09-08** | 정산 2페이지/메뉴는 payout, 강의실 메뉴는 LMS/LearnDash, 정적 가입신청 2페이지는 사이트 콘텐츠 운영 owner. Members는 이 접근 엔진을 소유하지 않음 |
-| D07 | **DECIDED FOR 0.7.2 2026-09-09** | 지원 판정은 single-site WordPress 7.1/PHP 8.3/Woo 11.1.0 조합. PHP 7.4~8.3 syntax 통과는 runtime 지원 주장으로 확대하지 않음 |
+| D07 | **DECIDED FOR 0.7.3 2026-09-09** | 지원 판정은 single-site WordPress 7.1/PHP 8.3/Woo 11.1.0 조합. PHP 7.4~8.3 syntax 통과는 runtime 지원 주장으로 확대하지 않음 |
 | D08 | **DECIDED 2026-09-09** | 가입 완료·비밀번호 변경·탈퇴 접수·탈퇴 처리 완료의 사용자 안내 메일을 후속 MVP 확장으로 승인. WordPress `wp_mail()`과 고정 plain-text preset을 사용하며 관리자·마케팅·주문·LMS 메일, 이메일 인증, template UI는 포함하지 않음 |
 
 D03~D05는 해당 선택 기능이나 legacy 전환을 실제로 시작할 때까지 기존 보수적 기본값을 유지한다. FUTURE/OPTIONAL 기능은 별도 승인 없이 구현하지 않는다.

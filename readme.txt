@@ -3,7 +3,7 @@ Contributors: kklidi
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.7.2
+Stable tag: 0.7.3
 
 Core-based member accounts with scoped UI, consent records and safe withdrawal handling.
 
@@ -14,9 +14,9 @@ KKLIDI Members adds login, registration, profile, consent and account management
 WooCommerce orders and LMS enrollment/progress stay with their respective plugins.
 Korean UI uses WordPress gettext translation catalogs.
 
-0.7.2 keeps the verified Core-auth runtime and clarifies current Phase 0 evidence
-without treating historical partial results as the current release verdict. See
-docs/RELEASE-0.7.2.md.
+0.7.3 adds fixed account notices for completed registration, password changes,
+withdrawal requests, and finalized withdrawals, with Korean catalogs and verified
+mail-failure state preservation. See docs/RELEASE-0.7.3.md.
 
 == Installation ==
 
@@ -25,6 +25,11 @@ docs/RELEASE-0.7.2.md.
 3. Review registration and consent policy before changing the closed defaults.
 
 == Changelog ==
+
+= 0.7.3 =
+* Added four fixed plain-text account notices using the current WordPress user email and locale.
+* Added Korean translations for all account-notice subjects and bodies.
+* Verified that mail failure preserves committed account state and session revocation while recording failure without delivery or retry claims.
 
 = 0.7.2 =
 * Clarified completed AUTH-UI-002 status and separated historical harness snapshots from the current release verdict.

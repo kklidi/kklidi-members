@@ -14,7 +14,7 @@ python tests/harness/mamp_lms_run.py
 python tests/harness/mamp_lifecycle_run.py
 ```
 
-LMS 검사는 실제 Woo 주문·수강·진도·수료증·비공개 질문의 동일 WordPress user ID와 Members 비활성 fallback을 확인한다. lifecycle 검사는 배포 ZIP의 신규 설치, 0.7.0→현재 버전 업데이트, 현재 버전 재설치, 비활성·재활성, 보호된 ID/domain 지문과 원본 파일 복원을 확인한다. 두 runner는 다른 site path/URL을 받지 않고 실행별 JSON을 `.harness/reports`에 기록한다.
+LMS 검사는 실제 Woo 주문·수강·진도·수료증·비공개 질문의 동일 WordPress user ID와 Members 비활성 fallback을 확인한다. lifecycle 검사는 배포 ZIP의 신규 설치, 직전 릴리스→현재 버전 업데이트, 현재 버전 재설치, 비활성·재활성, 보호된 ID/domain 지문과 원본 파일 복원을 확인한다. 두 runner는 다른 site path/URL을 받지 않고 실행별 JSON을 `.harness/reports`에 기록한다.
 
 lifecycle domain 지문은 WordPress posts/comments와 Woo/LMS/KBoard 소유 테이블만 포함한다.
 Action Scheduler와 익명 Woo session처럼 일반 HTTP 요청으로 변하는 기반 테이블은 Members

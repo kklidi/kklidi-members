@@ -207,7 +207,7 @@ class HarnessGuards(unittest.TestCase):
             'scope': 'synthetic_wordpress',
             'prefixes': ['wp_', 'non_default'],
             'mail_failure_injection': 'PASS',
-            'evidence_id': 'c5c2488e1b154cb6bef7bd010d85ae81',
+            'evidence_id': 'aed831b84fe140708b6346e244a2190c',
             'report': '.harness/reports/latest.json',
         })
         self.assertEqual(contract['transport'], {
@@ -423,7 +423,7 @@ class HarnessGuards(unittest.TestCase):
 
         lifecycle = (repository / 'tests/harness/mamp_lifecycle_run.py').read_text(encoding='utf-8')
         self.assertIn("SANDBOX = Path('C:/MAMP/htdocs/kklidi-members-mamp-sandbox')", lifecycle)
-        self.assertIn("PREVIOUS_VERSION = '0.7.1'", lifecycle)
+        self.assertIn("PREVIOUS_VERSION = '0.7.2'", lifecycle)
         self.assertIn("ALLOWED_INITIAL_VERSIONS = ('0.7.0', PREVIOUS_VERSION, CURRENT_VERSION)", lifecycle)
         self.assertIn("CURRENT_VERSION = re.search(", lifecycle)
         self.assertIn("OLD_ARCHIVE = ROOT / ('dist/kklidi-members-' + PREVIOUS_VERSION + '.zip')", lifecycle)
@@ -528,7 +528,7 @@ class HarnessGuards(unittest.TestCase):
         ready = json.loads(json.dumps(example))
         ready['environment']['base_url'] = 'https://staging.kklidi.com'
         ready['versions'].update(
-            wordpress='7.1', php='8.3', members='0.7.2', woocommerce='11.1.0')
+            wordpress='7.1', php='8.3', members='0.7.3', woocommerce='11.1.0')
         ready['owners'] = {key: 'approved-' + key for key in ready['owners']}
         ready['backup'].update(
             artifact_sha256='a' * 64,
@@ -541,7 +541,7 @@ class HarnessGuards(unittest.TestCase):
         self.assertEqual(report['failed'], [])
 
         wrong_release = json.loads(json.dumps(ready))
-        wrong_release['versions']['members'] = '0.7.0'
+        wrong_release['versions']['members'] = '0.7.2'
         self.assertIn('current_members_version',
                       inspect_deployment_manifest(wrong_release)['failed'])
 
