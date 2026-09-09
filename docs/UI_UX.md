@@ -14,7 +14,7 @@
 
 `AUTH-UI-002`는 2026-09-07에 구현했다. 당시 공통 frontend stylesheet, 관리자 전용 stylesheet, 8개 frontend page shell, route 전용 asset hook을 추가했으며 JavaScript는 없었다. MAMP sandbox에서 가입·로그인 오류·로그인 회원의 6개 계정 화면·관리자 화면을 확인했고, 2026-09-09의 0.7.1 패키지를 Chrome 360px viewport에서 다시 확인해 한국어 번역 적용, route 전용 0.7.1 자산, focus 규칙과 가로 overflow 부재를 검증했다. 0.7.5는 로그인·가입 route 전용 password enhancement를, 0.7.6은 아홉 번째 frontend reset shell과 변경·reset route의 같은 enhancement를 추가했다. 후속 화면의 브라우저 회귀는 0.7.9 gate가 소유한다.
 
-`AUTH-UX-003`은 0.7.4에서 승인한 UI·운영 구현의 전략 계약이다. 0.7.5의 로그인·회원가입, 0.7.6의 계정·재설정, 0.7.7의 관리자 정보 구조에 이어 0.7.8은 탈퇴 복구·확정과 상세 audit workflow를 구현했다. 남은 구현 순서는 0.7.9 브라우저·접근성·release gate다. 실행 가능한 manifest는 `tests/harness/ux_strategy_contract.json`이다.
+`AUTH-UX-003`은 0.7.4에서 승인한 UI·운영 구현의 전략 계약이다. 0.7.5의 로그인·회원가입, 0.7.6의 계정·재설정, 0.7.7의 관리자 정보 구조에 이어 0.7.8은 탈퇴 복구·확정과 상세 audit workflow를 구현했다. 0.7.9는 브라우저·접근성·release gate를 진행하며, Members 전용 글자 크기 기준은 별도 `AUTH-UX-004` 계약으로 고정한다. 실행 가능한 전략 manifest는 `tests/harness/ux_strategy_contract.json`이고, 타이포그래피 계약은 `docs/TYPOGRAPHY.md`다.
 
 ## 2. 공통 원칙
 
@@ -168,3 +168,7 @@
 - email verification, 2FA, social login
 - KBoard 권한 엔진, 권한 parity, content migration
 - animation, modal, client-side form framework, 외부 design system
+
+## 14. AUTH-UX-004 · 0.7.9 타이포그래피 계약
+
+Members frontend의 본문은 16px, H1은 28~32px, H2는 20~22px, 도움말·오류는 14px, 약관 전문은 15px을 기준으로 한다. 일반 본문 줄간격은 1.6, 약관 전문은 1.7로 고정한다. 이 기준은 Members route-scoped stylesheet에만 적용하며 사이트 테마의 전역 typography나 LMS·WooCommerce·KBoard 화면을 변경하지 않는다. 세부 토큰과 제외 범위는 `docs/TYPOGRAPHY.md`를 따른다.

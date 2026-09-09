@@ -259,6 +259,29 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('data-kklidi-members-password-toggle', register_template)
         self.assertIn('aria-describedby', register_template)
 
+    def test_auth_ux_004_typography_contract_is_scoped_and_bounded(self):
+        repository = Path(__file__).resolve().parents[2]
+        contract = (repository / 'docs/TYPOGRAPHY.md').read_text(encoding='utf-8')
+        css = (repository / 'assets/css/members.css').read_text(encoding='utf-8')
+
+        self.assertIn('`AUTH-UX-004`', contract)
+        self.assertIn('IMPLEMENTED_AND_UNIT_VERIFIED', contract)
+        self.assertIn('0.7.9', contract)
+        for token in (
+            '--kklidi-members-font-body', '--kklidi-members-font-title',
+            '--kklidi-members-font-section', '--kklidi-members-font-control',
+            '--kklidi-members-font-meta', '--kklidi-members-font-legal',
+            '--kklidi-members-line-body',
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, css)
+        self.assertIn('clamp(1.75rem, 3.6vw, 2rem)', css)
+        self.assertIn('font-size: var(--kklidi-members-font-body)', css)
+        self.assertIn('font-size: var(--kklidi-members-font-legal)', css)
+        self.assertIn('line-height: 1.7', css)
+        self.assertNotIn('font-size: clamp(1.75rem, 5vw, 2.35rem)', css)
+        self.assertNotIn('url(http', css.lower())
+
     def test_auth_ux_003_076_core_reset_and_link_slots_are_bounded(self):
         repository = Path(__file__).resolve().parents[2]
         reset = (repository / 'includes/Auth/PasswordResetController.php').read_text(encoding='utf-8')
@@ -711,7 +734,7 @@ class HarnessGuards(unittest.TestCase):
         ready = json.loads(json.dumps(example))
         ready['environment']['base_url'] = 'https://staging.kklidi.com'
         ready['versions'].update(
-            wordpress='7.1', php='8.3', members='0.7.8', woocommerce='11.1.0')
+            wordpress='7.1', php='8.3', members='0.7.9', woocommerce='11.1.0')
         ready['owners'] = {key: 'approved-' + key for key in ready['owners']}
         ready['backup'].update(
             artifact_sha256='a' * 64,
