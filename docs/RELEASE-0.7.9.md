@@ -8,7 +8,8 @@
 - CSS token and scope guard passed in the synthetic harness.
 - Existing 0.7.8 behavior guards remain green.
 - Korean translation catalog metadata and the installable package were rebuilt for 0.7.9.
+- MAMP browser typography gate `mamp-typography-20260909` passed at desktop and 360px viewports, including visible keyboard focus, server-rendered forms, and homepage route isolation.
 
 ## Remaining gate
 
-Desktop/mobile browser rendering, keyboard navigation, zoom behavior, no-JavaScript behavior, route isolation, and Members-off compatibility remain the 0.7.9 browser release gate. This document does not claim production acceptance or site-wide theme typography changes.
+The remaining release gate is the final cross-route no-JavaScript submission pass, zoom-specific browser pass, and production/staging observation evidence. This document does not claim production acceptance or site-wide theme typography changes.
