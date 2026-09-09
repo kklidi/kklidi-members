@@ -362,6 +362,30 @@ class HarnessGuards(unittest.TestCase):
         self.assertNotIn('wp_delete_user(', admin)
         self.assertNotRegex(admin, r'WC_|WooCommerce|kklidi_lms|enrollment|progress')
 
+    def test_auth_admin_ux_001_keeps_route_canonical_and_admin_setup_bounded(self):
+        repository = Path(__file__).resolve().parents[2]
+        contract = json.loads((repository / 'tests/harness/admin_ux_contract.json').read_text(encoding='utf-8'))
+        self.assertEqual(contract['contract'], 'AUTH-ADMIN-UX-001')
+        self.assertEqual(contract['target_release'], '0.7.17')
+        self.assertFalse(contract['overview']['automatic_page_creation'])
+        self.assertFalse(contract['overview']['automatic_menu_mutation'])
+        self.assertEqual(len(contract['overview']['route_links']), 9)
+        self.assertEqual(contract['notifications']['approved_events'], 4)
+        self.assertFalse(contract['notifications']['html'])
+        self.assertFalse(contract['notifications']['test_send'])
+        admin_source = (repository / 'includes/Admin/AdminController.php').read_text(encoding='utf-8')
+        admin_template = (repository / 'templates/admin.php').read_text(encoding='utf-8')
+        admin_css = (repository / 'assets/css/admin.css').read_text(encoding='utf-8')
+        for marker in ('$quick_links', '$route_urls', 'WordPress registration settings', 'Member route links'):
+            self.assertIn(marker, admin_source + admin_template)
+        for marker in ('kklidi-members-quick-links', 'kklidi-members-quick-link', 'kklidi-members-queue-count'):
+            self.assertIn(marker, admin_css + admin_template)
+        self.assertIn('get_edit_user_link(', admin_template)
+        self.assertIn("current_user_can('edit_user'", admin_template)
+        self.assertIn("current_user_can('manage_options')", admin_source)
+        self.assertIn('Clear filters', admin_template)
+        self.assertIn('Leave a field empty to restore its translated default.', admin_template)
+
     def test_auth_ux_003_078_withdrawal_and_audit_operations_are_bounded(self):
         repository = Path(__file__).resolve().parents[2]
         admin = (repository / 'includes/Admin/AdminController.php').read_text(encoding='utf-8')
@@ -925,7 +949,7 @@ class HarnessGuards(unittest.TestCase):
         ready = json.loads(json.dumps(example))
         ready['environment']['base_url'] = 'https://staging.kklidi.com'
         ready['versions'].update(
-            wordpress='7.1', php='8.3', members='0.7.16', woocommerce='11.1.0')
+            wordpress='7.1', php='8.3', members='0.7.17', woocommerce='11.1.0')
         ready['owners'] = {key: 'approved-' + key for key in ready['owners']}
         ready['backup'].update(
             artifact_sha256='a' * 64,

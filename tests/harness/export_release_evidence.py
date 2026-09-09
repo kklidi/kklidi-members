@@ -22,6 +22,11 @@ def main():
     )
     assert ux_strategy['contract'] == 'AUTH-UX-003'
     assert ux_strategy['status'] == 'IMPLEMENTED_THROUGH_0.7.8'
+    admin_ux = json.loads(
+        (ROOT / 'tests/harness/admin_ux_contract.json').read_text(encoding='utf-8')
+    )
+    assert admin_ux['contract'] == 'AUTH-ADMIN-UX-001'
+    assert admin_ux['status'] == 'IMPLEMENTED_AND_UNIT_VERIFIED'
     contracts = {name: [{'status': row['status'], **{key: row[key] for key in
         ('parallel_processes', 'parallel_calls', 'parallel_allowed', 'shared_database_nodes',
          'object_cache_outage', 'storage_failure', 'bounded_rollback', 'rollback_deleted',
@@ -68,6 +73,7 @@ def main():
         },
         'contracts': contracts,
         'strategy_contract': ux_strategy,
+        'admin_ux_contract': admin_ux,
         'integration': integrations,
         'performance': synthetic['mvp_contracts'].get('AUTH-PERF-003', []),
         'deployment_preflight': preflight,

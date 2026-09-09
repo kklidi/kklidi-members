@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the KKLIDI Members plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: KKLIDI Members 0.7.13\n"
+"Project-Id-Version: KKLIDI Members 0.7.17\n"
 "Report-Msgid-Bugs-To: https://kklidi.com/\n"
 "POT-Creation-Date: 2026-09-07 00:00+0000\n"
 "MIME-Version: 1.0\n"
@@ -893,4 +893,76 @@ msgid "Create your account with WordPress Core authentication. After registratio
 msgstr ""
 
 msgid "Enter your username or email. If an account matches, WordPress will send a password reset link."
+msgstr ""
+
+msgid "Publish and review the required account documents."
+msgstr ""
+
+msgid "Edit the four approved account notice messages."
+msgstr ""
+
+msgid "Review pending withdrawal requests without deleting records."
+msgstr ""
+
+msgid "Filter security and account events."
+msgstr ""
+
+msgid "WordPress registration settings"
+msgstr ""
+
+msgid "Public registration remains controlled by WordPress Core."
+msgstr ""
+
+msgid "Open WordPress settings"
+msgstr ""
+
+msgid "Manage documents"
+msgstr ""
+
+msgid "Review route settings"
+msgstr ""
+
+msgid "Manage URL ownership"
+msgstr ""
+
+msgid "Quick actions"
+msgstr ""
+
+msgid "Use these links to manage the account system. WordPress Core remains the owner of authentication and public registration."
+msgstr ""
+
+msgid "Member route links"
+msgstr ""
+
+msgid "Add the links you need to a site menu manually. Members does not create or replace WordPress pages automatically."
+msgstr ""
+
+msgid "Screen"
+msgstr ""
+
+msgid "URL"
+msgstr ""
+
+msgid "Before saving"
+msgstr ""
+
+msgid "Leave a field empty to restore its translated default. HTML, shortcodes, PHP, and unknown placeholders are rejected."
+msgstr ""
+
+msgid "%d pending request(s)"
+msgstr ""
+
+msgid "Clear filters"
+msgstr ""
+
+msgid "Account"
+msgstr ""
+
+msgid "Password reset"
+msgstr ""
+
+msgid "Registration"
+msgstr ""
+
+msgid "Withdrawal request"
 msgstr ""

@@ -1,0 +1,50 @@
+{
+  "contract": "AUTH-ADMIN-UX-001",
+  "version": 1,
+  "status": "IMPLEMENTED_AND_UNIT_VERIFIED",
+  "target_release": "0.7.17",
+  "principle": "route_canonical",
+  "overview": {
+    "diagnostics": [
+      "public_registration",
+      "required_documents",
+      "clean_route",
+      "url_ownership",
+      "members_tables",
+      "cleanup_schedule"
+    ],
+    "quick_links": [
+      "documents",
+      "notifications",
+      "withdrawals",
+      "audit",
+      "wordpress_registration_settings"
+    ],
+    "route_links": [
+      "login",
+      "register",
+      "account",
+      "profile",
+      "password",
+      "password_reset",
+      "consent",
+      "withdrawal",
+      "logout"
+    ],
+    "automatic_page_creation": false,
+    "automatic_menu_mutation": false
+  },
+  "notifications": {
+    "approved_events": 4,
+    "default_fallback": "gettext_defaults",
+    "sender_policy": "read_only",
+    "html": false,
+    "test_send": false
+  },
+  "security": {
+    "capability": "manage_kklidi_members",
+    "server_nonce": true,
+    "route_controller_shared": true,
+    "global_frontend_assets": false
+  }
+}

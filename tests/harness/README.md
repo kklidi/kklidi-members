@@ -47,6 +47,7 @@ The runner has no option for an existing site URL, existing DB endpoint, existin
 | `test_runner.py` | Destructive-operation boundaries, assertion falsification, and UI route-asset guards |
 | `notification_contract.json` | `AUTH-NOTIFY-001` four-event runtime, delivery, localization, and failure contract |
 | `notification_settings_contract.json` | `AUTH-NOTIFY-002` Core-first admin wording design and implementation boundary |
+| `admin_ux_contract.json` | `AUTH-ADMIN-UX-001` bounded administrator diagnostics, route links, and quick actions |
 | `ui_contract.json` | `AUTH-UI-001` screen/state/translation/accessibility/asset contract manifest |
 | `ux_strategy_contract.json` | `AUTH-UX-003` approved frontend/admin information architecture and implementation boundaries |
 | `mamp_woo_case.php` | CLI-only, fixed-sandbox Woo/WCI fixture with tagged user/product/orders, Members optional-dependency toggles, and exact cleanup |
@@ -65,6 +66,8 @@ The runner has no option for an existing site URL, existing DB endpoint, existin
 The `AUTH-UI-001` unit guard verifies that every current Members frontend route and the admin surface are represented in the UI contract. `AUTH-UI-002` additionally verifies the CSS files, responsive/focus rules, server-rendered page shell, route-only frontend asset hook, admin-only asset hook, and the route-scoped authentication enhancement. `AUTH-UX-003` fixes the approved strategy; 0.7.5 implements login/registration, 0.7.6 implements account/reset/navigation UX, 0.7.7 implements the Users-area information architecture, and 0.7.8 implements reasoned withdrawal review and bounded audit operations. Browser acceptance remains a separate MAMP check.
 
 `AUTH-NOTIFY-002` adds a second notification extension contract. The disposable runner submits the actual WordPress Settings API form as an administrator, rejects the same nonce for a subscriber, verifies non-autoload storage and metadata-only audit, checks event placeholder allowlists and gettext fallback, and then reruns the existing four-event mail and failure contracts under both database prefixes.
+
+`AUTH-ADMIN-UX-001` keeps the route controller canonical and makes administrator setup easier without creating pages or mutating site menus. The contract is guarded by the unit suite and the MAMP lifecycle runner; it does not claim external mailbox delivery.
 
 The fixed MAMP LMS fixture exercises actual Woo order reconciliation into KKLIDI LMS enrollment, WordPress ID continuity across progress/certificate/private-question rows, learner/outsider access, route-scoped Members profile delegation, Members-off LMS/Core fallback, and exact cleanup. It creates only tagged synthetic data and sinks notification mail.
 

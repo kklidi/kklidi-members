@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the KKLIDI Members plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: KKLIDI Members 0.7.16\n"
+"Project-Id-Version: KKLIDI Members 0.7.17\n"
 "Language: ko_KR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -799,3 +799,75 @@ msgstr "WordPress Core 인증으로 계정을 만드세요. 가입 후 가입할
 
 msgid "Enter your username or email. If an account matches, WordPress will send a password reset link."
 msgstr "사용자명 또는 이메일을 입력하세요. 일치하는 계정이 있으면 WordPress가 비밀번호 재설정 링크를 보냅니다."
+
+msgid "Publish and review the required account documents."
+msgstr "필수 계정 문서를 게시하고 검토합니다."
+
+msgid "Edit the four approved account notice messages."
+msgstr "승인된 계정 알림 4개의 문구를 편집합니다."
+
+msgid "Review pending withdrawal requests without deleting records."
+msgstr "기록을 삭제하지 않고 대기 중인 탈퇴 요청을 검토합니다."
+
+msgid "Filter security and account events."
+msgstr "보안 및 계정 사건을 필터링합니다."
+
+msgid "WordPress registration settings"
+msgstr "WordPress 가입 설정"
+
+msgid "Public registration remains controlled by WordPress Core."
+msgstr "공개 가입은 계속 WordPress Core가 관리합니다."
+
+msgid "Open WordPress settings"
+msgstr "WordPress 설정 열기"
+
+msgid "Manage documents"
+msgstr "문서 관리"
+
+msgid "Review route settings"
+msgstr "라우트 설정 검토"
+
+msgid "Manage URL ownership"
+msgstr "URL 소유권 관리"
+
+msgid "Quick actions"
+msgstr "빠른 작업"
+
+msgid "Use these links to manage the account system. WordPress Core remains the owner of authentication and public registration."
+msgstr "이 링크로 계정 시스템을 관리합니다. 인증과 공개 가입의 소유자는 계속 WordPress Core입니다."
+
+msgid "Member route links"
+msgstr "회원 라우트 링크"
+
+msgid "Add the links you need to a site menu manually. Members does not create or replace WordPress pages automatically."
+msgstr "필요한 링크를 사이트 메뉴에 직접 추가하세요. Members는 WordPress 페이지를 자동으로 만들거나 교체하지 않습니다."
+
+msgid "Screen"
+msgstr "화면"
+
+msgid "URL"
+msgstr "주소"
+
+msgid "Before saving"
+msgstr "저장 전 확인"
+
+msgid "Leave a field empty to restore its translated default. HTML, shortcodes, PHP, and unknown placeholders are rejected."
+msgstr "입력란을 비워 두면 번역된 기본값으로 되돌아갑니다. HTML, 쇼트코드, PHP 및 알 수 없는 치환값은 거부됩니다."
+
+msgid "%d pending request(s)"
+msgstr "대기 중인 요청 %d건"
+
+msgid "Clear filters"
+msgstr "필터 지우기"
+
+msgid "Account"
+msgstr "내 계정"
+
+msgid "Password reset"
+msgstr "비밀번호 재설정"
+
+msgid "Registration"
+msgstr "회원가입"
+
+msgid "Withdrawal request"
+msgstr "탈퇴 요청"

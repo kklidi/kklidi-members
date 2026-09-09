@@ -2,7 +2,7 @@
 
 WordPress Core Auth 위에서 KKLIDI 서비스가 공유하는 회원·계정·인증 UX 계층.
 
-**현재 개발 후보: 0.7.16.** 0.7.16은 Members 인증 화면의 비밀번호 표시 아이콘, 링크 우선순위, 간격·타이포그래피·모바일 밀도를 정리한다. 0.7.13의 WordPress Core reset-link 안내와 가입 후 수동 로그인 정책, 0.7.11의 탈퇴 검토·처리 UX, `AUTH-NOTIFY-002`의 plain-text 제목·본문 설정, WordPress Core 인증과 사용자 ID 경계는 그대로 유지한다. 실제 운영 인증서·다중 서버·운영 migration 승인은 [운영 계약](docs/OPERATIONS.md)의 환경 gate를 따른다.
+**현재 개발 후보: 0.7.17.** 0.7.17은 Members 관리자 화면의 진단 카드, 빠른 작업, route 링크와 알림·탈퇴·감사 관리 가독성을 개선한다. 인증·사용자 ID·메일 소유권 경계는 유지한다. 0.7.13의 WordPress Core reset-link 안내와 가입 후 수동 로그인 정책, 0.7.11의 탈퇴 검토·처리 UX, `AUTH-NOTIFY-002`의 plain-text 제목·본문 설정, WordPress Core 인증과 사용자 ID 경계는 그대로 유지한다. 실제 운영 인증서·다중 서버·운영 migration 승인은 [운영 계약](docs/OPERATIONS.md)의 환경 gate를 따른다.
 
 이전 검증 기록: **첫 MVP runtime 0.2.0 구현 및 24개 MVP 계약의 합성 WordPress 실행 완료**. 최신 합성 실행은 24개 MVP 계약이 모두 PASS다. 실제 device-limit 1.1.3의 Members/Core 허용·차단·제거 경로, WooCommerce 11.1.0/WCI 1.0.3의 checkout·cart·주문 귀속, KKLIDI LMS의 주문→수강·진도·수료증·비공개 질문과 Members-off 폴백, KBoard 제거 전 호환성, TLS/browser gate를 통과했다. KBoard 권한 엔진 이전·복제와 content migration은 범위 밖이다. 제품 방향 판정은 **GREENFIELD_RECOMMENDED**다.
 
@@ -48,4 +48,4 @@ Members의 사용자 문구는 영어 source string과 `kklidi-members` text dom
 
 ## UI implementation
 
-`AUTH-UI-002`와 후속 `AUTH-UX-003` 구현은 9개 frontend Members route와 Members 관리자 화면에 공통 page shell 및 stylesheet를 적용한다. frontend stylesheet는 Members query route에만, admin stylesheet는 `Tools → KKLIDI Members` 화면에만 로드된다. password 표시 JavaScript도 로그인·가입·변경·재설정 route에만 로드되며 외부 font/CDN 요청은 없다.
+`AUTH-UI-002`와 후속 `AUTH-UX-003` 구현은 9개 frontend Members route와 Members 관리자 화면에 공통 page shell 및 stylesheet를 적용한다. frontend stylesheet는 Members query route에만, admin stylesheet는 `Tools → KKLIDI Members` 화면에만 로드된다. password 표시 JavaScript도 로그인·가입·변경·재설정 route에만 로드되며 외부 font/CDN 요청은 없다.\n

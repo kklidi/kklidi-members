@@ -27,9 +27,24 @@
 						<h3><?php echo esc_html($item['label']); ?></h3>
 						<p><span class="kklidi-members-status <?php echo $item['ready'] ? 'is-ready' : 'is-attention'; ?>"><?php echo esc_html($item['ready'] ? __('Ready', 'kklidi-members') : __('Needs attention', 'kklidi-members')); ?></span></p>
 						<p><?php echo esc_html($item['detail']); ?></p>
+						<?php if (!empty($item['action_url'])) : ?><p><a href="<?php echo esc_url($item['action_url']); ?>"><?php echo esc_html($item['action_label']); ?></a></p><?php endif; ?>
 					</article>
 				<?php endforeach; ?>
 			</div>
+		</section>
+		<section class="kklidi-members-admin-card">
+			<h2><?php esc_html_e('Quick actions', 'kklidi-members'); ?></h2>
+			<p><?php esc_html_e('Use these links to manage the account system. WordPress Core remains the owner of authentication and public registration.', 'kklidi-members'); ?></p>
+			<div class="kklidi-members-quick-links">
+				<?php foreach ($quick_links as $link) : ?><a class="kklidi-members-quick-link" href="<?php echo esc_url($link['url']); ?>"><strong><?php echo esc_html($link['label']); ?></strong><span><?php echo esc_html($link['description']); ?></span></a><?php endforeach; ?>
+			</div>
+		</section>
+		<section class="kklidi-members-admin-card">
+			<h2><?php esc_html_e('Member route links', 'kklidi-members'); ?></h2>
+			<p><?php esc_html_e('Add the links you need to a site menu manually. Members does not create or replace WordPress pages automatically.', 'kklidi-members'); ?></p>
+			<table class="widefat striped kklidi-members-admin-table"><thead><tr><th scope="col"><?php esc_html_e('Screen', 'kklidi-members'); ?></th><th scope="col"><?php esc_html_e('URL', 'kklidi-members'); ?></th></tr></thead><tbody>
+			<?php foreach ($route_urls as $route) : ?><tr><td data-label="<?php esc_attr_e('Screen', 'kklidi-members'); ?>"><?php echo esc_html($route[0]); ?></td><td data-label="<?php esc_attr_e('URL', 'kklidi-members'); ?>"><a href="<?php echo esc_url($route[1]); ?>"><?php echo esc_html($route[1]); ?></a></td></tr><?php endforeach; ?>
+			</tbody></table>
 		</section>
 	<?php elseif ($section === 'documents') : ?>
 		<section class="kklidi-members-admin-card">
@@ -94,6 +109,7 @@
 		<section class="kklidi-members-admin-card">
 			<h2><?php esc_html_e('Account notification messages', 'kklidi-members'); ?></h2>
 			<p><?php esc_html_e('Edit only the four approved account notices. WordPress still controls identity, recipients, authentication, and mail delivery.', 'kklidi-members'); ?></p>
+			<p class="description"><strong><?php esc_html_e('Before saving', 'kklidi-members'); ?>:</strong> <?php esc_html_e('Leave a field empty to restore its translated default. HTML, shortcodes, PHP, and unknown placeholders are rejected.', 'kklidi-members'); ?></p>
 			<?php settings_errors('kklidi_members_notifications'); ?>
 			<form action="<?php echo esc_url(admin_url('options.php')); ?>" method="post">
 				<?php settings_fields(\KKLIDI\Members\Notifications\NotificationTemplates::OPTION_GROUP); ?>
@@ -105,10 +121,11 @@
 		<section class="kklidi-members-admin-card">
 			<h2><?php esc_html_e('Pending withdrawals', 'kklidi-members'); ?></h2>
 			<p><?php esc_html_e('A request blocks sign-in immediately. Finalization records review completion and keeps the account disabled; it does not delete the WordPress user or service records. Restoration requires a reason and never revives an existing session.', 'kklidi-members'); ?></p>
+			<p class="kklidi-members-queue-count"><strong><?php printf(esc_html__('%d pending request(s)', 'kklidi-members'), count($queue)); ?></strong></p>
 			<table class="widefat striped kklidi-members-admin-table"><thead><tr><th scope="col"><?php esc_html_e('User ID', 'kklidi-members'); ?></th><th scope="col"><?php esc_html_e('Display name', 'kklidi-members'); ?></th><th scope="col"><?php esc_html_e('Requested at (UTC)', 'kklidi-members'); ?></th><th scope="col"><?php esc_html_e('Review actions', 'kklidi-members'); ?></th></tr></thead><tbody>
 			<?php foreach ($queue as $queued_user) : ?>
 				<tr>
-					<td data-label="<?php esc_attr_e('User ID', 'kklidi-members'); ?>"><?php echo (int) $queued_user->ID; ?></td>
+					<td data-label="<?php esc_attr_e('User ID', 'kklidi-members'); ?>"><?php if (current_user_can('edit_user', (int) $queued_user->ID)) : ?><a href="<?php echo esc_url(get_edit_user_link((int) $queued_user->ID)); ?>"><?php echo (int) $queued_user->ID; ?></a><?php else : ?><?php echo (int) $queued_user->ID; ?><?php endif; ?></td>
 					<td data-label="<?php esc_attr_e('Display name', 'kklidi-members'); ?>"><?php echo esc_html($queued_user->display_name); ?></td>
 					<td data-label="<?php esc_attr_e('Requested at (UTC)', 'kklidi-members'); ?>"><?php echo esc_html((string) get_user_meta($queued_user->ID, '_kklidi_members_withdrawal_requested_at', true) ?: '—'); ?></td>
 					<td data-label="<?php esc_attr_e('Review actions', 'kklidi-members'); ?>">
@@ -147,6 +164,7 @@
 				<button class="button" type="submit"><?php esc_html_e('Filter', 'kklidi-members'); ?></button>
 			</form>
 			<p><?php printf(esc_html__('%d matching events', 'kklidi-members'), (int) $audit_view['total']); ?></p>
+			<?php if ($audit_view['filters']['event'] !== '' || $audit_view['filters']['result'] !== '' || $audit_view['filters']['date'] !== '' || $audit_view['filters']['user_id'] > 0) : ?><p><a href="<?php echo esc_url(add_query_arg(array('page' => 'kklidi-members', 'section' => 'audit'), admin_url('users.php'))); ?>"><?php esc_html_e('Clear filters', 'kklidi-members'); ?></a></p><?php endif; ?>
 			<table class="widefat striped kklidi-members-admin-table"><thead><tr><th scope="col">ID</th><th scope="col"><?php esc_html_e('User ID', 'kklidi-members'); ?></th><th scope="col">UTC</th><th scope="col"><?php esc_html_e('Type', 'kklidi-members'); ?></th><th scope="col"><?php esc_html_e('Result', 'kklidi-members'); ?></th><th scope="col"><?php esc_html_e('Reason', 'kklidi-members'); ?></th></tr></thead><tbody>
 			<?php foreach ($audit_view['rows'] as $row) : ?><tr><td data-label="ID"><?php echo (int) $row->id; ?></td><td data-label="<?php esc_attr_e('User ID', 'kklidi-members'); ?>"><?php echo $row->user_id ? (int) $row->user_id : '—'; ?></td><td data-label="UTC"><?php echo esc_html($row->occurred_at_utc); ?></td><td data-label="<?php esc_attr_e('Type', 'kklidi-members'); ?>"><?php echo esc_html(\KKLIDI\Members\Admin\AdminController::audit_event_label((string) $row->event_type)); ?></td><td data-label="<?php esc_attr_e('Result', 'kklidi-members'); ?>"><?php echo esc_html(\KKLIDI\Members\Admin\AdminController::audit_result_label((string) $row->result)); ?></td><td data-label="<?php esc_attr_e('Reason', 'kklidi-members'); ?>"><?php echo esc_html(\KKLIDI\Members\Admin\AdminController::audit_reason_label((string) $row->reason_code)); ?></td></tr><?php endforeach; ?>
 			<?php if (!$audit_view['rows']) : ?><tr><td colspan="6"><?php esc_html_e('No audit events.', 'kklidi-members'); ?></td></tr><?php endif; ?></tbody></table>

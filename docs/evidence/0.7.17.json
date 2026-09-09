@@ -1,0 +1,939 @@
+{
+  "release": "0.7.17",
+  "synthetic_run": "0a883fda3e6c4833896526a834c78e07",
+  "execution_status": "PASS",
+  "production_acceptance": "PARTIAL",
+  "package": {
+    "archive": "kklidi-members-0.7.17.zip",
+    "sha256": "1ff7c547f5866909aebab493a663bc236fb17fccdcbd7334534cb0997683ff50",
+    "manifest": "kklidi-members-0.7.17.manifest.json",
+    "files": 51
+  },
+  "contracts": {
+    "AUTH-REDIRECT-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-LOGIN-002": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-CSRF-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-REGISTER-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-REGISTER-002": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-NOTIFY-002": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-PROFILE-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-CONSENT-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-LOGOUT-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-RESET-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-WITHDRAW-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-NOTIFY-001": [
+      {
+        "status": "PASS",
+        "account_notice_events": 4,
+        "korean_site_fallback": true,
+        "korean_user_locale": true,
+        "catalog_rendered": true,
+        "mail_failure_events": 4,
+        "mail_failure_injected_attempts": 4,
+        "mail_failure_delivery_records": 0,
+        "mail_failure_audit_result": "failure/wp_mail_failed",
+        "mail_failure_committed_state_preserved": true,
+        "mail_failure_sessions_remain_revoked": true,
+        "mail_failure_user_response": "committed_operation_success",
+        "mail_failure_retry_attempts": 0,
+        "members_off_no_hard_dependency": true
+      },
+      {
+        "status": "PASS",
+        "account_notice_events": 4,
+        "korean_site_fallback": true,
+        "korean_user_locale": true,
+        "catalog_rendered": true,
+        "mail_failure_events": 4,
+        "mail_failure_injected_attempts": 4,
+        "mail_failure_delivery_records": 0,
+        "mail_failure_audit_result": "failure/wp_mail_failed",
+        "mail_failure_committed_state_preserved": true,
+        "mail_failure_sessions_remain_revoked": true,
+        "mail_failure_user_response": "committed_operation_success",
+        "mail_failure_retry_attempts": 0,
+        "members_off_no_hard_dependency": true
+      }
+    ],
+    "AUTH-RATE-LIMIT-001": [
+      {
+        "status": "PASS",
+        "parallel_processes": 8,
+        "parallel_calls": 100,
+        "parallel_allowed": 10,
+        "shared_database_nodes": 8,
+        "object_cache_outage": "PASS",
+        "storage_failure": "FAIL_CLOSED"
+      },
+      {
+        "status": "PASS",
+        "parallel_processes": 8,
+        "parallel_calls": 100,
+        "parallel_allowed": 10,
+        "shared_database_nodes": 8,
+        "object_cache_outage": "PASS",
+        "storage_failure": "FAIL_CLOSED"
+      }
+    ],
+    "AUTH-AUDIT-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-MIGRATION-001": [
+      {
+        "status": "PASS",
+        "bounded_rollback": true,
+        "rollback_deleted": 3
+      },
+      {
+        "status": "PASS",
+        "bounded_rollback": true,
+        "rollback_deleted": 3
+      }
+    ],
+    "AUTH-COOKIE-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-ENUM-001": [
+      {
+        "status": "PARTIAL"
+      },
+      {
+        "status": "PARTIAL"
+      }
+    ],
+    "AUTH-PRIVILEGE-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-PERF-001": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-PERF-002": [
+      {
+        "status": "PASS"
+      },
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-WOO-001": [
+      {
+        "status": "SYNTHETIC_PASS"
+      },
+      {
+        "status": "SYNTHETIC_PASS"
+      }
+    ],
+    "AUTH-LMS-001": [
+      {
+        "status": "SYNTHETIC_PASS"
+      },
+      {
+        "status": "SYNTHETIC_PASS"
+      }
+    ],
+    "AUTH-KBOARD-001": [
+      {
+        "status": "SYNTHETIC_PASS"
+      },
+      {
+        "status": "SYNTHETIC_PASS"
+      }
+    ],
+    "AUTH-PERF-003": [
+      {
+        "status": "PASS"
+      }
+    ],
+    "AUTH-DEVICE-001": [
+      {
+        "status": "PARTIAL"
+      },
+      {
+        "status": "PARTIAL"
+      }
+    ]
+  },
+  "strategy_contract": {
+    "contract": "AUTH-UX-003",
+    "version": 4,
+    "status": "IMPLEMENTED_THROUGH_0.7.8",
+    "decision_date": "2026-09-09",
+    "frontend": {
+      "surface": "standalone_branded_members_shell",
+      "theme_markup_dependency": false,
+      "routes": {
+        "canonical_family": "/members/",
+        "activation_requires_collision_preflight": true,
+        "existing_query_routes_remain_fallback": true
+      },
+      "login_actions": [
+        "password_reset",
+        "register",
+        "home"
+      ],
+      "registration": {
+        "identity_input": "email",
+        "wordpress_user_login": "opaque_private_candidate",
+        "supported_login_identifiers": [
+          "email",
+          "legacy_username"
+        ],
+        "required_fields": [
+          "email",
+          "password",
+          "password_confirm",
+          "first_name",
+          "display_name",
+          "consent_service",
+          "consent_privacy"
+        ],
+        "optional_fields": [
+          "last_name",
+          "phone"
+        ],
+        "duplicate_display_name_allowed": true,
+        "automatic_login": false,
+        "email_verification": false
+      },
+      "validation_recovery": {
+        "same_request_safe_fields": [
+          "email",
+          "first_name",
+          "last_name",
+          "display_name",
+          "phone"
+        ],
+        "always_cleared": [
+          "password",
+          "password_confirm",
+          "nonce",
+          "guest_token"
+        ],
+        "generic_identity_error": true,
+        "field_errors_linked_to_controls": true
+      },
+      "terms": {
+        "show_current_version": true,
+        "server_rendered_details": true,
+        "full_document_link": true
+      },
+      "password_visibility": {
+        "progressive_enhancement": true,
+        "route_scoped_script": true,
+        "no_javascript_required": true,
+        "custom_strength_auth_rule": false
+      },
+      "password_reset": {
+        "branded_wrapper_planned": true,
+        "branded_wrapper_implemented": true,
+        "wordpress_core_keys_and_apis_only": true,
+        "custom_token_or_auth_system": false,
+        "generic_request_response": true,
+        "token_response_headers": [
+          "no-store",
+          "no-referrer"
+        ]
+      },
+      "account_navigation": {
+        "integration_mode": "plugin_registered_link_only_slots",
+        "slot_hook": "kklidi_members_account_navigation_links",
+        "registered_fields": [
+          "label",
+          "url",
+          "priority"
+        ],
+        "local_urls_only": true,
+        "members_queries_woocommerce_or_lms_domain_data": false,
+        "integrations_optional": true
+      }
+    },
+    "admin": {
+      "implementation_status": "WITHDRAWAL_AND_AUDIT_OPERATIONS_IMPLEMENTED",
+      "menu_parent": "users",
+      "sections": [
+        "overview",
+        "documents",
+        "withdrawals",
+        "audit"
+      ],
+      "overview_checks": [
+        "core_public_registration",
+        "required_documents",
+        "route_collisions",
+        "url_ownership",
+        "owned_tables",
+        "cleanup_schedule"
+      ],
+      "documents": {
+        "current_version_and_hash": true,
+        "preview_before_publish": true,
+        "version_history": true,
+        "published_snapshot_immutable": true
+      },
+      "withdrawals": {
+        "allowed_transitions": [
+          "withdrawal_pending_to_disabled",
+          "withdrawal_pending_to_active_with_reason"
+        ],
+        "capability_and_nonce_required": true,
+        "wordpress_user_id_preserved": true,
+        "external_domain_rows_preserved": true,
+        "restored_sessions": false
+      },
+      "audit": {
+        "localized_labels": true,
+        "filters": [
+          "event",
+          "result",
+          "date",
+          "user_id"
+        ],
+        "bounded_pagination": true,
+        "new_sensitive_payload": false
+      },
+      "notifications": {
+        "read_only_audit_results": true,
+        "editable_templates": false,
+        "smtp_settings": false,
+        "retry_queue": false,
+        "admin_recipient_notices": false
+      },
+      "core_users": {
+        "columns": [
+          "account_state",
+          "required_consent_status"
+        ],
+        "filters": [
+          "account_state",
+          "required_consent_status"
+        ],
+        "separate_user_registry": false
+      },
+      "retention": {
+        "display_defaults": {
+          "success_days": 30,
+          "security_days": 90
+        },
+        "editable_before_legal_policy": false
+      },
+      "capability": "manage_kklidi_members",
+      "default_role": "administrator"
+    },
+    "boundaries": {
+      "wordpress_core_identity_and_auth": true,
+      "wordpress_user_ids_preserved": true,
+      "php_session_auth": false,
+      "global_frontend_assets": false,
+      "woocommerce_lms_domain_ownership_preserved": true,
+      "members_remains_optional_dependency": true,
+      "future_features_implemented": false
+    },
+    "implementation_order": {
+      "0.7.5": "login_register_ux",
+      "0.7.6": "account_reset_and_navigation_ux",
+      "0.7.7": "admin_information_architecture",
+      "0.7.8": "withdrawal_and_audit_operations",
+      "0.7.9": "browser_accessibility_and_release_gate"
+    },
+    "implementation": {
+      "completed": [
+        "0.7.5",
+        "0.7.6",
+        "0.7.7",
+        "0.7.8"
+      ],
+      "remaining": [
+        "0.7.9"
+      ]
+    }
+  },
+  "admin_ux_contract": {
+    "contract": "AUTH-ADMIN-UX-001",
+    "version": 1,
+    "status": "IMPLEMENTED_AND_UNIT_VERIFIED",
+    "target_release": "0.7.17",
+    "principle": "route_canonical",
+    "overview": {
+      "diagnostics": [
+        "public_registration",
+        "required_documents",
+        "clean_route",
+        "url_ownership",
+        "members_tables",
+        "cleanup_schedule"
+      ],
+      "quick_links": [
+        "documents",
+        "notifications",
+        "withdrawals",
+        "audit",
+        "wordpress_registration_settings"
+      ],
+      "route_links": [
+        "login",
+        "register",
+        "account",
+        "profile",
+        "password",
+        "password_reset",
+        "consent",
+        "withdrawal",
+        "logout"
+      ],
+      "automatic_page_creation": false,
+      "automatic_menu_mutation": false
+    },
+    "notifications": {
+      "approved_events": 4,
+      "default_fallback": "gettext_defaults",
+      "sender_policy": "read_only",
+      "html": false,
+      "test_send": false
+    },
+    "security": {
+      "capability": "manage_kklidi_members",
+      "server_nonce": true,
+      "route_controller_shared": true,
+      "global_frontend_assets": false
+    }
+  },
+  "integration": {
+    "mamp-lms-417313b60012": {
+      "run_id": "mamp-lms-417313b60012",
+      "contract": "AUTH-LMS-001",
+      "status": "PASS",
+      "environment": "fixed dedicated MAMP sandbox",
+      "wordpress_user_id_preserved": true,
+      "order_reconciliation_idempotent": true,
+      "progress_percent": 100,
+      "student_course_and_lesson_access": true,
+      "outsider_lesson_and_question_denied": true,
+      "outsider_lesson_status": 200,
+      "members_profile_delegation": true,
+      "members_css_on_lms": false,
+      "notification_mail_sunk": true,
+      "members_off_learning_status": 200,
+      "members_off_lms_profile_status": 200,
+      "members_off_anonymous_status": 200,
+      "members_off_anonymous_core_login": true,
+      "members_off_fatal_error": false,
+      "cleanup": {
+        "cleaned": true,
+        "run_token": "417313b60012",
+        "users_remaining": 0,
+        "course_remaining": false,
+        "lesson_remaining": false,
+        "owned_postmeta_remaining": 0,
+        "device_remaining": 0,
+        "state_remaining": false,
+        "members_active": true
+      }
+    },
+    "mamp-lifecycle-eb67ebb58f42": {
+      "run_id": "mamp-lifecycle-eb67ebb58f42",
+      "status": "PASS",
+      "sandbox": "fixed dedicated MAMP sandbox",
+      "old_archive_sha256": "0f380fafd4ce8350b341176f6a854c340b65438e7e48541c6ed38febc7f5a11c",
+      "new_archive_sha256": "1ff7c547f5866909aebab493a663bc236fb17fccdcbd7334534cb0997683ff50",
+      "initial_version": "0.7.0",
+      "new_install": "0.7.17",
+      "update": "0.7.12->0.7.17",
+      "reinstall": "0.7.17",
+      "deactivate_http": 200,
+      "deactivate_fatal_error": false,
+      "reactivate": true,
+      "wordpress_user_ids_preserved": true,
+      "domain_fingerprint_preserved": true,
+      "protected_table_count": 57,
+      "original_files": 37,
+      "original_restored": true,
+      "restored_files": 37,
+      "temporary_directory_removed": true
+    },
+    "mamp-kboard-579ba79dbc61": {
+      "contract": "AUTH-KBOARD-001",
+      "run_id": "mamp-kboard-579ba79dbc61",
+      "status": "PASS",
+      "modes": {
+        "on": {
+          "guest_write": false,
+          "member_write": true,
+          "post_owner": true,
+          "comment_owner": true,
+          "list_and_document_http_200": true,
+          "comment_rendered": true,
+          "members_css": false,
+          "comment_login_link": "Members"
+        },
+        "off": {
+          "guest_write": false,
+          "member_write": true,
+          "post_owner": true,
+          "comment_owner": true,
+          "list_and_document_http_200": true,
+          "comment_rendered": true,
+          "members_css": false,
+          "comment_login_link": "WordPress Core"
+        }
+      },
+      "d06_ownership_evidence": "reference-d06-20260908.json",
+      "interactive_submission": "OUT_OF_SCOPE_FOR_REMOVAL_COMPATIBILITY",
+      "cleanup": {
+        "remaining": {
+          "board": 0,
+          "content": 0,
+          "comment": 0,
+          "user": 0,
+          "page": 0
+        },
+        "members_restored": true
+      }
+    },
+    "mamp-woo-c26b70641283": {
+      "run_id": "mamp-woo-c26b70641283",
+      "status": "PASS",
+      "transport": "HTTP forms, no JavaScript engine",
+      "checkout_login_post": true,
+      "cart_preserved": true,
+      "rendered_member_order": true,
+      "guest_order_not_claimed": true,
+      "woo_device_allowed": true,
+      "woo_device_blocked": true,
+      "browser_javascript": "NOT_RUN",
+      "cleanup": {
+        "cleaned": true,
+        "run_token": "c26b70641283"
+      }
+    },
+    "mamp-race-48e7ed44af61": {
+      "run_id": "mamp-race-48e7ed44af61",
+      "status": "PASS",
+      "workers": 8,
+      "registration": {
+        "submissions": 8,
+        "successes": 1,
+        "users": 1,
+        "required_consents": 2,
+        "phone_optional": true
+      },
+      "reset": {
+        "submissions": 8,
+        "localized_success_responses": 0,
+        "matching_final_passwords": 1,
+        "replay_form_available": false,
+        "one_time_result": true
+      },
+      "cleanup": {
+        "cleaned": true,
+        "run_token": "48e7ed44af61"
+      }
+    },
+    "mamp-timing-73c351e1ccd8": {
+      "run_id": "mamp-timing-73c351e1ccd8",
+      "status": "PASS",
+      "samples_per_group": 9,
+      "public_message_equal": true,
+      "existing_ms": {
+        "median": 1230.336,
+        "p95": 1323.128
+      },
+      "missing_ms": {
+        "median": 1196.49,
+        "p95": 1288.134
+      },
+      "median_ratio": 1.028,
+      "threshold_ratio": 2.0,
+      "cleanup": {
+        "cleaned": true,
+        "run_token": "73c351e1ccd8"
+      }
+    },
+    "mamp-https-af92ad631de7": {
+      "run_id": "mamp-https-af92ad631de7",
+      "status": "PASS",
+      "transport": "MAMP behind local TLS proxy",
+      "preflight": {
+        "status": "PASS",
+        "checks": {
+          "https_final_url": true,
+          "login_form": true,
+          "no_store": true,
+          "private_cache": true,
+          "hsts": true,
+          "guest_cookie_present": true,
+          "guest_cookie_host_prefix": true,
+          "guest_cookie_secure": true,
+          "guest_cookie_httponly": true,
+          "guest_cookie_samesite_lax": true,
+          "guest_cookie_host_only": true,
+          "guest_cookie_root_path": true,
+          "php_session_absent": true
+        },
+        "network_request_sent": true,
+        "host": "localhost"
+      },
+      "checks": {
+        "preflight": true,
+        "login_redirect_https": true,
+        "core_logged_in_cookie": true,
+        "core_secure_auth_cookie": true,
+        "core_cookies_secure": true,
+        "core_cookies_httponly": true,
+        "account_authenticated": true,
+        "account_no_store": true,
+        "php_session_absent": true
+      },
+      "tls": {
+        "version": "TLSv1.3",
+        "cipher": "TLS_AES_256_GCM_SHA384"
+      },
+      "certificate_sha256": "d0c702c2a393fed175aa899036ffeb97652da4ff9ed7a9a09b31acf4df1fa140",
+      "client_forwarded_for_stripped": true,
+      "trusted_proxy_bootstrap": "loopback plus proxy-set forwarded proto",
+      "cleanup": {
+        "user_remaining": 0,
+        "audit_remaining": 0,
+        "state_remaining": false,
+        "plugins_restored": true
+      },
+      "mu_plugin_removed": true,
+      "certificate_directory_removed": true,
+      "certificate_root_removed": true
+    },
+    "browser-chrome-0.7.2-20260909": {
+      "run_id": "browser-chrome-0.7.2-20260909",
+      "status": "PASS",
+      "browser": "Chrome",
+      "title": "KKLIDI Members MAMP Sandbox 로그인",
+      "language": "ko-KR",
+      "login_heading": "로그인",
+      "registration_heading": "회원가입",
+      "members_asset_version": "0.7.2",
+      "members_stylesheets": 1,
+      "korean_translation_catalogs_in_package": true,
+      "package_sha256": "512cbd58116cf6051b487355e2a90eea5b4ba826a238ee13b7592e551821b7ae",
+      "device_fingerprint_script": true,
+      "console_errors": 0,
+      "viewport_width": 360,
+      "login_document_scroll_width": 360,
+      "registration_document_scroll_width": 345,
+      "horizontal_overflow": false,
+      "viewport_restored": true
+    }
+  },
+  "performance": [
+    {
+      "status": "PASS",
+      "prefix": "wp_",
+      "samples_per_block": 100,
+      "blocks": 3,
+      "off_median_ms": 325.754,
+      "on_median_ms": 262.311,
+      "median_budget_ms": 140.737,
+      "off_p95_ms": 385.53,
+      "on_p95_ms": 360.306,
+      "p95_budget_ms": 143.381,
+      "off_query_median": 4.0,
+      "on_query_median": 4.0,
+      "off_memory_median": 37748736.0,
+      "on_memory_median": 37748736.0
+    }
+  ],
+  "deployment_preflight": {
+    "status": "PASS",
+    "checks": {
+      "https_final_url": true,
+      "login_form": true,
+      "no_store": true,
+      "private_cache": true,
+      "hsts": true,
+      "guest_cookie_present": true,
+      "guest_cookie_host_prefix": true,
+      "guest_cookie_secure": true,
+      "guest_cookie_httponly": true,
+      "guest_cookie_samesite_lax": true,
+      "guest_cookie_host_only": true,
+      "guest_cookie_root_path": true,
+      "php_session_absent": true
+    },
+    "network_request_sent": true,
+    "host": "localhost"
+  },
+  "local_environment": {
+    "forwarded_header_ignored": true,
+    "external_object_cache": false,
+    "transport": "http",
+    "multisite": false
+  },
+  "d06_reference_audit": {
+    "reference": "ns_0727",
+    "database_mode": "read_only_transaction_rolled_back",
+    "active_plugin_slugs": [
+      "query-monitor",
+      "all-in-one-wp-migration",
+      "cosmosfarm-pay-for-woocommerce",
+      "cosmosfarm-quick-buy-woocomerce",
+      "disable-emails",
+      "duplicate-page",
+      "imagify",
+      "insert-headers-and-footers",
+      "kadence-blocks-pro",
+      "kadence-blocks",
+      "kadence-pro",
+      "kadence-shop-kit",
+      "kboard-comments",
+      "kboard-remove-powered-by",
+      "kboard",
+      "kklidi-device-limit",
+      "kklidi-lms-migration",
+      "kklidi-lms",
+      "kklidi-payout-system",
+      "kklidi-private-download-manager",
+      "kklidi-text-replacer",
+      "kklidi-woocommerce-integration",
+      "loco-translate",
+      "woocommerce"
+    ],
+    "theme": {
+      "template": "kadence",
+      "stylesheet": "nosasu-kadence-child"
+    },
+    "pages": [
+      {
+        "id": 2640,
+        "title": "내 강의실",
+        "slug": "my-dashboard",
+        "type": "page",
+        "status": "publish",
+        "parent": 0,
+        "shortcodes": [
+          "ld_dashboard"
+        ],
+        "meta": {
+          "_wp_page_template": "default",
+          "cosmosfarm_members_page_restriction_roles": [
+            "administrator"
+          ]
+        }
+      },
+      {
+        "id": 10601,
+        "title": "강사 정산",
+        "slug": "instructor-dashboard",
+        "type": "page",
+        "status": "publish",
+        "parent": 0,
+        "shortcodes": [
+          "kklidi_instructor_dashboard"
+        ],
+        "meta": {
+          "_wp_page_template": "default",
+          "cosmosfarm_members_page_restriction": "1",
+          "cosmosfarm_members_page_restriction_roles": [
+            "administrator",
+            "ld_instructor"
+          ]
+        }
+      },
+      {
+        "id": 10603,
+        "title": "파트너정산",
+        "slug": "partner-dashboard",
+        "type": "page",
+        "status": "publish",
+        "parent": 0,
+        "shortcodes": [
+          "kklidi_partner_dashboard"
+        ],
+        "meta": {
+          "_wp_page_template": "default",
+          "cosmosfarm_members_page_restriction_roles": [
+            "administrator"
+          ]
+        }
+      },
+      {
+        "id": 10987,
+        "title": "마케팅 파트너스 가입신청",
+        "slug": "partners_new",
+        "type": "page",
+        "status": "publish",
+        "parent": 0,
+        "shortcodes": [
+          "null"
+        ],
+        "meta": {
+          "cosmosfarm_members_page_restriction": "2",
+          "cosmosfarm_members_page_restriction_roles": [
+            "administrator"
+          ]
+        }
+      },
+      {
+        "id": 11278,
+        "title": "학생회 가입신청",
+        "slug": "campus-partners",
+        "type": "page",
+        "status": "publish",
+        "parent": 0,
+        "shortcodes": [
+          "null"
+        ],
+        "meta": {
+          "cosmosfarm_members_page_restriction": "2",
+          "cosmosfarm_members_page_restriction_roles": [
+            "administrator"
+          ]
+        }
+      }
+    ],
+    "menu_items": [
+      {
+        "id": 9298,
+        "title": "",
+        "status": "publish",
+        "meta": {
+          "_menu_item_classes": "a:1:{i:0;s:0:\"\";}",
+          "_menu_item_menu_item_parent": "0",
+          "_menu_item_object": "page",
+          "_menu_item_object_id": "2640",
+          "_menu_item_target": "",
+          "_menu_item_type": "post_type",
+          "_menu_item_url": "",
+          "_menu_item_xfn": "",
+          "_wpmem_item_settings": "in"
+        }
+      },
+      {
+        "id": 10608,
+        "title": "",
+        "status": "publish",
+        "meta": {
+          "_menu_item_classes": "a:1:{i:0;s:24:\"kklidi-partner-dashboard\";}",
+          "_menu_item_menu_item_parent": "0",
+          "_menu_item_object": "page",
+          "_menu_item_object_id": "10603",
+          "_menu_item_target": "",
+          "_menu_item_type": "post_type",
+          "_menu_item_url": "",
+          "_menu_item_xfn": "",
+          "_wpmem_item_settings": "in"
+        }
+      },
+      {
+        "id": 10609,
+        "title": "강사정산",
+        "status": "publish",
+        "meta": {
+          "_menu_item_classes": "a:1:{i:0;s:27:\"kklidi-instructor-dashboard\";}",
+          "_menu_item_menu_item_parent": "0",
+          "_menu_item_object": "page",
+          "_menu_item_object_id": "10601",
+          "_menu_item_target": "",
+          "_menu_item_type": "post_type",
+          "_menu_item_url": "",
+          "_menu_item_xfn": "",
+          "_wpmem_item_settings": "in"
+        }
+      }
+    ]
+  },
+  "scope_note": "Local behavior, TLS and storage-failure gates passed; the actual production certificate/proxy, multiple application hosts and production migration need an identified deployment environment and approved manifest."
+}
