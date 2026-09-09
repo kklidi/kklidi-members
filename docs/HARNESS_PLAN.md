@@ -61,13 +61,15 @@ reference와 독립된 WP DB/filesystem에 synthetic 사용자 A/B, subscriber/a
 
 이 항목은 기존 Phase 0의 24개 runtime behavior contract 집계에 추가하지 않는다. 상태는 **SPECIFIED**이며 `AUTH-UI-002` 구현은 완료했다. 2026-09-07 MAMP smoke에서 가입·로그인 오류·로그인 회원의 6개 계정 화면·관리자 화면, 360px reflow, keyboard focus, Members route CSS와 일반 페이지의 Members CSS 0을 확인했다. 모든 보안 상태 전이의 UI 회귀는 기존 MVP behavior harness와 후속 통합 gate가 소유한다.
 
+0.7.5는 `AUTH-UX-003`의 첫 번째 runtime slice인 로그인·회원가입 shell, 안전한 입력 복원, field 오류 연결, 약관 상세 표시, route 전용 password visibility enhancement와 clean-route preflight를 구현했다. 단위 계약 25개, 0.7.5 ZIP 번역/package gate, 합성 WordPress 전체 실행 `618b1354f1484a4b96d4bd319feef581`, MAMP lifecycle `mamp-lifecycle-1d042c936753`가 PASS했다. 실제 브라우저 JavaScript·키보드·no-JS 화면 검증은 0.7.9 gate에 남아 있고, production acceptance는 staging backup/restore와 관찰 기간 전까지 `PARTIAL`이다.
+
 ### 2.2 계정 알림 계약
 
 `AUTH-NOTIFY-001`은 [NOTIFICATIONS.md](NOTIFICATIONS.md)와 `tests/harness/notification_contract.json`에서 가입 완료·비밀번호 변경·탈퇴 접수·탈퇴 처리 완료의 사용자 알림을 고정한다. 기존 24개 MVP runtime 계약 집계에는 추가하지 않는다. 상태는 **SPECIFIED**, runtime은 **IMPLEMENTED_AND_SYNTHETIC_VERIFIED**다.
 
 WooCommerce 주문·결제 메일과 LMS 수강·진도·수료증 알림은 각 domain owner에 남는다. 이메일 가입 인증, 관리자 알림, 마케팅, 편집 가능한 template, SMTP/provider, 재시도 queue는 이 계약 범위가 아니다. P0-3은 gettext/한국어 catalog 검증을 완료했고, P0-4는 네 사건의 메일 실패 주입과 보안 상태 보존·실패 감사·전달 기록 0·재시도 0을 완료했다.
 
-2026-09-09 P0-2 실행 `0d31685ae4584e49af3aa5f54c0896a0`는 WordPress 7.1/PHP 8.3의 새 임시 설치에서 `wp_`와 임의 prefix를 각각 검사했다. P0-3 실행 `bacdd413b3444dd694baa26d725e7e9a`도 두 prefix에서 네 알림 preset, 현재 Core 수신자, 명시적 plain-text header, 성공 후 발송, `wp_mail` 수락 감사 결과, 거부·재실행 중복 0, credential/token·주문/LMS 상세 미포함, Members-off hard dependency 없음과 `ko_KR` 사이트 fallback/사용자 locale catalog 렌더링을 PASS했다. P0-4 릴리스 실행 `aed831b84fe140708b6346e244a2190c`는 두 prefix의 네 실제 HTTP 계정 경로에 실패를 정확히 4회 주입해 확정 상태·세션 철회·성공 응답 유지, `failure/wp_mail_failed` 4건, 전달 sink 0건, 자동 재시도 0건을 각각 PASS했고 성능 블록도 PASS했다. 0.7.4 회귀 실행 `5886351d4d39439993fae700b0cb610a`는 같은 계약과 `AUTH-PERF-003`을 다시 PASS했다. 모든 실행의 임시 DB/filesystem과 process가 정리됐고 reference에는 쓰지 않았다. 최신 로컬 증거는 `.harness/reports/latest.json`에 있다.
+2026-09-09 P0-2 실행 `0d31685ae4584e49af3aa5f54c0896a0`는 WordPress 7.1/PHP 8.3의 새 임시 설치에서 `wp_`와 임의 prefix를 각각 검사했다. P0-3 실행 `bacdd413b3444dd694baa26d725e7e9a`도 두 prefix에서 네 알림 preset, 현재 Core 수신자, 명시적 plain-text header, 성공 후 발송, `wp_mail` 수락 감사 결과, 거부·재실행 중복 0, credential/token·주문/LMS 상세 미포함, Members-off hard dependency 없음과 `ko_KR` 사이트 fallback/사용자 locale catalog 렌더링을 PASS했다. P0-4 릴리스 실행 `aed831b84fe140708b6346e244a2190c`는 두 prefix의 네 실제 HTTP 계정 경로에 실패를 정확히 4회 주입해 확정 상태·세션 철회·성공 응답 유지, `failure/wp_mail_failed` 4건, 전달 sink 0건, 자동 재시도 0건을 각각 PASS했고 성능 블록도 PASS했다. 0.7.4 회귀 실행 `5886351d4d39439993fae700b0cb610a`는 같은 계약과 `AUTH-PERF-003`을 다시 PASS했다. 0.7.5 합성 실행은 `618b1354f1484a4b96d4bd319feef581`이며, 모든 실행의 임시 DB/filesystem과 process가 정리됐고 reference에는 쓰지 않았다. 최신 로컬 증거는 `.harness/reports/latest.json`에 있다.
 
 가입 동시성은 단순 재클릭과 다르다. 동일 normalized email의 병렬 요청·다른 case·동일 idempotency key·서로 다른 key를 각각 검사한다. 사용자 생성 후 consent 저장 실패, mail 송신 실패, usermeta finalize 실패를 따로 주입한다. account pending 상태의 fail-closed를 검사하고 고아 계정 재사용·완료 절차를 검증한다.
 

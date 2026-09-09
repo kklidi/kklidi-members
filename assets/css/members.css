@@ -58,6 +58,14 @@
 	letter-spacing: -0.03em;
 }
 
+.kklidi-members-eyebrow {
+	font-size: 0.8rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	margin: 0 0 8px !important;
+	text-transform: uppercase;
+}
+
 .kklidi-members-section h2 {
 	font-size: 1.1rem;
 }
@@ -92,6 +100,51 @@
 	font: inherit;
 	font-weight: 400;
 	padding: 10px 12px;
+}
+
+.kklidi-members-password-control {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 8px;
+	align-items: center;
+}
+
+.kklidi-members-password-control input {
+	min-width: 0;
+}
+
+.kklidi-members-password-toggle {
+	min-height: 46px;
+	border: 1px solid var(--kklidi-members-line);
+	border-radius: 8px;
+	background: #fff;
+	color: var(--kklidi-members-accent);
+	cursor: pointer;
+	font: inherit;
+	font-size: 0.9rem;
+	font-weight: 700;
+	padding: 8px 10px;
+}
+
+.kklidi-members-field-help,
+.kklidi-members-field-error {
+	display: block;
+	font-size: 0.9rem;
+}
+
+.kklidi-members-field-help {
+	color: var(--kklidi-members-muted);
+	font-weight: 400;
+}
+
+.kklidi-members-field-error {
+	color: #8d1c13;
+	font-weight: 600;
+}
+
+.kklidi-members-field input[aria-invalid="true"],
+.kklidi-members-field textarea[aria-invalid="true"] {
+	border-color: var(--kklidi-members-danger);
 }
 
 .kklidi-members-field textarea {
@@ -177,6 +230,52 @@
 	border-color: #f0c1bd;
 	background: var(--kklidi-members-danger-surface);
 	color: #8d1c13;
+}
+
+.kklidi-members-field-errors {
+	margin: 0 0 22px;
+	border: 1px solid #f0c1bd;
+	border-radius: 8px;
+	background: var(--kklidi-members-danger-surface);
+	color: #8d1c13;
+	padding: 12px 14px;
+}
+
+.kklidi-members-field-errors p {
+	font-weight: 700;
+	margin: 0;
+}
+
+.kklidi-members-field-errors ul {
+	margin: 8px 0 0 20px;
+	padding: 0;
+}
+
+.kklidi-members-field-errors a {
+	color: inherit;
+	font-weight: 600;
+}
+
+.kklidi-members-form-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 18px;
+	margin-top: 24px;
+}
+
+.kklidi-members-form-links a {
+	color: var(--kklidi-members-accent);
+	font-weight: 650;
+}
+
+.kklidi-members-section details {
+	margin: 14px 0;
+}
+
+.kklidi-members-section summary {
+	cursor: pointer;
+	font-weight: 650;
+	padding: 4px 0;
 }
 
 .kklidi-members-section {

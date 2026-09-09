@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the KKLIDI Members plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: KKLIDI Members 0.7.4\n"
+"Project-Id-Version: KKLIDI Members 0.7.5\n"
 "Report-Msgid-Bugs-To: https://kklidi.com/\n"
 "POT-Creation-Date: 2026-09-07 00:00+0000\n"
 "MIME-Version: 1.0\n"
@@ -335,4 +335,82 @@ msgid "Your withdrawal request has been processed and sign-in access remains blo
 msgstr ""
 
 msgid "Your WordPress account ID and related order or learning records may be retained according to the applicable retention policies."
+msgstr ""
+
+msgid "Already have an account? Log in"
+msgstr ""
+
+msgid "Back to site"
+msgstr ""
+
+msgid "Create an account"
+msgstr ""
+
+msgid "Create your account with WordPress Core authentication."
+msgstr ""
+
+msgid "Enter a display name of 200 characters or fewer."
+msgstr ""
+
+msgid "Enter a valid email address."
+msgstr ""
+
+msgid "Enter a valid phone number or leave this field blank."
+msgstr ""
+
+msgid "Enter the same password again."
+msgstr ""
+
+msgid "Enter your first name."
+msgstr ""
+
+msgid "Enter your password."
+msgstr ""
+
+msgid "Enter your username or email."
+msgstr ""
+
+msgid "Hide password"
+msgstr ""
+
+msgid "Login help"
+msgstr ""
+
+msgid "Marketing communications · Version %s"
+msgstr ""
+
+msgid "Optional"
+msgstr ""
+
+msgid "Please correct the highlighted fields."
+msgstr ""
+
+msgid "Privacy policy · Version %s"
+msgstr ""
+
+msgid "Registration help"
+msgstr ""
+
+msgid "Service terms · Version %s"
+msgstr ""
+
+msgid "Show password"
+msgstr ""
+
+msgid "Use at least 12 characters."
+msgstr ""
+
+msgid "Use your email or username and password to continue."
+msgstr ""
+
+msgid "You must accept the privacy policy."
+msgstr ""
+
+msgid "You must accept the service terms."
+msgstr ""
+
+msgid "Your account was created. Please log in to continue."
+msgstr ""
+
+msgid "Your withdrawal request was submitted. Access is blocked while it is reviewed."
 msgstr ""

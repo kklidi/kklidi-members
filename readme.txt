@@ -3,7 +3,7 @@ Contributors: kklidi
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.7.4
+Stable tag: 0.7.5
 
 Core-based member accounts with scoped UI, consent records and safe withdrawal handling.
 
@@ -14,8 +14,8 @@ KKLIDI Members adds login, registration, profile, consent and account management
 WooCommerce orders and LMS enrollment/progress stay with their respective plugins.
 Korean UI uses WordPress gettext translation catalogs.
 
-0.7.4 preserves the verified 0.7.3 runtime and adds an executable UI/UX strategy
-contract for the next frontend and administrator stages. See docs/RELEASE-0.7.4.md.
+0.7.5 implements the approved login and registration UX contract on top of the
+verified Core-auth runtime. See docs/RELEASE-0.7.5.md.
 
 == Installation ==
 
@@ -24,6 +24,11 @@ contract for the next frontend and administrator stages. See docs/RELEASE-0.7.4.
 3. Review registration and consent policy before changing the closed defaults.
 
 == Changelog ==
+
+= 0.7.5 =
+* Implemented the server-rendered login and registration shell with safe input recovery, field-level errors, consent details, and Core password visibility enhancement.
+* Added route-scoped authentication JavaScript and a clean-route collision preflight while preserving query-route fallback.
+* Added Korean translations for the new login and registration states.
 
 = 0.7.4 =
 * Added an executable strategy contract for the approved frontend and administrator information architecture.

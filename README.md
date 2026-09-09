@@ -2,7 +2,7 @@
 
 WordPress Core Auth 위에서 KKLIDI 서비스가 공유하는 회원·계정·인증 UX 계층.
 
-**현재 배포 후보: 0.7.4 검증판.** 0.7.4는 0.7.3의 검증된 runtime을 유지하면서 `AUTH-UX-003`으로 다음 UI/UX와 관리자 운영 구현의 정보 구조·보안 경계·순서를 확정한다. 0.7.5 이후 기능을 미리 구현 완료로 표시하지 않는다. 실제 운영 인증서·다중 서버·운영 migration 승인은 [0.7.4 릴리스 문서](docs/RELEASE-0.7.4.md)의 환경 gate를 따른다.
+**현재 배포 후보: 0.7.5 검증판.** 0.7.5는 승인된 `AUTH-UX-003` 중 로그인·회원가입 UX 단계를 구현한다. 계정 홈·비밀번호 재설정·관리자 운영 화면 등 후속 단계는 아직 구현하지 않는다. 실제 운영 인증서·다중 서버·운영 migration 승인은 [0.7.5 릴리스 문서](docs/RELEASE-0.7.5.md)의 환경 gate를 따른다.
 
 이전 검증 기록: **첫 MVP runtime 0.2.0 구현 및 24개 MVP 계약의 합성 WordPress 실행 완료**. 최신 합성 실행은 24개 MVP 계약이 모두 PASS다. 실제 device-limit 1.1.3의 Members/Core 허용·차단·제거 경로, WooCommerce 11.1.0/WCI 1.0.3의 checkout·cart·주문 귀속, KKLIDI LMS의 주문→수강·진도·수료증·비공개 질문과 Members-off 폴백, KBoard 제거 전 호환성, TLS/browser gate를 통과했다. KBoard 권한 엔진 이전·복제와 content migration은 범위 밖이다. 제품 방향 판정은 **GREENFIELD_RECOMMENDED**다.
 

@@ -18,6 +18,8 @@ final class RegistrationController {
 		$enabled = (bool) get_option('users_can_register', false)
 			&& \KKLIDI\Members\Consent\Documents::required_ready();
 		$message = $enabled ? '' : __('New registrations are currently closed.', 'kklidi-members');
+		$field_errors = array();
+		$values = self::safe_values();
 		$request_id = self::text('request_id');
 		if (!wp_is_uuid($request_id)) {
 			$request_id = wp_generate_uuid4();
@@ -27,6 +29,7 @@ final class RegistrationController {
 			$result = self::process($request_id);
 			if (is_wp_error($result)) {
 				$message = $result->get_error_message();
+				$field_errors = self::field_errors($result);
 				if ($result->get_error_code() === 'rate_limited') {
 					status_header(429);
 					$data = $result->get_error_data();
@@ -43,6 +46,8 @@ final class RegistrationController {
 		$service_document = \KKLIDI\Members\Consent\Documents::current('service');
 		$privacy_document = \KKLIDI\Members\Consent\Documents::current('privacy');
 		$marketing_document = \KKLIDI\Members\Consent\Documents::current('marketing');
+		$login_url = kklidi_members_login_url();
+		$home_url = home_url('/');
 		$guest_fields = \KKLIDI\Members\Security\GuestCsrf::fields(self::ACTION);
 		require KKLIDI_MEMBERS_DIR . 'templates/register.php';
 		exit;
@@ -76,15 +81,40 @@ final class RegistrationController {
 		$last = self::text('last_name');
 		$display = self::text('display_name');
 		$phone = self::text('phone');
-		if (!is_email($email) || $first === '' || $display === '' || strlen($display) > 200
-			|| !self::valid_phone($phone)) {
-			return new \WP_Error('invalid_fields', __('Please check the registration details.', 'kklidi-members'));
+		$invalid_fields = array();
+		if (!is_email($email)) {
+			$invalid_fields[] = 'email';
+		}
+		if ($first === '') {
+			$invalid_fields[] = 'first_name';
+		}
+		if ($display === '' || strlen($display) > 200) {
+			$invalid_fields[] = 'display_name';
+		}
+		if (!self::valid_phone($phone)) {
+			$invalid_fields[] = 'phone';
+		}
+		if ($invalid_fields) {
+			return new \WP_Error('invalid_fields', __('Please check the registration details.', 'kklidi-members'), array(
+				'fields' => $invalid_fields,
+			));
 		}
 		if ($password !== $confirm || strlen($password) < 12 || strlen($password) > 1024) {
-			return new \WP_Error('invalid_password', __('The password must be at least 12 characters and match the confirmation.', 'kklidi-members'));
+			return new \WP_Error('invalid_password', __('The password must be at least 12 characters and match the confirmation.', 'kklidi-members'), array(
+				'fields' => array('password', 'password_confirm'),
+			));
 		}
 		if (!isset($_POST['consent_service'], $_POST['consent_privacy'])) {
-			return new \WP_Error('consent_required', __('Please accept the required terms and privacy policy.', 'kklidi-members'));
+			$fields = array();
+			if (!isset($_POST['consent_service'])) {
+				$fields[] = 'consent_service';
+			}
+			if (!isset($_POST['consent_privacy'])) {
+				$fields[] = 'consent_privacy';
+			}
+			return new \WP_Error('consent_required', __('Please accept the required terms and privacy policy.', 'kklidi-members'), array(
+				'fields' => $fields,
+			));
 		}
 
 		global $wpdb;
@@ -170,6 +200,39 @@ final class RegistrationController {
 
 	private static function valid_phone(string $phone): bool {
 		return $phone === '' || (strlen($phone) <= 30 && preg_match('/^[0-9+() .-]{7,30}$/', $phone));
+	}
+
+	private static function safe_values(): array {
+		return array(
+			'email' => strtolower(sanitize_email(self::text('email'))),
+			'first_name' => self::text('first_name'),
+			'last_name' => self::text('last_name'),
+			'display_name' => self::text('display_name'),
+			'phone' => self::text('phone'),
+		);
+	}
+
+	private static function field_errors(\WP_Error $error): array {
+		$data = $error->get_error_data();
+		$fields = is_array($data) && isset($data['fields']) && is_array($data['fields'])
+			? $data['fields'] : array();
+		$messages = array(
+			'email' => __('Enter a valid email address.', 'kklidi-members'),
+			'first_name' => __('Enter your first name.', 'kklidi-members'),
+			'display_name' => __('Enter a display name of 200 characters or fewer.', 'kklidi-members'),
+			'phone' => __('Enter a valid phone number or leave this field blank.', 'kklidi-members'),
+			'password' => __('Use at least 12 characters.', 'kklidi-members'),
+			'password_confirm' => __('Enter the same password again.', 'kklidi-members'),
+			'consent_service' => __('You must accept the service terms.', 'kklidi-members'),
+			'consent_privacy' => __('You must accept the privacy policy.', 'kklidi-members'),
+		);
+		$errors = array();
+		foreach ($fields as $field) {
+			if (isset($messages[$field])) {
+				$errors[$field] = $messages[$field];
+			}
+		}
+		return $errors;
 	}
 
 	private static function text(string $key): string {

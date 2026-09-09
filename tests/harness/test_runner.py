@@ -161,7 +161,7 @@ class HarnessGuards(unittest.TestCase):
         self.assertEqual(contract['contract'], 'AUTH-UX-003')
         self.assertEqual(contract['version'], 1)
         self.assertEqual(contract['status'], 'SPECIFIED_FOR_0.7.4_NOT_IMPLEMENTED')
-        self.assertIn('`AUTH-UX-003` 상태: **SPECIFIED_FOR_0.7.4_NOT_IMPLEMENTED**', ui_ux)
+        self.assertIn('`AUTH-UX-003` 상태: **STRATEGY_SPECIFIED; 0.7.5_LOGIN_REGISTER_IMPLEMENTED**', ui_ux)
         self.assertNotIn('email을 Core `user_login`으로 사용하는 신규 회원', ui_ux)
         self.assertIn('비공개 후보', ui_ux)
         self.assertIn('D09 | **DECIDED FOR 0.7.4', product)
@@ -232,6 +232,11 @@ class HarnessGuards(unittest.TestCase):
         admin_source = (repository / 'includes/Admin/AdminController.php').read_text(encoding='utf-8')
         self.assertIn("add_action('wp_enqueue_scripts'", plugin_source)
         self.assertIn('is_frontend_route', plugin_source)
+        self.assertIn('is_auth_route', plugin_source)
+        self.assertIn('members-auth.js', plugin_source)
+        self.assertIn("if (self::is_auth_route())", plugin_source)
+        self.assertIn('cleanRoutePreflight',
+                      (repository / 'includes/Core/Url.php').read_text(encoding='utf-8'))
 
         self.assertIn("add_action('admin_enqueue_scripts'", admin_source)
         self.assertIn("tools_page_kklidi-members", admin_source)
@@ -240,7 +245,14 @@ class HarnessGuards(unittest.TestCase):
             repository / 'includes/Core/Plugin.php',
             repository / 'includes/Admin/AdminController.php',
         ))
-        self.assertNotIn('wp_enqueue_script(', production_source)
+        self.assertIn('wp_enqueue_script(', production_source)
+        self.assertNotIn('wp_enqueue_script(', admin_source)
+        self.assertIn('data-kklidi-members-password-toggle',
+                      (repository / 'templates/login.php').read_text(encoding='utf-8'))
+        register_template = (repository / 'templates/register.php').read_text(encoding='utf-8')
+        self.assertIn('<details', register_template)
+        self.assertIn('data-kklidi-members-password-toggle', register_template)
+        self.assertIn('aria-describedby', register_template)
 
     def test_phase_zero_documents_do_not_report_completed_ui_as_pending(self):
         repository = Path(__file__).resolve().parents[2]
@@ -485,7 +497,7 @@ class HarnessGuards(unittest.TestCase):
 
         lifecycle = (repository / 'tests/harness/mamp_lifecycle_run.py').read_text(encoding='utf-8')
         self.assertIn("SANDBOX = Path('C:/MAMP/htdocs/kklidi-members-mamp-sandbox')", lifecycle)
-        self.assertIn("PREVIOUS_VERSION = '0.7.3'", lifecycle)
+        self.assertIn("PREVIOUS_VERSION = '0.7.4'", lifecycle)
         self.assertIn("ALLOWED_INITIAL_VERSIONS = ('0.7.0', PREVIOUS_VERSION, CURRENT_VERSION)", lifecycle)
         self.assertIn("CURRENT_VERSION = re.search(", lifecycle)
         self.assertIn("OLD_ARCHIVE = ROOT / ('dist/kklidi-members-' + PREVIOUS_VERSION + '.zip')", lifecycle)
@@ -590,7 +602,7 @@ class HarnessGuards(unittest.TestCase):
         ready = json.loads(json.dumps(example))
         ready['environment']['base_url'] = 'https://staging.kklidi.com'
         ready['versions'].update(
-            wordpress='7.1', php='8.3', members='0.7.4', woocommerce='11.1.0')
+            wordpress='7.1', php='8.3', members='0.7.5', woocommerce='11.1.0')
         ready['owners'] = {key: 'approved-' + key for key in ready['owners']}
         ready['backup'].update(
             artifact_sha256='a' * 64,
@@ -603,7 +615,7 @@ class HarnessGuards(unittest.TestCase):
         self.assertEqual(report['failed'], [])
 
         wrong_release = json.loads(json.dumps(ready))
-        wrong_release['versions']['members'] = '0.7.3'
+        wrong_release['versions']['members'] = '0.7.4'
         self.assertIn('current_members_version',
                       inspect_deployment_manifest(wrong_release)['failed'])
 

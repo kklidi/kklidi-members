@@ -7,14 +7,14 @@
 - 계약 ID: `AUTH-UI-001`
 - `AUTH-UI-001` 상태: **SPECIFIED**
 - `AUTH-UI-002` 상태: **IMPLEMENTED_AND_VERIFIED**
-- `AUTH-UX-003` 상태: **SPECIFIED_FOR_0.7.4_NOT_IMPLEMENTED**
+- `AUTH-UX-003` 상태: **STRATEGY_SPECIFIED; 0.7.5_LOGIN_REGISTER_IMPLEMENTED**
 - 범위: 로그인, 가입, 계정 홈, 프로필, 비밀번호 변경, 동의, 탈퇴 요청, 로그아웃 확인, Members 관리자 화면
 
 `AUTH-UI-001`은 화면 구현 전에 사용자에게 보이는 상태와 완료 기준을 고정한다. 현재 템플릿이 HTTP에서 렌더링된 사실만으로 이 계약이 구현되었다고 판정하지 않는다. CSS 적용, 반응형 브라우저 검증, 키보드 조작 검증은 `AUTH-UI-002`에서 수행한다.
 
 `AUTH-UI-002`는 2026-09-07에 구현했다. 공통 frontend stylesheet, 관리자 전용 stylesheet, 8개 frontend page shell, route 전용 asset hook을 추가했으며 JavaScript는 추가하지 않았다. MAMP sandbox에서 가입·로그인 오류·로그인 회원의 6개 계정 화면·관리자 화면을 확인했고, 2026-09-09의 0.7.1 패키지를 Chrome 360px viewport에서 다시 확인해 한국어 번역 적용, route 전용 0.7.1 자산, focus 규칙과 가로 overflow 부재를 검증했다. 이 smoke는 화면 구조·자산 격리·반응형·focus의 증거이며, 모든 보안 상태 전이의 UI 회귀는 기존 MVP behavior harness와 후속 통합 gate가 계속 소유한다.
 
-`AUTH-UX-003`은 0.7.4에서 승인한 다음 UI·운영 구현의 전략 계약이다. 이 단계는 정보 구조와 경계를 고정하며 clean route, 새 화면, 관리자 처리 기능이 이미 구현됐다고 주장하지 않는다. 실행 가능한 manifest는 `tests/harness/ux_strategy_contract.json`이다.
+`AUTH-UX-003`은 0.7.4에서 승인한 다음 UI·운영 구현의 전략 계약이다. 0.7.5는 이 계약의 로그인·회원가입 화면 단계만 구현했으며, 계정 홈·비밀번호 재설정·관리자 처리 기능이 이미 구현됐다고 주장하지 않는다. 실행 가능한 manifest는 `tests/harness/ux_strategy_contract.json`이다.
 
 ## 2. 공통 원칙
 
@@ -110,6 +110,19 @@
 5. 0.7.9: MAMP desktop/mobile browser, keyboard, no-JS, route isolation, Members-off 회귀와 release gate.
 
 각 단계는 기존 Core Auth·ID·domain ownership 계약을 그대로 통과해야 한다. 다음 단계 기능을 먼저 넣지 않는다.
+
+## 9. 0.7.5 구현 상태
+
+0.7.5는 8.3의 첫 번째 단계인 로그인·회원가입 UX를 구현했다.
+
+- 독립형 서버 렌더링 shell, 사이트명·안내 문구·홈/가입/로그인/비밀번호 재설정 action link를 제공한다.
+- 같은 요청에서 안전한 email·이름·표시명·전화 값만 복원하고 비밀번호·nonce·guest token은 복원하지 않는다.
+- 일반 오류 요약과 field 오류를 `aria-invalid`/`aria-describedby`로 연결한다. 이메일·기존 username 로그인을 유지하며 credential 존재 여부는 노출하지 않는다.
+- 서비스 약관·개인정보 처리방침·선택 마케팅 문서를 현재 version과 함께 `<details>`로 표시한다. 필수 동의는 서버에서 계속 검증한다.
+- 비밀번호 표시/숨김은 로그인·회원가입 route에서만 로드되는 작은 progressive-enhancement JavaScript다. JavaScript가 없어도 제출·검증·오류 복구가 동작한다.
+- `/members/` clean route 후보의 기존 페이지 충돌을 읽기 전용 preflight로 반환하고, 충돌 전에는 query route fallback을 유지한다. 이 릴리스는 clean route 소유권을 자동 활성화하지 않는다.
+
+검증은 하네스 단위 계약 25개, 번역 포함 ZIP 빌드, 합성 WordPress 전체 회귀 및 MAMP lifecycle gate로 갱신한다. 실제 HTTPS staging의 backup/restore와 관찰 기간이 없는 한 production acceptance는 계속 `PARTIAL`이다.
 
 ## 9. 범위 밖
 

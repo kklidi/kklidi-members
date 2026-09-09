@@ -16,19 +16,34 @@ final class LoginController {
 
 		$redirect_to = kklidi_members_safe_redirect_url(self::request_value('redirect_to', true), home_url('/'));
 		$message = '';
+		$notice = '';
 		$message_html = '';
 		$identifier = '';
+		$remember = false;
+		$field_errors = array();
+		if (self::request_value('registered') === '1') {
+			$notice = __('Your account was created. Please log in to continue.', 'kklidi-members');
+		} elseif (self::request_value('withdrawal') === 'requested') {
+			$notice = __('Your withdrawal request was submitted. Access is blocked while it is reviewed.', 'kklidi-members');
+		}
 
 		if (strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 			$identifier = self::request_value('kklidi_members_identifier', true);
 			$password = self::request_value('kklidi_members_password', true);
+			$remember = isset($_POST['kklidi_members_remember']);
 			$nonce = self::request_value(self::NONCE_FIELD);
 
 			if ($nonce === '' || !wp_verify_nonce($nonce, self::NONCE_ACTION)
 				|| !\KKLIDI\Members\Security\GuestCsrf::verify(self::NONCE_ACTION)) {
 				$message = __('We could not verify this request. Please reload the login page and try again.', 'kklidi-members');
 			} elseif ($identifier === '' || $password === '') {
-				$message = __('Enter your username or email and password.', 'kklidi-members');
+				$message = __('Please correct the highlighted fields.', 'kklidi-members');
+				if ($identifier === '') {
+					$field_errors['identifier'] = __('Enter your username or email.', 'kklidi-members');
+				}
+				if ($password === '') {
+					$field_errors['password'] = __('Enter your password.', 'kklidi-members');
+				}
 			} else {
 				$user = wp_signon(
 					array(
@@ -59,6 +74,9 @@ final class LoginController {
 		}
 
 		$action_url = kklidi_members_login_url($redirect_to);
+		$register_url = kklidi_members_register_url($redirect_to);
+		$password_reset_url = kklidi_members_password_reset_url($redirect_to);
+		$home_url = home_url('/');
 		$guest_fields = \KKLIDI\Members\Security\GuestCsrf::fields(self::NONCE_ACTION);
 		require KKLIDI_MEMBERS_DIR . 'templates/login.php';
 		exit;

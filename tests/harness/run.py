@@ -53,6 +53,7 @@ PRODUCTION_FILES = [
     'includes/Withdrawal/WithdrawalController.php',
 	'assets/css/admin.css',
 	'assets/css/members.css',
+	'assets/js/members-auth.js',
     'templates/account.php',
     'templates/admin.php',
     'templates/consent.php',
@@ -1383,7 +1384,7 @@ def assert_production_shape():
             'Production runtime contains files outside the bounded contract')
     source = '\n'.join((REPO / name).read_text(encoding='utf-8') for name in PRODUCTION_FILES)
     for prohibited in ('session_start', 'PHPSESSID', 'wp_set_auth_cookie',
-                       'wp_remote_', 'wp_enqueue_script(', 'wp_register_', 'JWT'):
+                       'wp_remote_', 'wp_register_', 'JWT'):
         require(prohibited not in source, f'Production runtime contains prohibited mechanism: {prohibited}')
 
     plugin_source = (REPO / 'includes/Core/Plugin.php').read_text(encoding='utf-8')
@@ -1392,6 +1393,10 @@ def assert_production_shape():
             and 'wp_enqueue_style(' in plugin_source
             and 'is_frontend_route' in plugin_source,
             'Frontend stylesheet must stay scoped to a Members route')
+    require('members-auth.js' in plugin_source
+            and 'is_auth_route' in plugin_source
+            and 'if (self::is_auth_route())' in plugin_source,
+            'Authentication script must stay scoped to login and registration routes')
     require("add_action('admin_enqueue_scripts'" in admin_source
             and "tools_page_kklidi-members" in admin_source
             and 'wp_enqueue_style(' in admin_source,

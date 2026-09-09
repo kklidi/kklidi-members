@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.7.5 — 2026-09-09
+
+- Implemented the approved login and registration UX contract with a standalone
+  server-rendered shell, safe same-request value recovery, field-level errors,
+  accessible error summaries, action links, and versioned consent details.
+- Added a small route-scoped password visibility enhancement that leaves the core
+  submit and validation flow usable without JavaScript.
+- Added a clean-route collision preflight while keeping existing query routes as the
+  fallback, and expanded the Korean catalog for the new user-facing states.
+
 ## 0.7.4 — 2026-09-09
 
 - Added the executable `AUTH-UX-003` strategy contract for the approved frontend and

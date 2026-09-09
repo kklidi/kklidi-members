@@ -3,7 +3,7 @@
  * Plugin Name: KKLIDI Members
  * Plugin URI: https://kklidi.com/
  * Description: KKLIDI member and account experience on top of WordPress Core Auth.
- * Version: 0.7.4
+ * Version: 0.7.5
  * Author: KKLIDI
  * Text Domain: kklidi-members
  * Requires PHP: 8.3
@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
 	exit;
 }
 
-define('KKLIDI_MEMBERS_VERSION', '0.7.4');
+define('KKLIDI_MEMBERS_VERSION', '0.7.5');
 define('KKLIDI_MEMBERS_FILE', __FILE__);
 define('KKLIDI_MEMBERS_DIR', plugin_dir_path(__FILE__));
 
@@ -51,6 +51,12 @@ function kklidi_members_password_reset_url(string $redirect_to = ''): string {
 	require_once KKLIDI_MEMBERS_DIR . 'includes/Core/Url.php';
 
 	return \KKLIDI\Members\Core\Url::passwordReset($redirect_to);
+}
+
+function kklidi_members_clean_route_preflight(): array {
+	require_once KKLIDI_MEMBERS_DIR . 'includes/Core/Url.php';
+
+	return \KKLIDI\Members\Core\Url::cleanRoutePreflight();
 }
 
 /**

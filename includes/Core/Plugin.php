@@ -110,6 +110,21 @@ final class Plugin {
 			array(),
 			KKLIDI_MEMBERS_VERSION
 		);
+
+		if (self::is_auth_route()) {
+			wp_enqueue_script(
+				'kklidi-members-auth',
+				plugins_url('assets/js/members-auth.js', KKLIDI_MEMBERS_FILE),
+				array(),
+				KKLIDI_MEMBERS_VERSION,
+				true
+			);
+		}
+	}
+
+	private static function is_auth_route(): bool {
+		return isset($_GET['kklidi_members_login']) || isset($_POST['kklidi_members_login'])
+			|| isset($_GET['kklidi_members_register']) || isset($_POST['kklidi_members_register']);
 	}
 
 	private static function is_frontend_route(): bool {

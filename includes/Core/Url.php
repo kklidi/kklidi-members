@@ -47,6 +47,44 @@ final class Url {
 		return $url;
 	}
 
+	/**
+	 * Check whether the future /members/ route family can be activated safely.
+	 * Existing query routes remain authoritative until this preflight is clear.
+	 */
+	public static function cleanRoutePreflight(): array {
+		$paths = array(
+			'login' => 'members/login',
+			'register' => 'members/register',
+			'account' => 'members/account',
+			'profile' => 'members/account/profile',
+			'password' => 'members/account/password',
+			'consent' => 'members/account/consent',
+			'withdrawal' => 'members/account/withdrawal',
+			'logout' => 'members/logout',
+		);
+		$collisions = array();
+		if (function_exists('get_page_by_path')) {
+			foreach ($paths as $route => $path) {
+				$page = get_page_by_path($path, OBJECT, 'page');
+				if ($page instanceof \WP_Post) {
+					$collisions[$route] = array(
+						'path' => $path,
+						'page_id' => (int) $page->ID,
+						'status' => (string) $page->post_status,
+					);
+				}
+			}
+		}
+
+		return array(
+			'base' => '/members/',
+			'paths' => $paths,
+			'ready' => $collisions === array(),
+			'collisions' => $collisions,
+			'query_fallback' => true,
+		);
+	}
+
 	private static function route(string $key, string $redirect_to = ''): string {
 		$url = add_query_arg($key, '1', home_url('/'));
 
