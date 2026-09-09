@@ -23,6 +23,8 @@ final class LoginController {
 		$field_errors = array();
 		if (self::request_value('registered') === '1') {
 			$notice = __('Your account was created. Please sign in with the email address you registered.', 'kklidi-members');
+		} elseif (self::request_value('password_changed') === '1') {
+			$notice = __('Your password was changed. Please sign in again.', 'kklidi-members');
 		} elseif (self::request_value('password_reset') === '1') {
 			$notice = __('Your password has been reset. Please log in with your new password.', 'kklidi-members');
 		} elseif (self::request_value('withdrawal') === 'requested') {

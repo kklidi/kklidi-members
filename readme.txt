@@ -3,7 +3,7 @@ Contributors: kklidi
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.7.18
+Stable tag: 0.7.19
 
 Core-based member accounts with scoped UI, consent records and safe withdrawal handling.
 
@@ -14,10 +14,10 @@ KKLIDI Members adds login, registration, profile, consent and account management
 WooCommerce orders and LMS enrollment/progress stay with their respective plugins.
 Korean UI uses WordPress gettext translation catalogs.
 
-0.7.18 adds bounded required, optional, or hidden states for the approved first
-name, last name, and phone registration fields. Identity, password, display name,
-required consent, WordPress Core authentication, and existing user data stay fixed.
-See docs/RELEASE-0.7.18.md.
+0.7.19 adds a read-only translated account-message catalog, shows translated
+defaults beside the four approved account-email overrides, and confirms a
+successful password change on the login screen without exposing secrets.
+See docs/RELEASE-0.7.19.md.
 
 0.7.17 adds administrator diagnostics, quick actions, route links, and clearer
 notification, withdrawal, and audit management while preserving the approved
@@ -35,6 +35,11 @@ docs/RELEASE-0.7.16.md.
 3. Review registration and consent policy before changing the closed defaults.
 
 == Changelog ==
+
+= 0.7.19 =
+* Added a read-only translated catalog for approved account and security messages.
+* Displayed translated default subject and body content beside account-email overrides.
+* Added a secret-free password-change completion notice before manual sign-in.
 
 = 0.7.18 =
 * Added a Users-area Registration Fields section backed by the WordPress Settings API.

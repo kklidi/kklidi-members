@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the KKLIDI Members plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: KKLIDI Members 0.7.18\n"
+"Project-Id-Version: KKLIDI Members 0.7.19\n"
 "Report-Msgid-Bugs-To: https://kklidi.com/\n"
 "POT-Creation-Date: 2026-09-07 00:00+0000\n"
 "MIME-Version: 1.0\n"
@@ -1001,4 +1001,55 @@ msgid "Enter a last name of 200 characters or fewer."
 msgstr ""
 
 msgid "Withdrawal request"
+msgstr ""
+
+msgid "Messages"
+msgstr ""
+
+msgid "Review the translated account and security messages."
+msgstr ""
+
+msgid "Account notices"
+msgstr ""
+
+msgid "Your password was changed. Please sign in again."
+msgstr ""
+
+msgid "Authentication"
+msgstr ""
+
+msgid "Notice"
+msgstr ""
+
+msgid "Error"
+msgstr ""
+
+msgid "Security message"
+msgstr ""
+
+msgid "Default messages"
+msgstr ""
+
+msgid "These messages use the current WordPress administrator locale and are read only. Security messages cannot be edited because their wording prevents account disclosure and preserves request protections."
+msgstr ""
+
+msgid "Edit the four approved account email notices in Notifications."
+msgstr ""
+
+msgid "Message key"
+msgstr ""
+
+msgid "Translated default message"
+msgstr ""
+
+msgid "Translated default subject for this administrator locale:"
+msgstr ""
+
+msgid "Translated default message for this administrator locale:"
+msgstr ""
+
+msgid "Consent"
+msgstr ""
+
+msgid "Withdrawal"
 msgstr ""

@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the KKLIDI Members plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: KKLIDI Members 0.7.18\n"
+"Project-Id-Version: KKLIDI Members 0.7.19\n"
 "Language: ko_KR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -907,3 +907,54 @@ msgstr "성을 200자 이내로 입력하세요."
 
 msgid "Withdrawal request"
 msgstr "탈퇴 요청"
+
+msgid "Messages"
+msgstr "메시지"
+
+msgid "Review the translated account and security messages."
+msgstr "번역된 계정 및 보안 메시지를 검토합니다."
+
+msgid "Account notices"
+msgstr "계정 안내"
+
+msgid "Your password was changed. Please sign in again."
+msgstr "비밀번호가 변경되었습니다. 다시 로그인하세요."
+
+msgid "Authentication"
+msgstr "인증"
+
+msgid "Notice"
+msgstr "안내"
+
+msgid "Error"
+msgstr "오류"
+
+msgid "Security message"
+msgstr "보안 메시지"
+
+msgid "Default messages"
+msgstr "기본 메시지"
+
+msgid "These messages use the current WordPress administrator locale and are read only. Security messages cannot be edited because their wording prevents account disclosure and preserves request protections."
+msgstr "이 메시지는 현재 WordPress 관리자 로케일을 사용하며 읽기 전용입니다. 보안 메시지는 계정 정보 노출을 방지하고 요청 보호를 유지하는 문구이므로 수정할 수 없습니다."
+
+msgid "Edit the four approved account email notices in Notifications."
+msgstr "알림에서 승인된 계정 이메일 안내 4개를 수정합니다."
+
+msgid "Message key"
+msgstr "메시지 키"
+
+msgid "Translated default message"
+msgstr "번역된 기본 메시지"
+
+msgid "Translated default subject for this administrator locale:"
+msgstr "현재 관리자 로케일의 번역된 기본 제목:"
+
+msgid "Translated default message for this administrator locale:"
+msgstr "현재 관리자 로케일의 번역된 기본 메시지:"
+
+msgid "Consent"
+msgstr "동의"
+
+msgid "Withdrawal"
+msgstr "탈퇴"

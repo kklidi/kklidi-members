@@ -140,6 +140,7 @@ final class NotificationTemplates {
 			? $settings['events'][$event] : array();
 		$subject = isset($values['subject']) && is_string($values['subject']) ? $values['subject'] : '';
 		$body = isset($values['body']) && is_string($values['body']) ? $values['body'] : '';
+		$defaults = self::default_content($event);
 		$name = self::OPTION_NAME . '[events][' . $event . ']';
 		$placeholder_list = implode(', ', array_map(static function (string $placeholder): string {
 			return '{' . $placeholder . '}';
@@ -148,8 +149,11 @@ final class NotificationTemplates {
 		<div class="kklidi-members-notification-fields">
 			<label for="kklidi-members-<?php echo esc_attr($event); ?>-subject"><?php esc_html_e('Subject', 'kklidi-members'); ?></label>
 			<input class="large-text" id="kklidi-members-<?php echo esc_attr($event); ?>-subject" maxlength="<?php echo (int) self::SUBJECT_MAX; ?>" name="<?php echo esc_attr($name); ?>[subject]" placeholder="<?php echo esc_attr__('Leave empty to use the translated default subject.', 'kklidi-members'); ?>" type="text" value="<?php echo esc_attr($subject); ?>">
+			<p class="description"><strong><?php esc_html_e('Translated default subject for this administrator locale:', 'kklidi-members'); ?></strong> <code><?php echo esc_html($defaults[0]); ?></code></p>
 			<label for="kklidi-members-<?php echo esc_attr($event); ?>-body"><?php esc_html_e('Message body', 'kklidi-members'); ?></label>
 			<textarea class="large-text code" id="kklidi-members-<?php echo esc_attr($event); ?>-body" maxlength="<?php echo (int) self::BODY_MAX; ?>" name="<?php echo esc_attr($name); ?>[body]" placeholder="<?php echo esc_attr__('Leave empty to use the translated default message for the recipient locale.', 'kklidi-members'); ?>" rows="7"><?php echo esc_textarea($body); ?></textarea>
+			<p class="description"><strong><?php esc_html_e('Translated default message for this administrator locale:', 'kklidi-members'); ?></strong></p>
+			<pre class="kklidi-members-notification-default"><?php echo esc_html($defaults[1]); ?></pre>
 			<p class="description"><?php printf(esc_html__('Allowed placeholders: %s', 'kklidi-members'), esc_html($placeholder_list)); ?></p>
 		</div>
 		<?php

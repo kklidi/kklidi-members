@@ -542,7 +542,7 @@ class HarnessGuards(unittest.TestCase):
         )
         self.assertEqual(contract['contract'], 'AUTH-MESSAGE-UX-001')
         self.assertEqual(contract['version'], 1)
-        self.assertEqual(contract['status'], 'SPECIFIED_NOT_IMPLEMENTED')
+        self.assertEqual(contract['status'], 'IMPLEMENTED_AND_SYNTHETIC_VERIFIED')
         self.assertEqual(contract['target_release'], '0.7.19')
         self.assertEqual(
             contract['principle'],
@@ -592,12 +592,39 @@ class HarnessGuards(unittest.TestCase):
         message_doc = (repository / 'docs/MESSAGES.md').read_text(encoding='utf-8')
         product = (repository / 'docs/PRODUCT.md').read_text(encoding='utf-8')
         harness = (repository / 'docs/HARNESS_PLAN.md').read_text(encoding='utf-8')
-        self.assertIn('SPECIFIED_NOT_IMPLEMENTED', message_doc)
-        self.assertIn('| D12 | **SPECIFIED FOR 0.7.19', product)
-        self.assertIn('AUTH-MESSAGE-UX-001 / 0.7.19 extension (SPECIFIED)', harness)
+        self.assertIn('IMPLEMENTED_AND_SYNTHETIC_VERIFIED', message_doc)
+        self.assertIn('| D12 | **IMPLEMENTED FOR 0.7.19', product)
+        self.assertIn('AUTH-MESSAGE-UX-001 / 0.7.19 extension (IMPLEMENTED)', harness)
         self.assertIn("'docs/MESSAGES.md'", (
             repository / 'tests/harness/build_release.py'
         ).read_text(encoding='utf-8'))
+
+    def test_auth_message_ux_001_implementation_is_bounded(self):
+        repository = Path(__file__).resolve().parents[2]
+        admin = (repository / 'includes/Admin/AdminController.php').read_text(encoding='utf-8')
+        catalog = (repository / 'includes/Admin/MessageCatalog.php').read_text(encoding='utf-8')
+        template = (repository / 'templates/admin.php').read_text(encoding='utf-8')
+        notifications = (repository / 'includes/Notifications/NotificationTemplates.php').read_text(
+            encoding='utf-8')
+        password = (repository / 'includes/Auth/PasswordController.php').read_text(encoding='utf-8')
+        login = (repository / 'includes/Auth/LoginController.php').read_text(encoding='utf-8')
+        runtime_harness = (repository / 'tests/harness/run.py').read_text(encoding='utf-8')
+
+        self.assertIn("'messages' => __('Messages'", admin)
+        self.assertIn("includes/Admin/MessageCatalog.php", admin)
+        self.assertIn('$message_groups = MessageCatalog::groups();', admin)
+        self.assertEqual(catalog.count("self::message('"), 16)
+        for prohibited in ('register_setting(', 'add_option(', 'update_option(', 'add_filter('):
+            self.assertNotIn(prohibited, catalog)
+        self.assertIn("$section === 'messages'", template)
+        self.assertIn('kklidi-members-notification-default', notifications)
+        self.assertIn('$defaults = self::default_content($event);', notifications)
+        self.assertIn("add_query_arg('password_changed', '1'", password)
+        self.assertIn("request_value('password_changed') === '1'", login)
+        for secret in ('password', 'key', 'user_id', 'email'):
+            self.assertNotIn("add_query_arg('" + secret + "'", password)
+        self.assertIn("results['AUTH-MESSAGE-UX-001']", runtime_harness)
+        self.assertIn("'extension_contracts_total': 4", runtime_harness)
 
     def test_auth_ux_003_078_withdrawal_and_audit_operations_are_bounded(self):
         repository = Path(__file__).resolve().parents[2]
@@ -954,7 +981,7 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('If an account matches, WordPress will send a password reset link.', reset_template)
         self.assertIn("'includes/Notifications/NotificationTemplates.php'", package)
         self.assertIn("results['AUTH-NOTIFY-002']", package)
-        self.assertIn("'extension_contracts_total': 3", package)
+        self.assertIn("'extension_contracts_total': 4", package)
 
     def test_auth_notify_001_catalog_covers_mail_presets(self):
         repository = Path(__file__).resolve().parents[2]
@@ -1162,7 +1189,7 @@ class HarnessGuards(unittest.TestCase):
         ready = json.loads(json.dumps(example))
         ready['environment']['base_url'] = 'https://staging.kklidi.com'
         ready['versions'].update(
-            wordpress='7.1', php='8.3', members='0.7.18', woocommerce='11.1.0')
+            wordpress='7.1', php='8.3', members='0.7.19', woocommerce='11.1.0')
         ready['owners'] = {key: 'approved-' + key for key in ready['owners']}
         ready['backup'].update(
             artifact_sha256='a' * 64,

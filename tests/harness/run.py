@@ -32,7 +32,8 @@ CACHE = REPO / '.harness' / 'cache'
 LOCK = json.loads((HERE / 'wordpress.lock.json').read_text(encoding='utf-8'))
 PRODUCTION_FILES = [
     'kklidi-members.php',
-    'includes/Admin/AdminController.php',
+	'includes/Admin/AdminController.php',
+	'includes/Admin/MessageCatalog.php',
     'includes/Audit/Recorder.php',
     'includes/Auth/LoginController.php',
     'includes/Auth/LogoutController.php',
@@ -655,6 +656,7 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
     require(translation_check == {
         'locale': 'ko_KR', 'determined_locale': 'ko_KR', 'catalog_exists': True,
         'registration_subject': '[Synthetic Members Harness] 회원가입이 완료되었습니다',
+        'password_changed_notice': '비밀번호가 변경되었습니다. 다시 로그인하세요.',
     }, 'Korean catalog was not loaded by WordPress: ' + repr(translation_check))
     registration = Browser(base)
     status, headers, form = registration.request('/?kklidi_members_register=1')
@@ -999,12 +1001,32 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
         'existing_users_and_external_domains_unchanged': True,
     }
 
+    message_path = '/wp-admin/users.php?page=kklidi-members&section=messages'
+    message_status, _, message_page = admin.request(message_path)
+    denied_message_status, _, _ = profile_browser.request(message_path)
+    message_keys = (
+        'registration_complete', 'password_changed', 'password_reset',
+        'withdrawal_requested', 'invalid_credentials', 'login_rate_limited',
+        'registration_closed', 'registration_invalid', 'registration_unavailable',
+        'reset_request_generic', 'reset_invalid_link', 'profile_saved',
+        'profile_save_failed', 'consent_saved', 'consent_save_failed',
+        'withdrawal_save_failed',
+    )
+    require(message_status == 200 and denied_message_status == 403
+            and all('<code>' + item + '</code>' in message_page for item in message_keys)
+            and 'name="option_page"' not in message_page
+            and 'kklidi_members_notification_templates' not in message_page,
+            'Read-only Messages catalog or capability boundary is unavailable')
+
     notification_path = '/wp-admin/users.php?page=kklidi-members&section=notifications'
     notification_status, _, notification_page = admin.request(notification_path)
     require(notification_status == 200
             and 'kklidi_members_notification_templates[events][registration_completed][subject]'
             in notification_page
             and 'Leave a field empty to restore its translated default.' in notification_page
+            and 'kklidi-members-notification-default' in notification_page
+            and '[Synthetic Members Harness] Registration complete' in notification_page
+            and 'Your account registration is complete.' in notification_page
             and hidden_input(notification_page, 'option_page') == 'kklidi_members_notifications',
             'Notification Settings API screen is unavailable')
     settings_nonce = hidden_input(notification_page, '_wpnonce')
@@ -1219,13 +1241,38 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
         'new_password': env['KKH_NEW_PASSWORD'],
         'new_password_confirm': env['KKH_NEW_PASSWORD'],
     }
-    status, _, _ = first.request('/?kklidi_members_password=1', data=password_fields)
+    status, password_headers, _ = first.request('/?kklidi_members_password=1', data=password_fields)
+    password_location = password_headers.get('Location', '')
+    password_query = urllib.parse.parse_qs(urllib.parse.urlsplit(password_location).query)
+    changed_status, _, changed_login = Browser(base).request(local_response_path(base, password_location))
     password_probe = command(php_cli + [HERE / 'mvp_probe.php'], json_result=True)
     require(status == 302 and first.observe(key)['logged_in'] is False
             and second.observe(key)['logged_in'] is False
             and password_probe['user']['old_password_valid'] is False
-            and password_probe['user']['new_password_valid'] is True,
-            'Password change did not use Core hash/session revocation')
+            and password_probe['user']['new_password_valid'] is True
+            and password_query == {
+                'kklidi_members_login': ['1'], 'password_changed': ['1']}
+            and changed_status == 200
+            and any(notice in changed_login for notice in (
+                '비밀번호가 변경되었습니다. 다시 로그인하세요.',
+                'Your password was changed. Please sign in again.'))
+            and all(secret not in password_location for secret in (
+                env['KKH_USER_PASSWORD'], env['KKH_NEW_PASSWORD'], env['KKH_MVP_EMAIL'],
+                'key=', 'user_id=')),
+            'Password change did not use Core hash/session revocation: ' + repr({
+                'status': status,
+                'location': password_location,
+                'query': password_query,
+                'first_logged_in': first.observe(key)['logged_in'],
+                'second_logged_in': second.observe(key)['logged_in'],
+                'old_password_valid': password_probe['user']['old_password_valid'],
+                'new_password_valid': password_probe['user']['new_password_valid'],
+                'changed_status': changed_status,
+                'notice_present': '비밀번호가 변경되었습니다. 다시 로그인하세요.' in changed_login,
+                'source_notice_present': 'Your password was changed. Please sign in again.' in changed_login,
+                'notice_fragment': re.findall(
+                    r'<p class="kklidi-members-notice"[^>]*>([^<]*)</p>', changed_login),
+            }))
     password_mail = read_mailbox(mailbox_path)
     require(len(password_mail) == password_mail_count + 1,
             'Password change did not create exactly one account notice')
@@ -1238,6 +1285,12 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
     )
     results['AUTH-RESET-001']['self_change_core_hash'] = 'PASS'
     results['AUTH-RESET-001']['all_sessions_revoked_on_self_change'] = True
+    results['AUTH-MESSAGE-UX-001'] = {
+        'status': 'PASS', 'catalog_read_only': True, 'catalog_keys': 16,
+        'subscriber_denied': True, 'translated_notification_defaults_visible': True,
+        'password_change_notice': True, 'redirect_contains_secret': False,
+        'global_message_option': False,
+    }
 
     # Withdrawal preserves the Core ID and queues the user while revoking access.
     withdrawing, login_response, _ = members_login(base, env, env['KKH_MVP_EMAIL'], env['KKH_NEW_PASSWORD'])
@@ -1794,7 +1847,7 @@ def execute(php, mysqld, one_prefix=False, skip_perf=False):
               'modes': {'core_baseline': {'status': 'FAIL', 'variants': []},
                         'members_on': {'status': 'FAIL', 'variants': []}},
               'contracts_total': 24, 'contracts_exercised': 24,
-               'extension_contracts_total': 3, 'extension_contracts_exercised': 3,
+               'extension_contracts_total': 4, 'extension_contracts_exercised': 4,
               'not_run': ['actual WooCommerce/LMS full-stack browser regression',
                           'KBoard removal-period compatibility smoke/no-fatal',
                           'device-limit WooCommerce login entry', 'TLS/Secure cookie deployment',
@@ -2046,7 +2099,7 @@ def execute(php, mysqld, one_prefix=False, skip_perf=False):
         (output / 'latest.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
     core_total = sum(len(v['cases']) for v in report['modes']['core_baseline']['variants'])
     members_total = sum(len(v['cases']) for v in report['modes']['members_on']['variants'])
-    print(f'{report["status"]}: MVP contracts=24 + extension contracts=3, '
+    print(f'{report["status"]}: MVP contracts=24 + extension contracts=4, '
           f'AUTH-LOGIN-001 Core={core_total}, '
           f'Members={members_total}; release evidence PARTIAL. Report: .harness/reports/latest.json')
     if 'error' in report:

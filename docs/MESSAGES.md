@@ -1,6 +1,6 @@
 # Messages
 
-`AUTH-MESSAGE-UX-001` 상태: **SPECIFIED_NOT_IMPLEMENTED**
+`AUTH-MESSAGE-UX-001` 상태: **IMPLEMENTED_AND_SYNTHETIC_VERIFIED**
 
 대상 버전: **0.7.19**
 
@@ -49,6 +49,8 @@ Notifications 화면의 각 승인 사건에서 현재 번역된 기본 제목�
 4. Notifications 화면은 네 사건의 번역 기본 제목·본문을 보여주며 기존 override 저장과 fallback을 그대로 유지한다.
 5. 비밀번호 변경 성공 뒤 일반 상태값만 가진 로그인 URL로 이동하고 재로그인을 요구한다.
 6. frontend 일반 요청에 catalog class, 관리자 자산이나 새로운 전역 filter를 로드하지 않는다.
+
+2026-09-10 합성 실행 `76b5fbbeec1940548eea447f3af980dd`에서 기본/임의 DB prefix, 관리자·subscriber 권한, 16개 key, 저장 form 부재, 네 이메일 번역 기본값, 비밀번호 변경 redirect와 비밀값 부재를 확인했다. 24개 MVP 계약과 확장 계약 4개가 모두 PASS했고 합성 root와 DB는 정리되었다.
 
 ## 6. 제외 범위
 

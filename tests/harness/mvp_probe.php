@@ -56,6 +56,7 @@ if ($action === 'translation-check') {
         'determined_locale' => determine_locale(),
         'catalog_exists' => file_exists($catalog),
         'registration_subject' => sprintf(__('[%s] Registration complete', 'kklidi-members'), get_bloginfo('name')),
+		'password_changed_notice' => __('Your password was changed. Please sign in again.', 'kklidi-members'),
     ));
     exit;
 }

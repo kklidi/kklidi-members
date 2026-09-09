@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.19 — 2026-09-10
+
+- Added `AUTH-MESSAGE-UX-001` with a read-only administrator catalog of 16 translated account and security messages.
+- Showed the actual translated default subject and body beside each of the four approved plain-text account-email overrides.
+- Added a secret-free `password_changed=1` login notice after WordPress Core changes the password and revokes existing sessions.
+- Kept security messages, HTML email, sender/SMTP controls, test sending, retry queues, and administrator registration notices outside this contract.
+
 ## 0.7.18 — 2026-09-10
 
 - Added a bounded WordPress Settings API screen for first-name, last-name, and phone registration states.

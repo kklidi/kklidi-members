@@ -40,7 +40,7 @@ final class PasswordController {
 				\KKLIDI\Members\Notifications\AccountMailer::send('password_changed', (int) $user->ID, $request_id);
 				wp_clear_auth_cookie();
 				wp_set_current_user(0);
-				wp_safe_redirect(kklidi_members_login_url());
+				wp_safe_redirect(add_query_arg('password_changed', '1', kklidi_members_login_url()));
 				exit;
 			}
 		}

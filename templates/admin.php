@@ -117,6 +117,21 @@
 				<?php submit_button(__('Save registration fields', 'kklidi-members')); ?>
 			</form>
 		</section>
+	<?php elseif ($section === 'messages') : ?>
+		<section class="kklidi-members-admin-card">
+			<h2><?php esc_html_e('Default messages', 'kklidi-members'); ?></h2>
+			<p><?php esc_html_e('These messages use the current WordPress administrator locale and are read only. Security messages cannot be edited because their wording prevents account disclosure and preserves request protections.', 'kklidi-members'); ?></p>
+			<p><a href="<?php echo esc_url(add_query_arg(array('page' => 'kklidi-members', 'section' => 'notifications'), admin_url('users.php'))); ?>"><?php esc_html_e('Edit the four approved account email notices in Notifications.', 'kklidi-members'); ?></a></p>
+		</section>
+		<?php foreach ($message_groups as $message_group) : ?>
+			<section class="kklidi-members-admin-card">
+				<h2><?php echo esc_html($message_group['label']); ?></h2>
+				<table class="widefat striped kklidi-members-admin-table">
+					<thead><tr><th scope="col"><?php esc_html_e('Message key', 'kklidi-members'); ?></th><th scope="col"><?php esc_html_e('Type', 'kklidi-members'); ?></th><th scope="col"><?php esc_html_e('Translated default message', 'kklidi-members'); ?></th></tr></thead>
+					<tbody><?php foreach ($message_group['messages'] as $catalog_message) : ?><tr><td data-label="<?php esc_attr_e('Message key', 'kklidi-members'); ?>"><code><?php echo esc_html($catalog_message['key']); ?></code></td><td data-label="<?php esc_attr_e('Type', 'kklidi-members'); ?>"><?php echo esc_html(\KKLIDI\Members\Admin\MessageCatalog::type_label($catalog_message['type'])); ?></td><td data-label="<?php esc_attr_e('Translated default message', 'kklidi-members'); ?>"><?php echo esc_html($catalog_message['text']); ?></td></tr><?php endforeach; ?></tbody>
+				</table>
+			</section>
+		<?php endforeach; ?>
 	<?php elseif ($section === 'notifications') : ?>
 		<section class="kklidi-members-admin-card">
 			<h2><?php esc_html_e('Account notification messages', 'kklidi-members'); ?></h2>

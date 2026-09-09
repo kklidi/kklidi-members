@@ -7,7 +7,7 @@ if (!defined('ABSPATH')) {
 }
 
 final class AdminController {
-	private const SECTIONS = array('overview', 'documents', 'registration', 'notifications', 'withdrawals', 'audit');
+	private const SECTIONS = array('overview', 'documents', 'registration', 'messages', 'notifications', 'withdrawals', 'audit');
 	private static $document_preview = null;
 	private static $consent_status_cache = array();
 
@@ -285,6 +285,7 @@ final class AdminController {
 			'overview' => __('Overview', 'kklidi-members'),
 			'documents' => __('Documents', 'kklidi-members'),
 			'registration' => __('Registration fields', 'kklidi-members'),
+			'messages' => __('Messages', 'kklidi-members'),
 			'notifications' => __('Notifications', 'kklidi-members'),
 			'withdrawals' => __('Withdrawals', 'kklidi-members'),
 			'audit' => __('Audit', 'kklidi-members'),
@@ -296,6 +297,7 @@ final class AdminController {
 		$audit_view = array();
 		$quick_links = array();
 		$route_urls = array();
+		$message_groups = array();
 
 		if ($section === 'overview') {
 			$overview = self::overview();
@@ -303,6 +305,7 @@ final class AdminController {
 			$quick_links = array(
 				array('label' => __('Documents', 'kklidi-members'), 'description' => __('Publish and review the required account documents.', 'kklidi-members'), 'url' => self::page_url('documents')),
 				array('label' => __('Registration fields', 'kklidi-members'), 'description' => __('Choose which approved profile fields appear during registration.', 'kklidi-members'), 'url' => self::page_url('registration')),
+				array('label' => __('Messages', 'kklidi-members'), 'description' => __('Review the translated account and security messages.', 'kklidi-members'), 'url' => self::page_url('messages')),
 				array('label' => __('Notifications', 'kklidi-members'), 'description' => __('Edit the four approved account notice messages.', 'kklidi-members'), 'url' => self::page_url('notifications')),
 				array('label' => __('Withdrawals', 'kklidi-members'), 'description' => __('Review pending withdrawal requests without deleting records.', 'kklidi-members'), 'url' => self::page_url('withdrawals')),
 				array('label' => __('Audit', 'kklidi-members'), 'description' => __('Filter security and account events.', 'kklidi-members'), 'url' => self::page_url('audit')),
@@ -329,6 +332,9 @@ final class AdminController {
 			}
 		} elseif ($section === 'registration') {
 			require_once KKLIDI_MEMBERS_DIR . 'includes/Registration/RegistrationFields.php';
+		} elseif ($section === 'messages') {
+			require_once KKLIDI_MEMBERS_DIR . 'includes/Admin/MessageCatalog.php';
+			$message_groups = MessageCatalog::groups();
 		} elseif ($section === 'notifications') {
 			require_once KKLIDI_MEMBERS_DIR . 'includes/Notifications/NotificationTemplates.php';
 		} elseif ($section === 'withdrawals') {

@@ -1,7 +1,7 @@
 {
   "contract": "AUTH-MESSAGE-UX-001",
   "version": 1,
-  "status": "SPECIFIED_NOT_IMPLEMENTED",
+  "status": "IMPLEMENTED_AND_SYNTHETIC_VERIFIED",
   "target_release": "0.7.19",
   "depends_on": [
     "AUTH-UX-003",
