@@ -76,7 +76,7 @@ Members 내부 Repository나 Service class를 다른 플러그인의 import 대�
 
 | 모듈 | 책임 | 1.0 / 로딩 조건 |
 | --- | --- | --- |
-| Core | version/config, lazy factory, URL facade, 필수 lifecycle guards | 필수, 최소 bootstrap |
+| Core | version/config, lazy factory, URL facade, 필수 lifecycle guards | 필수, 최소 bootstrap. `AUTH-ROUTE-MAP-001`은 고정 clean route를 선택적으로 연결하되 query fallback과 같은 controller를 사용 |
 | Auth | Core signon/logout wrapper, 계정 상태 및 limiter policy | 인증 경로에서 service load; 필수 auth guard hook 등록은 전역 허용 |
 | Registration | bounded built-in field allowlist, server role, duplicate/consent validation | 가입 GET/POST만. 0.7.18 설계는 이름·성·전화 상태만 설정하며 임의 meta field를 만들지 않음 |
 | Password | Core lost/reset, 현재 비밀번호 확인 후 변경 | password route만 |

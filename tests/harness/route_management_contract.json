@@ -1,0 +1,103 @@
+{
+  "contract": "AUTH-ROUTE-MAP-001",
+  "version": 1,
+  "status": "SPECIFIED_NOT_IMPLEMENTED",
+  "target_release": "0.7.21",
+  "depends_on": [
+    "AUTH-REDIRECT-001",
+    "AUTH-UI-001",
+    "AUTH-UX-003",
+    "AUTH-ADMIN-UX-001"
+  ],
+  "principle": "route_first_no_page_dependency",
+  "defaults_preserve_0_7_20_behavior": true,
+  "route_map": {
+    "namespace": "/members/",
+    "custom_slugs": false,
+    "routes": {
+      "login": ["/members/login/", "kklidi_members_login"],
+      "register": ["/members/register/", "kklidi_members_register"],
+      "account": ["/members/account/", "kklidi_members_account"],
+      "profile": ["/members/account/profile/", "kklidi_members_profile"],
+      "password": ["/members/account/password/", "kklidi_members_password"],
+      "password_reset": ["/members/password-reset/", "kklidi_members_password_reset"],
+      "consent": ["/members/account/consent/", "kklidi_members_consent"],
+      "withdrawal": ["/members/account/withdrawal/", "kklidi_members_withdrawal"],
+      "logout": ["/members/logout/", "kklidi_members_logout"]
+    },
+    "query_routes_remain_fallback": true,
+    "same_controllers_and_templates": true,
+    "wordpress_subdirectory_uses_home_url": true
+  },
+  "activation": {
+    "default_enabled": false,
+    "explicit_admin_action": true,
+    "capability": "manage_kklidi_members",
+    "wordpress_nonce_required": true,
+    "preflight_scope": [
+      "namespace",
+      "wordpress_pages",
+      "existing_rewrite_rules",
+      "reserved_endpoints"
+    ],
+    "collision_result": "reject_all_without_mutation",
+    "collision_disclosure": ["path", "page_id", "status", "owner_type"],
+    "rewrite_flush": ["plugin_activation", "actual_setting_transition"],
+    "flush_on_normal_request": false,
+    "post_flush_rule_verification": true,
+    "failed_transition": "restore_previous_option_state"
+  },
+  "storage": {
+    "api": "wordpress_options",
+    "option_name": "kklidi_members_route_map",
+    "schema_version": 1,
+    "fields": ["clean_routes_enabled"],
+    "autoload": false,
+    "custom_table": false,
+    "invalid_or_unreadable": "query_fallback"
+  },
+  "integration": {
+    "public_helpers_choose_effective_route": true,
+    "login_url_ownership_remains_separate_opt_in": true,
+    "register_url_ownership_remains_separate_opt_in": true,
+    "core_force_reauth_not_intercepted": true,
+    "direct_wp_login_redirected": false,
+    "optional_dependency_guards_required": true
+  },
+  "content": {
+    "automatic_page_creation": false,
+    "shortcodes": false,
+    "blocks": false,
+    "page_builder_widgets": false,
+    "automatic_menu_mutation": false,
+    "theme_content_filter_dependency": false
+  },
+  "security": {
+    "wordpress_core_identity_and_auth": true,
+    "custom_auth_cookie": false,
+    "php_session": false,
+    "existing_redirect_contract_reused": true,
+    "reset_secrets_in_path": false,
+    "route_requests_no_store": true,
+    "server_authorization_rechecked": true
+  },
+  "isolation": {
+    "route_assets_only": true,
+    "global_frontend_bootstrap": false,
+    "unrelated_request_rewrite_flush": false,
+    "woocommerce_lms_kboard_data_access": false
+  },
+  "rollback": {
+    "disable_clean_routes": true,
+    "query_routes_continue": true,
+    "pages_or_menus_to_restore": false,
+    "wordpress_user_ids_preserved": true
+  },
+  "future_or_excluded": [
+    "custom_slugs",
+    "localized_paths",
+    "multisite_network_routes",
+    "generic_content_restriction",
+    "seo_canonical_management"
+  ]
+}

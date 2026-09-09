@@ -51,6 +51,7 @@ The runner has no option for an existing site URL, existing DB endpoint, existin
 | `registration_fields_contract.json` | `AUTH-REGISTER-FIELDS-001` bounded built-in registration field states and security boundary |
 | `message_ux_contract.json` | `AUTH-MESSAGE-UX-001` read-only gettext catalog and visible notification-default boundary |
 | `admin_notification_contract.json` | `AUTH-ADMIN-NOTIFY-001` default-off administrator registration notice and Core mail boundary |
+| `route_management_contract.json` | `AUTH-ROUTE-MAP-001` page-free clean route activation, collision, and query-fallback boundary |
 | `ui_contract.json` | `AUTH-UI-001` screen/state/translation/accessibility/asset contract manifest |
 | `ux_strategy_contract.json` | `AUTH-UX-003` approved frontend/admin information architecture and implementation boundaries |
 | `mamp_woo_case.php` | CLI-only, fixed-sandbox Woo/WCI fixture with tagged user/product/orders, Members optional-dependency toggles, and exact cleanup |
@@ -71,6 +72,8 @@ The `AUTH-UI-001` unit guard verifies that every current Members frontend route 
 `AUTH-NOTIFY-002` adds a second notification extension contract. The disposable runner submits the actual WordPress Settings API form as an administrator, rejects the same nonce for a subscriber, verifies non-autoload storage and metadata-only audit, checks event placeholder allowlists and gettext fallback, and then reruns the existing four-event mail and failure contracts under both database prefixes.
 
 `AUTH-ADMIN-UX-001` keeps the route controller canonical and makes administrator setup easier without creating pages or mutating site menus. The contract is guarded by the unit suite and the MAMP lifecycle runner; it does not claim external mailbox delivery.
+
+`AUTH-ROUTE-MAP-001` specifies the next bounded route-management slice. It keeps all nine query routes as fallback, adds no WordPress page or shortcode, and requires an explicit capability/nonce-protected activation after namespace, page, rewrite-rule, and reserved-endpoint collision checks. The current runtime has not implemented this contract.
 
 `AUTH-REGISTER-FIELDS-001` implements the 0.7.18 registration-only field policy. Email, password, display name and required consent stay locked; only first name, last name and phone may be required, optional or hidden. The disposable runner verifies Settings API capability/nonce, non-autoload storage, invalid-state rejection, required validation, hidden POST rejection, fixed role, both prefixes, and exact synthetic-user cleanup.
 

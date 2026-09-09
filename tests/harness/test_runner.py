@@ -386,6 +386,105 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('Clear filters', admin_template)
         self.assertIn('Leave a field empty to restore its translated default.', admin_template)
 
+    def test_auth_route_map_001_design_is_page_free_bounded_and_reversible(self):
+        repository = Path(__file__).resolve().parents[2]
+        contract = json.loads(
+            (repository / 'tests/harness/route_management_contract.json').read_text(
+                encoding='utf-8'
+            )
+        )
+
+        self.assertEqual(contract['contract'], 'AUTH-ROUTE-MAP-001')
+        self.assertEqual(contract['version'], 1)
+        self.assertEqual(contract['status'], 'SPECIFIED_NOT_IMPLEMENTED')
+        self.assertEqual(contract['target_release'], '0.7.21')
+        self.assertEqual(contract['principle'], 'route_first_no_page_dependency')
+        self.assertTrue(contract['defaults_preserve_0_7_20_behavior'])
+
+        route_map = contract['route_map']
+        self.assertEqual(route_map['namespace'], '/members/')
+        self.assertFalse(route_map['custom_slugs'])
+        self.assertTrue(route_map['query_routes_remain_fallback'])
+        self.assertTrue(route_map['same_controllers_and_templates'])
+        expected_routes = {
+            'login': ('/members/login/', 'kklidi_members_login'),
+            'register': ('/members/register/', 'kklidi_members_register'),
+            'account': ('/members/account/', 'kklidi_members_account'),
+            'profile': ('/members/account/profile/', 'kklidi_members_profile'),
+            'password': ('/members/account/password/', 'kklidi_members_password'),
+            'password_reset': ('/members/password-reset/', 'kklidi_members_password_reset'),
+            'consent': ('/members/account/consent/', 'kklidi_members_consent'),
+            'withdrawal': ('/members/account/withdrawal/', 'kklidi_members_withdrawal'),
+            'logout': ('/members/logout/', 'kklidi_members_logout'),
+        }
+        self.assertEqual(
+            {name: tuple(value) for name, value in route_map['routes'].items()},
+            expected_routes,
+        )
+        self.assertEqual(len({value[0] for value in expected_routes.values()}), 9)
+        self.assertEqual(len({value[1] for value in expected_routes.values()}), 9)
+
+        activation = contract['activation']
+        self.assertFalse(activation['default_enabled'])
+        self.assertTrue(activation['explicit_admin_action'])
+        self.assertEqual(activation['capability'], 'manage_kklidi_members')
+        self.assertTrue(activation['wordpress_nonce_required'])
+        self.assertEqual(
+            set(activation['preflight_scope']),
+            {'namespace', 'wordpress_pages', 'existing_rewrite_rules',
+             'reserved_endpoints'},
+        )
+        self.assertEqual(activation['collision_result'], 'reject_all_without_mutation')
+        self.assertFalse(activation['flush_on_normal_request'])
+        self.assertTrue(activation['post_flush_rule_verification'])
+        self.assertEqual(
+            activation['failed_transition'], 'restore_previous_option_state'
+        )
+
+        storage = contract['storage']
+        self.assertEqual(storage['option_name'], 'kklidi_members_route_map')
+        self.assertEqual(storage['schema_version'], 1)
+        self.assertEqual(storage['fields'], ['clean_routes_enabled'])
+        self.assertFalse(storage['autoload'])
+        self.assertFalse(storage['custom_table'])
+        self.assertEqual(storage['invalid_or_unreadable'], 'query_fallback')
+
+        integration = contract['integration']
+        self.assertTrue(integration['login_url_ownership_remains_separate_opt_in'])
+        self.assertTrue(integration['register_url_ownership_remains_separate_opt_in'])
+        self.assertTrue(integration['core_force_reauth_not_intercepted'])
+        self.assertFalse(integration['direct_wp_login_redirected'])
+        self.assertTrue(integration['optional_dependency_guards_required'])
+
+        for prohibited in ('automatic_page_creation', 'shortcodes', 'blocks',
+                           'page_builder_widgets', 'automatic_menu_mutation',
+                           'theme_content_filter_dependency'):
+            self.assertFalse(contract['content'][prohibited])
+        self.assertTrue(contract['security']['wordpress_core_identity_and_auth'])
+        self.assertFalse(contract['security']['custom_auth_cookie'])
+        self.assertFalse(contract['security']['php_session'])
+        self.assertFalse(contract['security']['reset_secrets_in_path'])
+        self.assertFalse(contract['isolation']['global_frontend_bootstrap'])
+        self.assertFalse(contract['isolation']['unrelated_request_rewrite_flush'])
+        self.assertFalse(contract['isolation']['woocommerce_lms_kboard_data_access'])
+        self.assertTrue(contract['rollback']['query_routes_continue'])
+        self.assertFalse(contract['rollback']['pages_or_menus_to_restore'])
+        self.assertTrue(contract['rollback']['wordpress_user_ids_preserved'])
+
+        design = (repository / 'docs/ROUTE_MANAGEMENT.md').read_text(encoding='utf-8')
+        product = (repository / 'docs/PRODUCT.md').read_text(encoding='utf-8')
+        harness = (repository / 'docs/HARNESS_PLAN.md').read_text(encoding='utf-8')
+        builder = (repository / 'tests/harness/build_release.py').read_text(encoding='utf-8')
+        plugin = (repository / 'kklidi-members.php').read_text(encoding='utf-8')
+        installer = (repository / 'includes/Core/Installer.php').read_text(encoding='utf-8')
+        self.assertIn('SPECIFIED_NOT_IMPLEMENTED', design)
+        self.assertIn('| D14 | **SPECIFIED FOR 0.7.21', product)
+        self.assertIn('AUTH-ROUTE-MAP-001 / 0.7.21 extension (SPECIFIED)', harness)
+        self.assertIn("'docs/ROUTE_MANAGEMENT.md'", builder)
+        self.assertIn("Version: 0.7.20", plugin)
+        self.assertNotIn('kklidi_members_route_map', installer)
+        self.assertNotIn('add_rewrite_rule(', plugin + installer)
+
     def test_auth_register_fields_001_design_is_bounded_and_default_compatible(self):
         repository = Path(__file__).resolve().parents[2]
         contract = json.loads(

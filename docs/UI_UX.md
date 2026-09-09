@@ -172,3 +172,9 @@
 ## 14. AUTH-UX-004 · 0.7.9 타이포그래피 계약
 
 Members frontend의 본문은 16px, H1은 28~32px, H2는 20~22px, 도움말·오류는 14px, 약관 전문은 15px을 기준으로 한다. 일반 본문 줄간격은 1.6, 약관 전문은 1.7로 고정한다. 이 기준은 Members route-scoped stylesheet에만 적용하며 사이트 테마의 전역 typography나 LMS·WooCommerce·KBoard 화면을 변경하지 않는다. 세부 토큰과 제외 범위는 `docs/TYPOGRAPHY.md`를 따른다.
+
+## 15. AUTH-ROUTE-MAP-001 · 0.7.21 route 연결 설계
+
+로그인·회원가입·계정 화면은 WordPress 페이지나 shortcode를 자동 생성하지 않고 Members route controller가 직접 렌더링한다. 관리자가 충돌 검사를 통과한 뒤에만 고정 `/members/` clean route를 켤 수 있으며 기존 query route는 항상 호환 fallback으로 남는다. URL helper와 화면 template은 두 형식에서 동일하다.
+
+메뉴는 관리자 화면에 표시된 대표 URL을 WordPress custom link로 수동 추가한다. Members는 기존 페이지·메뉴를 삭제하거나 고치지 않는다. clean route 기본값, 충돌 거부, Core login/register URL 소유권과 rollback의 상세 계약은 `ROUTE_MANAGEMENT.md`와 `tests/harness/route_management_contract.json`이 소유한다.
