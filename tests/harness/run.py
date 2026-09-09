@@ -731,6 +731,60 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
     require(existing_status == 200
             and '입력한 정보와 일치하는 계정이 있으면 WordPress가 비밀번호 재설정 링크를 보냅니다.' in existing_body,
             'Members reset wrapper changed the matching-account response shape')
+
+    def latest_reset_link():
+        rows = read_mailbox(mailbox_path)
+        require(rows, 'Members reset wrapper did not create a reset message')
+        message = html_module.unescape(str(rows[-1].get('message', '')))
+        for candidate in re.findall(r'https?://[^\s<>]+', message):
+            parsed = urllib.parse.urlsplit(candidate.rstrip('.,)'))
+            query = urllib.parse.parse_qs(parsed.query)
+            if query.get('kklidi_members_password_reset') == ['1'] and query.get('key'):
+                return urllib.parse.urlunsplit(parsed)
+        require(False, 'Members reset message did not contain a usable wrapper link')
+
+    def complete_members_reset(browser, link, password):
+        reset_path = local_response_path(base, link)
+        reset_status, reset_headers, reset_body = browser.request(reset_path)
+        if reset_status == 302 and reset_headers.get('Location'):
+            form_path = local_response_path(base, reset_headers['Location'])
+            reset_status, _, complete_form = browser.request(form_path)
+        else:
+            complete_form = reset_body
+        require(reset_status == 200 and 'name="new_password"' in complete_form,
+                'Members reset completion form missing')
+        complete_fields = {
+            'kklidi_members_password_reset': '1',
+            'reset_action': 'complete',
+            'key': hidden_input(complete_form, 'key'),
+            'login': hidden_input(complete_form, 'login'),
+            'new_password': password,
+            'new_password_confirm': password,
+            '_kklidi_members_password_reset_complete_nonce': hidden_input(
+                complete_form, '_kklidi_members_password_reset_complete_nonce'),
+            '_kklidi_members_guest_exp': hidden_input(complete_form, '_kklidi_members_guest_exp'),
+            '_kklidi_members_guest_token': hidden_input(complete_form, '_kklidi_members_guest_token'),
+        }
+        reset_status, reset_headers, _ = browser.request(
+            '/?kklidi_members_password_reset=1', data=complete_fields)
+        require(reset_status == 302 and 'password_reset=1' in reset_headers.get('Location', '')
+                and browser.observe(key)['logged_in'] is False,
+                'Members reset completion did not use Core reset behavior')
+
+    complete_members_reset(existing_reset, latest_reset_link(), env['KKH_RESET_PASSWORD'])
+    restore_reset = Browser(base)
+    _, _, restore_form = restore_reset.request('/?kklidi_members_password_reset=1')
+    restore_fields = dict(existing_reset_fields,
+        _kklidi_members_password_reset_nonce=hidden_input(
+            restore_form, '_kklidi_members_password_reset_nonce'),
+        _kklidi_members_guest_exp=hidden_input(restore_form, '_kklidi_members_guest_exp'),
+        _kklidi_members_guest_token=hidden_input(restore_form, '_kklidi_members_guest_token'))
+    restore_status, _, restore_body = restore_reset.request(
+        '/?kklidi_members_password_reset=1', data=restore_fields)
+    require(restore_status == 200
+            and '입력한 정보와 일치하는 계정이 있으면 WordPress가 비밀번호 재설정 링크를 보냅니다.' in restore_body,
+            'Members reset restore request changed the generic response shape')
+    complete_members_reset(restore_reset, latest_reset_link(), env['KKH_USER_PASSWORD'])
     mailbox_path.write_bytes(reset_mailbox_snapshot)
     english_site = command(php_cli + [HERE / 'mvp_setup.php', 'set-site-locale', 'en_US'],
                            json_result=True)
