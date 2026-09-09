@@ -73,7 +73,9 @@ reference와 독립된 WP DB/filesystem에 synthetic 사용자 A/B, subscriber/a
 
 `AUTH-NOTIFY-001`은 [NOTIFICATIONS.md](NOTIFICATIONS.md)와 `tests/harness/notification_contract.json`에서 가입 완료·비밀번호 변경·탈퇴 접수·탈퇴 처리 완료의 사용자 알림을 고정한다. 기존 24개 MVP runtime 계약 집계에는 추가하지 않는다. 상태는 **SPECIFIED**, runtime은 **IMPLEMENTED_AND_SYNTHETIC_VERIFIED**다.
 
-WooCommerce 주문·결제 메일과 LMS 수강·진도·수료증 알림은 각 domain owner에 남는다. 이메일 가입 인증, 관리자 알림, 마케팅, 편집 가능한 template, SMTP/provider, 재시도 queue는 이 계약 범위가 아니다. P0-3은 gettext/한국어 catalog 검증을 완료했고, P0-4는 네 사건의 메일 실패 주입과 보안 상태 보존·실패 감사·전달 기록 0·재시도 0을 완료했다.
+`AUTH-NOTIFY-002`는 0.7.10 목표의 **SPECIFIED_NOT_IMPLEMENTED** 설계 계약이다. `tests/harness/notification_settings_contract.json`은 기존 네 사건의 plain-text 제목·본문만 WordPress Settings API와 non-autoload option으로 관리하도록 고정한다. 현재 runtime과 합성 실행 결과에는 포함하지 않으며, 구현 뒤 별도의 저장·권한·fallback·placeholder·메일 회귀 및 관리자 브라우저 증거가 있어야 상태를 변경한다.
+
+WooCommerce 주문·결제 메일과 LMS 수강·진도·수료증 알림은 각 domain owner에 남는다. 이메일 가입 인증, 관리자 알림, 마케팅, SMTP/provider와 재시도 queue는 두 계약 모두의 범위가 아니다. 편집 가능한 제목·본문은 `AUTH-NOTIFY-002`에만 속하며 아직 runtime에 구현되지 않았다. P0-3은 gettext/한국어 catalog 검증을 완료했고, P0-4는 네 사건의 메일 실패 주입과 보안 상태 보존·실패 감사·전달 기록 0·재시도 0을 완료했다.
 
 2026-09-09 P0-2 실행 `0d31685ae4584e49af3aa5f54c0896a0`는 WordPress 7.1/PHP 8.3의 새 임시 설치에서 `wp_`와 임의 prefix를 각각 검사했다. P0-3 실행 `bacdd413b3444dd694baa26d725e7e9a`도 두 prefix에서 네 알림 preset, 현재 Core 수신자, 명시적 plain-text header, 성공 후 발송, `wp_mail` 수락 감사 결과, 거부·재실행 중복 0, credential/token·주문/LMS 상세 미포함, Members-off hard dependency 없음과 `ko_KR` 사이트 fallback/사용자 locale catalog 렌더링을 PASS했다. P0-4 릴리스 실행 `aed831b84fe140708b6346e244a2190c`는 두 prefix의 네 실제 HTTP 계정 경로에 실패를 정확히 4회 주입해 확정 상태·세션 철회·성공 응답 유지, `failure/wp_mail_failed` 4건, 전달 sink 0건, 자동 재시도 0건을 각각 PASS했고 성능 블록도 PASS했다. 0.7.4 회귀 실행 `5886351d4d39439993fae700b0cb610a`는 같은 계약과 `AUTH-PERF-003`을 다시 PASS했다. 0.7.5 합성 실행은 `618b1354f1484a4b96d4bd319feef581`이며, 모든 실행의 임시 DB/filesystem과 process가 정리됐고 reference에는 쓰지 않았다. 최신 로컬 증거는 `.harness/reports/latest.json`에 있다.
 

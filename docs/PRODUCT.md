@@ -160,5 +160,6 @@ KBoard는 12개 board 중 author/roles 제한을 갖는 board가 있고 412개 c
 | D07 | **DECIDED FOR 0.7.4 2026-09-09** | 지원 판정은 single-site WordPress 7.1/PHP 8.3/Woo 11.1.0 조합. PHP 7.4~8.3 syntax 통과는 runtime 지원 주장으로 확대하지 않음 |
 | D08 | **DECIDED 2026-09-09** | 가입 완료·비밀번호 변경·탈퇴 접수·탈퇴 처리 완료의 사용자 안내 메일을 후속 MVP 확장으로 승인. WordPress `wp_mail()`과 고정 plain-text preset을 사용하며 관리자·마케팅·주문·LMS 메일, 이메일 인증, template UI는 포함하지 않음 |
 | D09 | **DECIDED FOR 0.7.4 2026-09-09** | `AUTH-UX-003`: 독립형 branded shell, 충돌 검사 후 `/members/` clean route와 query fallback, 현재 가입 필드 정책, display_name 중복 허용, no-JS 기본·route 전용 password visibility, Core reset wrapper, plugin-owned link slot, Users 하위 관리자 정보 구조와 탈퇴 pending 복구/확정·감사 조회 계약 |
+| D10 | **DECIDED FOR 0.7.10 2026-09-09** | `AUTH-NOTIFY-002`: 기존 네 사용자 알림의 plain-text 제목·본문만 WordPress Settings API와 단일 non-autoload option으로 관리. `wp_mail()`·Core/site 발신 정책을 유지하고 전역 sender filter, SMTP/provider 설정, 시험 발송, HTML, queue 및 다른 domain 메일은 포함하지 않음 |
 
-D03~D05는 보수적 기본값으로 확정했다. 마케팅 수집이나 강제 재동의를 실제로 시작하려면 새로운 목적·보존·철회 behavior contract가 필요하다. FUTURE/OPTIONAL 기능은 별도 승인 없이 구현하지 않는다. D09의 상세 계약과 단계별 구현 상태는 `UI_UX.md`와 `tests/harness/ux_strategy_contract.json`이 소유한다.
+D03~D05는 보수적 기본값으로 확정했다. 마케팅 수집이나 강제 재동의를 실제로 시작하려면 새로운 목적·보존·철회 behavior contract가 필요하다. FUTURE/OPTIONAL 기능은 별도 승인 없이 구현하지 않는다. D09의 상세 계약과 단계별 구현 상태는 `UI_UX.md`와 `tests/harness/ux_strategy_contract.json`이 소유한다. D10의 Core 우선 관리자 설정 경계는 `NOTIFICATIONS.md`와 `tests/harness/notification_settings_contract.json`이 소유한다.

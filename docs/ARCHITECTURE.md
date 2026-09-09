@@ -87,7 +87,7 @@ Members 내부 Repository나 Service class를 다른 플러그인의 import 대�
 | Social | provider registry·callback·link/unlink | FUTURE, provider별 route에서만 |
 | Withdrawal | 본인 요청·상태 전이·세션 철회·domain 처리 조정 | 필수, 요청/관리 작업에 한정 |
 | Audit | 성공/실패/민감 변경의 최소 event | 해당 hook 발생 시 repository load |
-| Notifications | 고정 계정·보안 안내 메일의 post-success 전달 | 승인된 네 사건의 성공 경로에서만 `wp_mail()` 사용; 전역 bootstrap/provider/queue 없음 |
+| Notifications | 계정·보안 안내 메일의 post-success 전달과 승인된 문구 설정 | 승인된 네 사건의 성공 경로에서만 `wp_mail()` 사용. 0.7.10 계획은 Settings API와 non-autoload option으로 plain-text 제목·본문만 덮어쓰며 전역 sender filter/provider/queue 없음 |
 | Frontend | server-rendered form, 오류·접근성, assets | 등록된 account 화면/실제 component 렌더 시만 |
 | Admin | page/필드 설정, audit·탈퇴 queue 권한 UI | 관리자 화면에 한정; frontend 객체 초기화 금지 |
 | Integrations/WooCommerce | account link, 호환 phone adapter, lifecycle 협의 | Woo 존재 + 관련 route/event일 때 |

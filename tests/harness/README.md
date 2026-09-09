@@ -45,6 +45,8 @@ The runner has no option for an existing site URL, existing DB endpoint, existin
 | --- | --- |
 | `run.py` | Lifecycle, dependency verification, isolated HTTP client, login assertions, redacted reports |
 | `test_runner.py` | Destructive-operation boundaries, assertion falsification, and UI route-asset guards |
+| `notification_contract.json` | `AUTH-NOTIFY-001` four-event runtime, delivery, localization, and failure contract |
+| `notification_settings_contract.json` | `AUTH-NOTIFY-002` Core-first admin wording design and implementation boundary |
 | `ui_contract.json` | `AUTH-UI-001` screen/state/translation/accessibility/asset contract manifest |
 | `ux_strategy_contract.json` | `AUTH-UX-003` approved frontend/admin information architecture and implementation boundaries |
 | `mamp_woo_case.php` | CLI-only, fixed-sandbox Woo/WCI fixture with tagged user/product/orders, Members optional-dependency toggles, and exact cleanup |

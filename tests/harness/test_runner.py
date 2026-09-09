@@ -533,6 +533,113 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn("kkh_record(['type' => 'mail_failed'])", observer)
         self.assertIn('return false;', observer)
 
+    def test_auth_notify_002_core_first_design_is_bounded(self):
+        repository = Path(__file__).resolve().parents[2]
+        contract = json.loads(
+            (repository / 'tests/harness/notification_settings_contract.json').read_text(
+                encoding='utf-8'
+            )
+        )
+
+        self.assertEqual(contract['contract'], 'AUTH-NOTIFY-002')
+        self.assertEqual(contract['version'], 1)
+        self.assertEqual(contract['status'], 'SPECIFIED_NOT_IMPLEMENTED')
+        self.assertEqual(contract['target_release'], '0.7.10')
+        self.assertEqual(contract['depends_on'], 'AUTH-NOTIFY-001')
+        self.assertEqual(contract['principle'], 'wordpress_core_first')
+
+        admin = contract['admin']
+        self.assertEqual(admin['menu_parent'], 'users')
+        self.assertEqual(admin['section'], 'notifications')
+        self.assertEqual(admin['api'], 'wordpress_settings_api')
+        self.assertEqual(admin['capability'], 'manage_kklidi_members')
+        self.assertTrue(admin['server_nonce_required'])
+        self.assertEqual(admin['editable_fields'], ['subject', 'body'])
+        self.assertFalse(admin['per_event_disable'])
+        self.assertEqual(admin['sender_policy_display'], 'read_only')
+
+        storage = contract['storage']
+        self.assertEqual(storage['api'], 'wordpress_options')
+        self.assertEqual(storage['option_name'], 'kklidi_members_notification_templates')
+        self.assertEqual(storage['schema_version'], 1)
+        self.assertFalse(storage['autoload'])
+        self.assertFalse(storage['custom_table'])
+        self.assertEqual(storage['fallback'], 'gettext_defaults')
+
+        self.assertEqual(contract['transport'], {
+            'api': 'wp_mail',
+            'format': 'text/plain',
+            'sender': 'wordpress_or_site_transport_default',
+            'members_registers_global_sender_filters': False,
+            'smtp_owned_by_members': False,
+            'provider_credentials_stored': False,
+        })
+
+        expected_placeholders = {
+            'registration_completed': ['site_name', 'login_url'],
+            'password_changed': ['site_name', 'password_reset_url'],
+            'withdrawal_requested': ['site_name'],
+            'withdrawal_finalized': ['site_name'],
+        }
+        self.assertEqual(set(contract['events']), set(expected_placeholders))
+        for event, placeholders in expected_placeholders.items():
+            with self.subTest(event=event):
+                self.assertEqual(contract['events'][event]['editable'], ['subject', 'body'])
+                self.assertEqual(contract['events'][event]['allowed_placeholders'], placeholders)
+
+        validation = contract['validation']
+        self.assertEqual(validation['subject_max_chars'], 200)
+        self.assertEqual(validation['body_max_chars'], 5000)
+        self.assertFalse(validation['raw_html'])
+        self.assertFalse(validation['shortcodes'])
+        self.assertFalse(validation['php'])
+        self.assertEqual(validation['unknown_placeholders'], 'reject')
+        self.assertEqual(validation['empty_or_invalid'], 'use_gettext_default')
+
+        forbidden = set(contract['security']['forbidden_values'])
+        self.assertTrue({
+            'password', 'reset_key', 'auth_cookie', 'nonce', 'wordpress_user_id',
+            'role', 'order_data', 'lms_data',
+        }.issubset(forbidden))
+        self.assertEqual(
+            contract['security']['settings_update_audit'],
+            'metadata_only_no_template_content',
+        )
+        self.assertEqual(
+            contract['security']['mail_failure_behavior'], 'preserve_auth_notify_001'
+        )
+
+        boundaries = contract['boundaries']
+        self.assertTrue(boundaries['wordpress_core_auth_preserved'])
+        self.assertTrue(boundaries['wordpress_user_ids_preserved'])
+        self.assertEqual(
+            boundaries['wordpress_core_password_reset_mail_owned_by'], 'wordpress_core'
+        )
+        self.assertEqual(boundaries['woocommerce_order_mail_owned_by'], 'woocommerce')
+        self.assertEqual(boundaries['lms_learning_mail_owned_by'], 'lms')
+        self.assertEqual(boundaries['kboard_mail_owned_by'], 'kboard')
+        self.assertTrue(boundaries['members_optional_dependency'])
+        self.assertFalse(boundaries['global_frontend_bootstrap'])
+
+        required_exclusions = {
+            'wordpress_core_password_reset_mail_template', 'admin_notification_recipients',
+            'per_event_disable', 'html_email', 'wysiwyg_editor', 'template_preview',
+            'test_send', 'retry_queue', 'delivery_webhooks', 'delivery_log',
+            'smtp_settings', 'provider_api', 'provider_credentials',
+            'global_sender_override', 'woocommerce_order_mail', 'lms_learning_mail',
+            'kboard_mail',
+        }
+        self.assertTrue(required_exclusions.issubset(set(contract['out_of_scope'])))
+
+        notification_doc = (repository / 'docs/NOTIFICATIONS.md').read_text(encoding='utf-8')
+        product_doc = (repository / 'docs/PRODUCT.md').read_text(encoding='utf-8')
+        architecture_doc = (repository / 'docs/ARCHITECTURE.md').read_text(encoding='utf-8')
+        self.assertIn('AUTH-NOTIFY-002', notification_doc)
+        self.assertIn('SPECIFIED_NOT_IMPLEMENTED', notification_doc)
+        self.assertIn('| D10 | **DECIDED FOR 0.7.10 2026-09-09**', product_doc)
+        self.assertIn('Settings API', architecture_doc)
+        self.assertNotIn('wp_mail_from', architecture_doc)
+
     def test_auth_notify_001_catalog_covers_mail_presets(self):
         repository = Path(__file__).resolve().parents[2]
         mailer = (repository / 'includes/Notifications/AccountMailer.php').read_text(encoding='utf-8')

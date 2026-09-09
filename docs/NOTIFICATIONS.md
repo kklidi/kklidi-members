@@ -43,3 +43,42 @@ WooCommerce 주문·결제·환불 메일은 WooCommerce가 소유한다. LMS �
 - **P0-3 — 완료:** 12개 신규 메일 msgid를 영어 POT와 한국어 PO/MO로 제공하고, 합성 WordPress의 `ko_KR` 사이트 fallback 및 사용자 locale 전환에서 네 가지 알림 preset이 한국어로 렌더링됨을 `bacdd413b3444dd694baa26d725e7e9a` 실행으로 `wp_`/비기본 prefix 각각 검증했다.
 - **P0-4 — 완료:** 릴리스 실행 `aed831b84fe140708b6346e244a2190c`에서 `wp_`와 비기본 prefix 각각 네 실제 계정 경로에 `wp_mail()` 실패를 주입했다. 가입 활성 상태·필수 동의, 변경 비밀번호·전 세션 철회, 탈퇴 접수 상태·접근 차단, 최종 비활성 상태가 모두 유지됐고 작업 성공 응답도 유지됐다. 각 prefix에서 실패 주입은 정확히 4회였고 감사 결과는 정확히 4건의 `failure/wp_mail_failed`, 전달 sink 기록과 자동 재시도는 0건이었다. 재시도 queue 또는 운영 UI는 구현하지 않았다.
 - **0.7.4 회귀 — 완료:** 실행 `5886351d4d39439993fae700b0cb610a`에서 같은 두 prefix와 네 성공/실패 알림 경계를 다시 PASS했다. 0.7.4의 `AUTH-UX-003`은 알림 template 편집, SMTP, 재시도 queue 또는 관리자 수신 알림을 추가하지 않는다.
+
+## 5. AUTH-NOTIFY-002 — Core 우선 알림 문구 설정
+
+| 항목 | 값 |
+| --- | --- |
+| Contract ID | `AUTH-NOTIFY-002` |
+| 계약 상태 | **SPECIFIED_NOT_IMPLEMENTED** |
+| 목표 릴리스 | `0.7.10` |
+| 선행 계약 | `AUTH-NOTIFY-001` |
+| 승인 범위 | 기존 네 사건의 plain-text 제목과 본문을 관리자 설정으로 덮어쓰기 |
+
+이 계약은 `AUTH-NOTIFY-001`의 사건, 수신자, 성공 후 발송, 중복 방지, 실패 처리 및 domain 소유권을 변경하지 않는다. 0.7.9 runtime의 고정 gettext preset은 구현 전까지 계속 source of truth다.
+
+### 5.1 관리자와 저장 계약
+
+1. 설정 화면은 WordPress Users 하위 Members 관리자 정보 구조의 `알림` section에 둔다. 저장은 WordPress Settings API를 사용하며 `manage_kklidi_members` capability와 서버 nonce 검증을 모두 요구한다.
+2. 관리자는 네 사건별 제목과 본문만 편집할 수 있다. 사건별 발송 중지, 수신자 변경, HTML/WYSIWYG, 미리보기와 시험 발송은 포함하지 않는다.
+3. 설정은 custom table 없이 `wp_options`의 단일 versioned option `kklidi_members_notification_templates`에 저장하고 autoload하지 않는다. 누락·빈 값·손상·검증 실패가 있으면 해당 필드만 기존 gettext preset으로 되돌린다.
+4. 제목은 최대 200자 단일 text, 본문은 최대 5,000자 plain text다. raw HTML, shortcode, PHP와 허용 목록 밖 placeholder는 거부한다. 감사 기록에는 변경 주체·시각·성공/실패 같은 metadata만 남기며 제목과 본문 원문은 기록하지 않는다.
+
+### 5.2 허용 placeholder
+
+| 사건 | 허용 placeholder |
+| --- | --- |
+| `registration_completed` | `{site_name}`, `{login_url}` |
+| `password_changed` | `{site_name}`, `{password_reset_url}` |
+| `withdrawal_requested` | `{site_name}` |
+| `withdrawal_finalized` | `{site_name}` |
+
+비밀번호, reset key, nonce, 인증 cookie, WordPress 사용자 ID, role, 주문·결제 및 LMS 데이터는 저장하거나 치환하지 않는다. 알려지지 않은 placeholder를 조용히 삭제하지 않고 저장을 거부한다.
+
+### 5.3 WordPress Core와 전달 계층 경계
+
+1. 전송 API와 형식은 계속 `wp_mail()`과 `text/plain`이다. 발신 이름·주소는 WordPress 또는 사이트의 메일 전송 계층이 정하며 Members 화면에는 현재 정책을 읽기 전용으로만 설명한다.
+2. Members는 전역 `wp_mail_from`/`wp_mail_from_name` filter, SMTP 설정, provider credential, 외부 이메일 API, queue, 재시도, webhook 또는 전달 이력을 소유하지 않는다. 사이트가 SMTP plugin, Elastic Email 같은 provider 또는 managed transport를 도입해도 이 계약의 작성·치환 계층은 바뀌지 않는다.
+3. WordPress Core 비밀번호 재설정 메일은 Core 소유로 유지한다. Members의 `password_changed` 안내만 이 설정 범위에 포함하며 Core reset 메일의 제목·본문을 가로채지 않는다.
+4. 저장된 문구는 사이트별 plain text override다. override가 없을 때 영어 gettext 원문과 사용자 locale 우선·사이트 locale fallback의 번역 catalog를 그대로 사용한다.
+
+실행 가능한 설계 manifest는 `tests/harness/notification_settings_contract.json`이다. Runtime 구현, 관리자 브라우저 검증과 실제 메일 전달 판정은 후속 단계에서 별도 증거를 요구한다.
