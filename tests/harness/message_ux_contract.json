@@ -1,0 +1,117 @@
+{
+  "contract": "AUTH-MESSAGE-UX-001",
+  "version": 1,
+  "status": "SPECIFIED_NOT_IMPLEMENTED",
+  "target_release": "0.7.19",
+  "depends_on": [
+    "AUTH-UX-003",
+    "AUTH-NOTIFY-001",
+    "AUTH-NOTIFY-002"
+  ],
+  "principle": "translated_defaults_visible_security_messages_locked",
+  "admin": {
+    "menu_parent": "users",
+    "section": "messages",
+    "capability": "manage_kklidi_members",
+    "catalog_read_only": true,
+    "catalog_storage": false,
+    "email_overrides_remain_in": "notifications",
+    "global_message_editor": false
+  },
+  "catalog": {
+    "source": "english_gettext",
+    "render_locale": "wordpress_admin_user_locale",
+    "groups": {
+      "account_notices": [
+        "registration_complete",
+        "password_changed",
+        "password_reset",
+        "withdrawal_requested"
+      ],
+      "authentication": [
+        "invalid_credentials",
+        "login_rate_limited"
+      ],
+      "registration": [
+        "registration_closed",
+        "registration_invalid",
+        "registration_unavailable"
+      ],
+      "password_reset": [
+        "reset_request_generic",
+        "reset_invalid_link"
+      ],
+      "profile": [
+        "profile_saved",
+        "profile_save_failed"
+      ],
+      "consent": [
+        "consent_saved",
+        "consent_save_failed"
+      ],
+      "withdrawal": [
+        "withdrawal_save_failed"
+      ]
+    },
+    "security_sensitive_keys": [
+      "invalid_credentials",
+      "login_rate_limited",
+      "registration_unavailable",
+      "reset_request_generic",
+      "reset_invalid_link"
+    ],
+    "editable_keys": []
+  },
+  "notification_defaults": {
+    "approved_events": 4,
+    "show_translated_default_subject": true,
+    "show_translated_default_body": true,
+    "saved_override_fields": [
+      "subject",
+      "body"
+    ],
+    "empty_override_uses_default": true,
+    "default_preview_is_sent": false,
+    "transport_changed": false,
+    "format": "text/plain"
+  },
+  "runtime_adjustment": {
+    "password_change_redirect_notice": true,
+    "automatic_login": false,
+    "query_contains_secret": false
+  },
+  "security": {
+    "account_enumeration_messages_editable": false,
+    "csrf_messages_editable": false,
+    "rate_limit_messages_editable": false,
+    "raw_html": false,
+    "shortcodes": false,
+    "php": false,
+    "stored_member_values": false,
+    "stored_credentials": false
+  },
+  "boundaries": {
+    "wordpress_core_identity_and_auth_preserved": true,
+    "wordpress_core_password_reset_preserved": true,
+    "wordpress_user_ids_preserved": true,
+    "notification_option_schema_changed": false,
+    "global_frontend_filters": false,
+    "global_frontend_assets": false,
+    "members_optional_dependency": true
+  },
+  "out_of_scope": [
+    "editable_security_messages",
+    "global_message_overrides",
+    "html_email",
+    "wysiwyg_editor",
+    "email_template_layout",
+    "sender_override",
+    "smtp_settings",
+    "test_send",
+    "retry_queue",
+    "administrator_registration_notice",
+    "woocommerce_messages",
+    "lms_messages",
+    "kboard_messages"
+  ]
+}

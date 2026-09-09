@@ -30,7 +30,7 @@ def build():
     files = sorted(set(PACKAGE_FILES + ['README.md', 'readme.txt', 'CHANGELOG.md',
         'docs/PRODUCT.md', 'docs/ARCHITECTURE.md', 'docs/SECURITY.md', 'docs/MIGRATION.md',
         'docs/HARNESS_PLAN.md', 'docs/UI_UX.md', 'docs/NOTIFICATIONS.md',
-        'docs/REGISTRATION_FIELDS.md',
+        'docs/REGISTRATION_FIELDS.md', 'docs/MESSAGES.md',
         'docs/OPERATIONS.md', release_doc]))
     assert all(not path.startswith(('tests/', '.harness/')) for path in files)
     assert all(not path.startswith('docs/evidence/') for path in files)

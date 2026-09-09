@@ -535,6 +535,70 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('RegistrationFields::defaults()', installer)
         self.assertIn("results['AUTH-REGISTER-FIELDS-001']", runtime_harness)
 
+    def test_auth_message_ux_001_design_keeps_security_messages_read_only(self):
+        repository = Path(__file__).resolve().parents[2]
+        contract = json.loads(
+            (repository / 'tests/harness/message_ux_contract.json').read_text(encoding='utf-8')
+        )
+        self.assertEqual(contract['contract'], 'AUTH-MESSAGE-UX-001')
+        self.assertEqual(contract['version'], 1)
+        self.assertEqual(contract['status'], 'SPECIFIED_NOT_IMPLEMENTED')
+        self.assertEqual(contract['target_release'], '0.7.19')
+        self.assertEqual(
+            contract['principle'],
+            'translated_defaults_visible_security_messages_locked',
+        )
+        admin = contract['admin']
+        self.assertEqual(admin['section'], 'messages')
+        self.assertEqual(admin['capability'], 'manage_kklidi_members')
+        self.assertTrue(admin['catalog_read_only'])
+        self.assertFalse(admin['catalog_storage'])
+        self.assertFalse(admin['global_message_editor'])
+        catalog = contract['catalog']
+        self.assertEqual(catalog['source'], 'english_gettext')
+        self.assertEqual(catalog['editable_keys'], [])
+        self.assertEqual(len(catalog['groups']), 7)
+        catalog_keys = {key for keys in catalog['groups'].values() for key in keys}
+        self.assertEqual(len(catalog_keys), 16)
+        self.assertTrue(set(catalog['security_sensitive_keys']).issubset(catalog_keys))
+        notification = contract['notification_defaults']
+        self.assertEqual(notification['approved_events'], 4)
+        self.assertTrue(notification['show_translated_default_subject'])
+        self.assertTrue(notification['show_translated_default_body'])
+        self.assertEqual(notification['saved_override_fields'], ['subject', 'body'])
+        self.assertFalse(notification['default_preview_is_sent'])
+        self.assertFalse(notification['transport_changed'])
+        self.assertEqual(notification['format'], 'text/plain')
+        self.assertTrue(contract['runtime_adjustment']['password_change_redirect_notice'])
+        self.assertFalse(contract['runtime_adjustment']['automatic_login'])
+        self.assertFalse(contract['runtime_adjustment']['query_contains_secret'])
+        self.assertTrue(all(value is False for value in contract['security'].values()))
+        boundaries = contract['boundaries']
+        self.assertTrue(boundaries['wordpress_core_identity_and_auth_preserved'])
+        self.assertTrue(boundaries['wordpress_core_password_reset_preserved'])
+        self.assertTrue(boundaries['wordpress_user_ids_preserved'])
+        self.assertFalse(boundaries['notification_option_schema_changed'])
+        self.assertFalse(boundaries['global_frontend_filters'])
+        self.assertFalse(boundaries['global_frontend_assets'])
+        self.assertTrue(boundaries['members_optional_dependency'])
+        required_exclusions = {
+            'editable_security_messages', 'global_message_overrides', 'html_email',
+            'wysiwyg_editor', 'email_template_layout', 'sender_override',
+            'smtp_settings', 'test_send', 'retry_queue',
+            'administrator_registration_notice', 'woocommerce_messages',
+            'lms_messages', 'kboard_messages',
+        }
+        self.assertTrue(required_exclusions.issubset(set(contract['out_of_scope'])))
+        message_doc = (repository / 'docs/MESSAGES.md').read_text(encoding='utf-8')
+        product = (repository / 'docs/PRODUCT.md').read_text(encoding='utf-8')
+        harness = (repository / 'docs/HARNESS_PLAN.md').read_text(encoding='utf-8')
+        self.assertIn('SPECIFIED_NOT_IMPLEMENTED', message_doc)
+        self.assertIn('| D12 | **SPECIFIED FOR 0.7.19', product)
+        self.assertIn('AUTH-MESSAGE-UX-001 / 0.7.19 extension (SPECIFIED)', harness)
+        self.assertIn("'docs/MESSAGES.md'", (
+            repository / 'tests/harness/build_release.py'
+        ).read_text(encoding='utf-8'))
+
     def test_auth_ux_003_078_withdrawal_and_audit_operations_are_bounded(self):
         repository = Path(__file__).resolve().parents[2]
         admin = (repository / 'includes/Admin/AdminController.php').read_text(encoding='utf-8')
