@@ -304,8 +304,9 @@ def assert_account_notice(row, recipient, subject_fragment, required_fragments, 
             'Account notice did not declare its plain-text format')
     require(subject_fragment in str(row.get('subject', '')),
             'Account notice used the wrong preset subject: ' + str(row.get('subject', '')))
-    require(all(fragment in content for fragment in required_fragments),
-            'Account notice omitted required preset content')
+    missing_fragments = [fragment for fragment in required_fragments if fragment not in content]
+    require(not missing_fragments,
+            'Account notice omitted required preset content: ' + repr(missing_fragments))
     require(not any(fragment and fragment in content for fragment in forbidden_fragments),
             'Account notice exposed forbidden account data')
 
@@ -680,12 +681,6 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
     require(status == 302 and 'registered=1' in headers.get('Location', '')
             and registration.observe(key)['logged_in'] is False,
             'Registration did not complete without auto-login')
-    english_site = command(php_cli + [HERE / 'mvp_setup.php', 'set-site-locale', 'en_US'],
-                           json_result=True)
-    require(english_site.get('locale') == 'en_US' and english_site.get('option') in ('', 'en_US'),
-            'Site-locale restore failed: ' + repr(english_site))
-    if restart_server:
-        restart_server()
     registration_mail = read_mailbox(mailbox_path)
     require(len(registration_mail) == initial_mail_count + 1,
             'Registration success did not create exactly one account notice')
@@ -694,6 +689,12 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
         ['회원가입이 완료되었습니다.', '로그인:', base],
         [env['KKH_USER_PASSWORD'], request_id, env['KKH_MVP_EMAIL'], 'user_id', 'role=']
     )
+    english_site = command(php_cli + [HERE / 'mvp_setup.php', 'set-site-locale', 'en_US'],
+                           json_result=True)
+    require(english_site.get('locale') == 'en_US' and english_site.get('option') in ('', 'en_US'),
+            'Site-locale restore failed: ' + repr(english_site))
+    if restart_server:
+        restart_server()
     probe = command(php_cli + [HERE / 'mvp_probe.php'], json_result=True)
     new_user = probe.get('user', {})
     require(probe['users_count'] == 4 and new_user.get('login_is_private') is True
@@ -924,7 +925,7 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
     assert_account_notice(
         password_mail[-1], env['KKH_MVP_EMAIL'], '비밀번호가 변경되었습니다',
         ['회원 계정의 비밀번호가 변경되었습니다.', '비밀번호를 재설정하세요:',
-         '/wp-login.php?action=lostpassword'],
+         '/?kklidi_members_password_reset=1'],
         [env['KKH_USER_PASSWORD'], env['KKH_NEW_PASSWORD'], env['KKH_RESET_PASSWORD'],
          env['KKH_MVP_EMAIL'], 'key=', 'user_id', 'auth_cookie']
     )
