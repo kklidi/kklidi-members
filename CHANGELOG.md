@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.7.16 — 2026-09-09
+
+- Refined Members auth shell spacing, typography density, and narrow mobile reflow.
+- Preserved route-scoped assets, Core authentication ownership, and gettext UI strings.
+
+## 0.7.15 — 2026-09-09
+
+- Clarified login, registration, and reset link hierarchy with WordPress site-name context.
+
+## 0.7.14 — 2026-09-09
+
+- Replaced password control text with accessible inline eye icons across login,
+  registration, change-password, and reset-password screens.
+
 ## 0.7.13 — 2026-09-09
 
 - Clarified the password-reset request screen with the supported username/email input and WordPress Core generic-link response policy.
