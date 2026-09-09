@@ -396,11 +396,18 @@ class HarnessGuards(unittest.TestCase):
 
         self.assertEqual(contract['contract'], 'AUTH-REGISTER-FIELDS-001')
         self.assertEqual(contract['version'], 1)
-        self.assertEqual(contract['status'], 'SPECIFIED_NOT_IMPLEMENTED')
+        self.assertEqual(contract['status'], 'IMPLEMENTED_AND_SYNTHETIC_VERIFIED')
         self.assertEqual(contract['target_release'], '0.7.18')
         self.assertEqual(contract['principle'], 'bounded_builtin_allowlist')
         self.assertEqual(contract['scope'], 'registration_route_only')
         self.assertTrue(contract['defaults_preserve_0_7_17_behavior'])
+        self.assertEqual(contract['verification'], {
+            'status': 'PASS',
+            'scope': 'synthetic_wordpress',
+            'prefixes': ['wp_', 'non_default'],
+            'evidence_id': '10c0655fedec48139a72e44264503bc5',
+            'report': '.harness/reports/latest.json',
+        })
 
         admin = contract['admin']
         self.assertEqual(admin['api'], 'wordpress_settings_api')
@@ -483,13 +490,50 @@ class HarnessGuards(unittest.TestCase):
         product = (repository / 'docs/PRODUCT.md').read_text(encoding='utf-8')
         architecture = (repository / 'docs/ARCHITECTURE.md').read_text(encoding='utf-8')
         harness = (repository / 'docs/HARNESS_PLAN.md').read_text(encoding='utf-8')
-        self.assertIn('SPECIFIED_NOT_IMPLEMENTED', design)
-        self.assertIn('| D11 | **SPECIFIED FOR 0.7.18', product)
+        self.assertIn('IMPLEMENTED_AND_SYNTHETIC_VERIFIED', design)
+        self.assertIn('| D11 | **IMPLEMENTED FOR 0.7.18', product)
         self.assertIn('bounded built-in field allowlist', architecture)
-        self.assertIn('AUTH-REGISTER-FIELDS-001 / 0.7.18 extension (SPECIFIED)', harness)
+        self.assertIn('AUTH-REGISTER-FIELDS-001 / 0.7.18 extension (IMPLEMENTED)', harness)
         self.assertIn("'docs/REGISTRATION_FIELDS.md'", (
             repository / 'tests/harness/build_release.py'
         ).read_text(encoding='utf-8'))
+
+        settings_source = (
+            repository / 'includes/Registration/RegistrationFields.php'
+        ).read_text(encoding='utf-8')
+        registration_source = (
+            repository / 'includes/Registration/RegistrationController.php'
+        ).read_text(encoding='utf-8')
+        registration_template = (
+            repository / 'templates/register.php'
+        ).read_text(encoding='utf-8')
+        admin_source = (
+            repository / 'includes/Admin/AdminController.php'
+        ).read_text(encoding='utf-8')
+        admin_template = (repository / 'templates/admin.php').read_text(encoding='utf-8')
+        installer = (repository / 'includes/Core/Installer.php').read_text(encoding='utf-8')
+        runtime_harness = (repository / 'tests/harness/run.py').read_text(encoding='utf-8')
+
+        self.assertIn("register_setting(self::OPTION_GROUP, self::OPTION_NAME", settings_source)
+        self.assertIn("add_option(self::OPTION_NAME, self::defaults(), '', 'no')", settings_source)
+        self.assertIn("'sanitize_callback' => array(__CLASS__, 'sanitize')", settings_source)
+        self.assertIn("return 'manage_kklidi_members';", settings_source)
+        self.assertIn("'first_name' => 'required'", settings_source)
+        self.assertIn("'last_name' => 'optional'", settings_source)
+        self.assertIn("'phone' => 'optional'", settings_source)
+        self.assertIn("'registration_fields_update'", settings_source)
+        self.assertNotIn('wp_insert_user(', settings_source)
+        self.assertNotIn('WC_', settings_source)
+        self.assertNotIn('kklidi_lms', settings_source)
+        self.assertIn("RegistrationFields::settings()", registration_source)
+        self.assertIn("? self::text('first_name') : ''", registration_source)
+        self.assertIn("? self::text('phone') : ''", registration_source)
+        self.assertIn("$field_states['first_name'] !== 'hidden'", registration_template)
+        self.assertIn("$field_states['phone'] !== 'hidden'", registration_template)
+        self.assertIn("'registration' => __('Registration fields'", admin_source)
+        self.assertIn('RegistrationFields::OPTION_GROUP', admin_template)
+        self.assertIn('RegistrationFields::defaults()', installer)
+        self.assertIn("results['AUTH-REGISTER-FIELDS-001']", runtime_harness)
 
     def test_auth_ux_003_078_withdrawal_and_audit_operations_are_bounded(self):
         repository = Path(__file__).resolve().parents[2]
@@ -846,7 +890,7 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('If an account matches, WordPress will send a password reset link.', reset_template)
         self.assertIn("'includes/Notifications/NotificationTemplates.php'", package)
         self.assertIn("results['AUTH-NOTIFY-002']", package)
-        self.assertIn("'extension_contracts_total': 2", package)
+        self.assertIn("'extension_contracts_total': 3", package)
 
     def test_auth_notify_001_catalog_covers_mail_presets(self):
         repository = Path(__file__).resolve().parents[2]
@@ -1054,7 +1098,7 @@ class HarnessGuards(unittest.TestCase):
         ready = json.loads(json.dumps(example))
         ready['environment']['base_url'] = 'https://staging.kklidi.com'
         ready['versions'].update(
-            wordpress='7.1', php='8.3', members='0.7.17', woocommerce='11.1.0')
+            wordpress='7.1', php='8.3', members='0.7.18', woocommerce='11.1.0')
         ready['owners'] = {key: 'approved-' + key for key in ready['owners']}
         ready['backup'].update(
             artifact_sha256='a' * 64,

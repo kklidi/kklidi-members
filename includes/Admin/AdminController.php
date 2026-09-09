@@ -7,12 +7,13 @@ if (!defined('ABSPATH')) {
 }
 
 final class AdminController {
-	private const SECTIONS = array('overview', 'documents', 'notifications', 'withdrawals', 'audit');
+	private const SECTIONS = array('overview', 'documents', 'registration', 'notifications', 'withdrawals', 'audit');
 	private static $document_preview = null;
 	private static $consent_status_cache = array();
 
 	public static function boot(): void {
 		add_action('admin_menu', array(__CLASS__, 'menu'));
+		add_action('admin_init', array(__CLASS__, 'register_registration_settings'));
 		add_action('admin_init', array(__CLASS__, 'register_notification_settings'));
 		add_action('admin_init', array(__CLASS__, 'handle_admin_request'));
 		add_action('admin_enqueue_scripts', array(__CLASS__, 'enqueue_assets'));
@@ -20,6 +21,14 @@ final class AdminController {
 			'\KKLIDI\Members\Notifications\NotificationTemplates',
 			'settings_capability',
 		));
+		add_filter('option_page_capability_kklidi_members_registration_fields', array(
+			'\KKLIDI\Members\Registration\RegistrationFields',
+			'settings_capability',
+		));
+		add_action('update_option_kklidi_members_registration_fields', array(
+			'\KKLIDI\Members\Registration\RegistrationFields',
+			'audit_update',
+		), 10, 2);
 		add_action('update_option_kklidi_members_notification_templates', array(
 			'\KKLIDI\Members\Notifications\NotificationTemplates',
 			'audit_update',
@@ -29,6 +38,11 @@ final class AdminController {
 		add_action('restrict_manage_users', array(__CLASS__, 'user_filters'));
 		add_action('pre_get_users', array(__CLASS__, 'filter_users_by_state'));
 		add_action('pre_user_query', array(__CLASS__, 'filter_users_by_consent'));
+	}
+
+	public static function register_registration_settings(): void {
+		require_once KKLIDI_MEMBERS_DIR . 'includes/Registration/RegistrationFields.php';
+		\KKLIDI\Members\Registration\RegistrationFields::register_settings();
 	}
 
 	public static function register_notification_settings(): void {
@@ -270,6 +284,7 @@ final class AdminController {
 		$sections = array(
 			'overview' => __('Overview', 'kklidi-members'),
 			'documents' => __('Documents', 'kklidi-members'),
+			'registration' => __('Registration fields', 'kklidi-members'),
 			'notifications' => __('Notifications', 'kklidi-members'),
 			'withdrawals' => __('Withdrawals', 'kklidi-members'),
 			'audit' => __('Audit', 'kklidi-members'),
@@ -287,6 +302,7 @@ final class AdminController {
 			require_once KKLIDI_MEMBERS_DIR . 'includes/Core/Url.php';
 			$quick_links = array(
 				array('label' => __('Documents', 'kklidi-members'), 'description' => __('Publish and review the required account documents.', 'kklidi-members'), 'url' => self::page_url('documents')),
+				array('label' => __('Registration fields', 'kklidi-members'), 'description' => __('Choose which approved profile fields appear during registration.', 'kklidi-members'), 'url' => self::page_url('registration')),
 				array('label' => __('Notifications', 'kklidi-members'), 'description' => __('Edit the four approved account notice messages.', 'kklidi-members'), 'url' => self::page_url('notifications')),
 				array('label' => __('Withdrawals', 'kklidi-members'), 'description' => __('Review pending withdrawal requests without deleting records.', 'kklidi-members'), 'url' => self::page_url('withdrawals')),
 				array('label' => __('Audit', 'kklidi-members'), 'description' => __('Filter security and account events.', 'kklidi-members'), 'url' => self::page_url('audit')),
@@ -311,6 +327,8 @@ final class AdminController {
 				$documents[$type] = \KKLIDI\Members\Consent\Documents::current($type);
 				$document_history[$type] = \KKLIDI\Members\Consent\Documents::history($type);
 			}
+		} elseif ($section === 'registration') {
+			require_once KKLIDI_MEMBERS_DIR . 'includes/Registration/RegistrationFields.php';
 		} elseif ($section === 'notifications') {
 			require_once KKLIDI_MEMBERS_DIR . 'includes/Notifications/NotificationTemplates.php';
 		} elseif ($section === 'withdrawals') {
@@ -441,6 +459,7 @@ final class AdminController {
 			'mail_withdrawal_requested' => __('Withdrawal-request notice', 'kklidi-members'),
 			'mail_withdrawal_finalized' => __('Withdrawal-finalized notice', 'kklidi-members'),
 			'notification_settings_update' => __('Notification settings updated', 'kklidi-members'),
+			'registration_fields_update' => __('Registration field settings updated', 'kklidi-members'),
 		);
 	}
 

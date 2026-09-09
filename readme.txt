@@ -3,7 +3,7 @@ Contributors: kklidi
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.7.17
+Stable tag: 0.7.18
 
 Core-based member accounts with scoped UI, consent records and safe withdrawal handling.
 
@@ -13,6 +13,11 @@ WordPress Core owns users, passwords, sessions and authentication cookies.
 KKLIDI Members adds login, registration, profile, consent and account management UI.
 WooCommerce orders and LMS enrollment/progress stay with their respective plugins.
 Korean UI uses WordPress gettext translation catalogs.
+
+0.7.18 adds bounded required, optional, or hidden states for the approved first
+name, last name, and phone registration fields. Identity, password, display name,
+required consent, WordPress Core authentication, and existing user data stay fixed.
+See docs/RELEASE-0.7.18.md.
 
 0.7.17 adds administrator diagnostics, quick actions, route links, and clearer
 notification, withdrawal, and audit management while preserving the approved
@@ -30,6 +35,11 @@ docs/RELEASE-0.7.16.md.
 3. Review registration and consent policy before changing the closed defaults.
 
 == Changelog ==
+
+= 0.7.18 =
+* Added a Users-area Registration Fields section backed by the WordPress Settings API.
+* Limited configuration to required, optional, or hidden states for first name, last name, and phone.
+* Kept identity, password, display name, required consent, existing users, WooCommerce orders, and LMS data unchanged.
 
 = 0.7.17 =
 * Improved the administrator overview with quick actions, route links, and actionable prerequisite diagnostics.

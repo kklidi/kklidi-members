@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.7.18 — 2026-09-10
+
+- Added a bounded WordPress Settings API screen for first-name, last-name, and phone registration states.
+- Enforced required, optional, and hidden states on the server; hidden POST values are ignored.
+- Preserved Core identity/authentication, fixed subscriber role, required consent, and existing profile/Woo/LMS data.
+
+## 0.7.17 — 2026-09-10
+
+- Added administrator diagnostics, quick actions, canonical route links, and clearer notification, withdrawal, and audit management.
+- Kept page/menu creation manual and preserved Core registration, authentication, and mail ownership.
+
 ## 0.7.16 — 2026-09-09
 
 - Refined Members auth shell spacing, typography density, and narrow mobile reflow.

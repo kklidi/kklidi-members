@@ -1,10 +1,10 @@
 # Registration fields
 
-`AUTH-REGISTER-FIELDS-001` 상태: **SPECIFIED_NOT_IMPLEMENTED**
+`AUTH-REGISTER-FIELDS-001` 상태: **IMPLEMENTED_AND_SYNTHETIC_VERIFIED**
 
 대상 버전: **0.7.18**
 
-이 문서는 회원가입 필드 설정의 범위와 안전 경계를 소유한다. 실행 가능한 manifest는 `tests/harness/registration_fields_contract.json`이다. 0.7.17 runtime은 아직 이 설정을 읽지 않으며, 아래 기본값과 같은 고정 폼을 사용한다.
+이 문서는 회원가입 필드 설정의 범위와 안전 경계를 소유한다. 실행 가능한 manifest는 `tests/harness/registration_fields_contract.json`이다. 0.7.18 runtime과 관리자 화면은 이 설정을 사용하며, option이 없거나 읽을 수 없으면 아래 기본값으로 폴백한다.
 
 ## 1. 목적
 
@@ -64,6 +64,8 @@
 4. 필수/선택 validation, 안전한 오류 복원, 접근성 연결과 한국어 gettext catalog를 검증한다.
 5. `wp_`와 임의 prefix에서 같은 WordPress ID·Core auth·동의·중복 방지 계약을 유지한다.
 6. Members 비활성 시 Core/Woo/LMS가 fatal 없이 동작하고 설정 option이 다른 domain 데이터를 변경하지 않는다.
+
+2026-09-10 합성 WordPress 실행 `10c0655fedec48139a72e44264503bc5`는 `wp_`와 임의 prefix에서 위 설정·주입·기본값·정리 계약을 통과했다. 실제 MAMP ZIP lifecycle은 출시 전 통합 gate에서 실행한다.
 
 ## 7. 제외 범위
 

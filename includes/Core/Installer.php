@@ -25,6 +25,13 @@ final class Installer {
 			'version' => 1,
 			'events' => array(),
 		), '', false);
+		require_once KKLIDI_MEMBERS_DIR . 'includes/Registration/RegistrationFields.php';
+		add_option(
+			\KKLIDI\Members\Registration\RegistrationFields::OPTION_NAME,
+			\KKLIDI\Members\Registration\RegistrationFields::defaults(),
+			'',
+			'no'
+		);
 
 		$role = get_role('administrator');
 		if ($role) {

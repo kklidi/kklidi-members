@@ -50,6 +50,7 @@ PRODUCTION_FILES = [
     'includes/Notifications/NotificationTemplates.php',
     'includes/Profile/ProfileController.php',
     'includes/Registration/RegistrationController.php',
+    'includes/Registration/RegistrationFields.php',
     'includes/Security/AccountState.php',
     'includes/Security/GuestCsrf.php',
     'includes/Security/RateLimiter.php',
@@ -868,6 +869,136 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
             Browser(base).request('/?kklidi_members_register=1')[2],
             'Subscriber used an administrator nonce to change Members settings')
 
+    registration_settings_path = \
+        '/wp-admin/users.php?page=kklidi-members&section=registration'
+    fields_status, _, fields_page = admin.request(registration_settings_path)
+    require(fields_status == 200
+            and 'kklidi_members_registration_fields[fields][first_name]' in fields_page
+            and hidden_input(fields_page, 'option_page') == 'kklidi_members_registration_fields',
+            'Registration field Settings API screen is unavailable')
+    fields_nonce = hidden_input(fields_page, '_wpnonce')
+
+    def registration_settings_fields(first_name, last_name, phone, nonce=fields_nonce):
+        return {
+            'option_page': 'kklidi_members_registration_fields',
+            'action': 'update',
+            '_wpnonce': nonce,
+            '_wp_http_referer': registration_settings_path,
+            'kklidi_members_registration_fields[version]': '1',
+            'kklidi_members_registration_fields[fields][first_name]': first_name,
+            'kklidi_members_registration_fields[fields][last_name]': last_name,
+            'kklidi_members_registration_fields[fields][phone]': phone,
+        }
+
+    configured_status, _, _ = admin.request('/wp-admin/options.php', data=
+        registration_settings_fields('hidden', 'required', 'hidden'))
+    configured_fields = command(
+        php_cli + [HERE / 'mvp_probe.php', 'registration-fields-summary'], json_result=True)
+    expected_field_states = {
+        'version': 1,
+        'fields': {'first_name': 'hidden', 'last_name': 'required', 'phone': 'hidden'},
+    }
+    require(configured_status == 302 and configured_fields['autoload'] in ('no', 'off')
+            and configured_fields['stored'] == expected_field_states
+            and configured_fields['effective'] == expected_field_states
+            and configured_fields['settings_audit_count'] == 1
+            and configured_fields['settings_audit_has_digest'] is True,
+            'Valid registration field settings were not stored or audited safely: '
+            + repr(configured_fields))
+
+    invalid_field_status, _, _ = admin.request('/wp-admin/options.php', data=
+        registration_settings_fields('hidden', 'required', 'administrator'))
+    rejected_fields = command(
+        php_cli + [HERE / 'mvp_probe.php', 'registration-fields-summary'], json_result=True)
+    require(invalid_field_status == 302 and rejected_fields == configured_fields,
+            'Unsupported registration field state was not rejected atomically')
+
+    denied_fields_status, _, _ = profile_browser.request('/wp-admin/options.php', data=
+        registration_settings_fields('required', 'optional', 'optional'))
+    require(denied_fields_status == 403,
+            'Subscriber used a registration-field Settings API nonce')
+
+    field_mailbox_snapshot = mailbox_path.read_bytes()
+    field_registration = Browser(base)
+    field_status, _, field_form = field_registration.request('/?kklidi_members_register=1')
+    require(field_status == 200 and 'name="first_name"' not in field_form
+            and 'name="phone"' not in field_form and 'name="last_name"' in field_form
+            and re.search(r'name="last_name"[^>]*\srequired(?:\s|>)', field_form),
+            'Configured registration field visibility or requirement was not rendered')
+
+    field_request = {
+        'kklidi_members_register': '1',
+        'request_id': hidden_input(field_form, 'request_id'),
+        '_kklidi_members_register_nonce': hidden_input(
+            field_form, '_kklidi_members_register_nonce'),
+        '_kklidi_members_guest_exp': hidden_input(field_form, '_kklidi_members_guest_exp'),
+        '_kklidi_members_guest_token': hidden_input(field_form, '_kklidi_members_guest_token'),
+        'email': env['KKH_FIELDS_EMAIL'],
+        'password': env['KKH_USER_PASSWORD'],
+        'password_confirm': env['KKH_USER_PASSWORD'],
+        'first_name': 'Injected first name',
+        'display_name': 'Field Contract Member',
+        'phone': '+82 10-1111-2222',
+        'consent_service': '1',
+        'consent_privacy': '1',
+        'role': 'administrator',
+        'user_id': str(fixture['fixtures']['email_identity']['id']),
+    }
+    missing_status, _, missing_body = field_registration.request(
+        '/?kklidi_members_register=1', data=field_request)
+    require(missing_status == 200 and 'name="last_name"' in missing_body
+            and 'aria-invalid="true"' in missing_body,
+            'Configured required registration field was not validated on the server')
+    field_request.update({
+        'last_name': 'Contract',
+        '_kklidi_members_register_nonce': hidden_input(
+            missing_body, '_kklidi_members_register_nonce'),
+        '_kklidi_members_guest_exp': hidden_input(missing_body, '_kklidi_members_guest_exp'),
+        '_kklidi_members_guest_token': hidden_input(missing_body, '_kklidi_members_guest_token'),
+    })
+    created_status, created_headers, _ = field_registration.request(
+        '/?kklidi_members_register=1', data=field_request)
+    created_fields = command(
+        php_cli + [HERE / 'mvp_probe.php', 'registration-fields-summary'], json_result=True)
+    require(created_status == 302 and 'registered=1' in created_headers.get('Location', '')
+            and created_fields['field_user'] is not None
+            and created_fields['field_user']['roles'] == ['subscriber']
+            and created_fields['field_user']['first_name'] == ''
+            and created_fields['field_user']['last_name'] == 'Contract'
+            and created_fields['field_user']['phone'] == ''
+            and created_fields['field_user']['required_consents'] == 2,
+            'Hidden registration input was stored or required fields were not persisted safely: '
+            + repr(created_fields.get('field_user')))
+    field_cleanup = command(
+        php_cli + [HERE / 'mvp_probe.php', 'cleanup-registration-fields-user'], json_result=True)
+    require(field_cleanup == {'deleted': True, 'remaining': 0},
+            'Synthetic registration-fields user cleanup failed')
+    mailbox_path.write_bytes(field_mailbox_snapshot)
+
+    _, _, reset_fields_page = admin.request(registration_settings_path)
+    reset_fields_status, _, _ = admin.request('/wp-admin/options.php', data=
+        registration_settings_fields(
+            'required', 'optional', 'optional', hidden_input(reset_fields_page, '_wpnonce')))
+    reset_fields = command(
+        php_cli + [HERE / 'mvp_probe.php', 'registration-fields-summary'], json_result=True)
+    default_field_states = {
+        'version': 1,
+        'fields': {'first_name': 'required', 'last_name': 'optional', 'phone': 'optional'},
+    }
+    require(reset_fields_status == 302 and reset_fields['effective'] == default_field_states
+            and reset_fields['settings_audit_count'] == 2
+            and reset_fields['field_user'] is None,
+            'Registration field defaults or synthetic cleanup were not restored')
+    results['AUTH-REGISTER-FIELDS-001'] = {
+        'status': 'PASS', 'settings_api': True, 'capability_and_nonce': True,
+        'non_autoload_option': True, 'default_compatible': True,
+        'configurable_fields': ['first_name', 'last_name', 'phone'],
+        'states': ['required', 'optional', 'hidden'],
+        'invalid_update_rejected': True, 'required_server_validation': True,
+        'hidden_post_ignored': True, 'role_and_user_id_injection_ignored': True,
+        'existing_users_and_external_domains_unchanged': True,
+    }
+
     notification_path = '/wp-admin/users.php?page=kklidi-members&section=notifications'
     notification_status, _, notification_page = admin.request(notification_path)
     require(notification_status == 200
@@ -1649,6 +1780,7 @@ def execute(php, mysqld, one_prefix=False, skip_perf=False):
                KKH_NEW_PASSWORD=secrets.token_urlsafe(36),
                KKH_RESET_PASSWORD=secrets.token_urlsafe(38),
                KKH_MVP_EMAIL='mvp-' + run_id[:12] + '@example.invalid',
+               KKH_FIELDS_EMAIL='fields-' + run_id[:12] + '@example.invalid',
                KKH_FAILURE_EMAIL='notify-failure-' + run_id[:12] + '@example.invalid',
                KKH_FAILURE_PASSWORD=secrets.token_urlsafe(40),
                KKH_SALT=secrets.token_hex(48), KKH_PROBE_KEY=secrets.token_hex(32),
@@ -1662,7 +1794,7 @@ def execute(php, mysqld, one_prefix=False, skip_perf=False):
               'modes': {'core_baseline': {'status': 'FAIL', 'variants': []},
                         'members_on': {'status': 'FAIL', 'variants': []}},
               'contracts_total': 24, 'contracts_exercised': 24,
-              'extension_contracts_total': 2, 'extension_contracts_exercised': 2,
+               'extension_contracts_total': 3, 'extension_contracts_exercised': 3,
               'not_run': ['actual WooCommerce/LMS full-stack browser regression',
                           'KBoard removal-period compatibility smoke/no-fatal',
                           'device-limit WooCommerce login entry', 'TLS/Secure cookie deployment',
@@ -1675,7 +1807,8 @@ def execute(php, mysqld, one_prefix=False, skip_perf=False):
         def diagnostic():
             message = (completed.stderr + completed.stdout).decode('utf-8', errors='replace')
             for name in ('KKH_DB_PASSWORD', 'KKH_USER_PASSWORD', 'KKH_NEW_PASSWORD',
-                         'KKH_RESET_PASSWORD', 'KKH_FAILURE_PASSWORD', 'KKH_SALT', 'KKH_PROBE_KEY'):
+                         'KKH_RESET_PASSWORD', 'KKH_FAILURE_PASSWORD', 'KKH_SALT', 'KKH_PROBE_KEY',
+                         'KKH_MVP_EMAIL', 'KKH_FIELDS_EMAIL', 'KKH_FAILURE_EMAIL'):
                 message = message.replace(env[name], '[redacted]')
             return message[-2500:]
         require(completed.returncode == 0, 'Isolated subprocess failed: ' + diagnostic())
@@ -1890,7 +2023,8 @@ def execute(php, mysqld, one_prefix=False, skip_perf=False):
         diagnostics = '\n'.join(p.read_text(encoding='utf-8', errors='replace')[-2500:]
                                 for p in root.glob('php-*.log'))
         for name in ('KKH_DB_PASSWORD', 'KKH_USER_PASSWORD', 'KKH_NEW_PASSWORD',
-                     'KKH_RESET_PASSWORD', 'KKH_FAILURE_PASSWORD', 'KKH_SALT', 'KKH_PROBE_KEY'):
+                     'KKH_RESET_PASSWORD', 'KKH_FAILURE_PASSWORD', 'KKH_SALT', 'KKH_PROBE_KEY',
+                     'KKH_MVP_EMAIL', 'KKH_FIELDS_EMAIL', 'KKH_FAILURE_EMAIL'):
             diagnostics = diagnostics.replace(env[name], '[redacted]')
         report['diagnostics'] = diagnostics
     finally:
@@ -1912,7 +2046,7 @@ def execute(php, mysqld, one_prefix=False, skip_perf=False):
         (output / 'latest.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
     core_total = sum(len(v['cases']) for v in report['modes']['core_baseline']['variants'])
     members_total = sum(len(v['cases']) for v in report['modes']['members_on']['variants'])
-    print(f'{report["status"]}: MVP contracts=24 + extension contracts=2, '
+    print(f'{report["status"]}: MVP contracts=24 + extension contracts=3, '
           f'AUTH-LOGIN-001 Core={core_total}, '
           f'Members={members_total}; release evidence PARTIAL. Report: .harness/reports/latest.json')
     if 'error' in report:

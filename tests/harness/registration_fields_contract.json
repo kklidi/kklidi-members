@@ -1,7 +1,7 @@
 {
   "contract": "AUTH-REGISTER-FIELDS-001",
   "version": 1,
-  "status": "SPECIFIED_NOT_IMPLEMENTED",
+  "status": "IMPLEMENTED_AND_SYNTHETIC_VERIFIED",
   "target_release": "0.7.18",
   "depends_on": [
     "AUTH-REGISTER-001",
@@ -12,6 +12,16 @@
   "principle": "bounded_builtin_allowlist",
   "scope": "registration_route_only",
   "defaults_preserve_0_7_17_behavior": true,
+  "verification": {
+    "status": "PASS",
+    "scope": "synthetic_wordpress",
+    "prefixes": [
+      "wp_",
+      "non_default"
+    ],
+    "evidence_id": "10c0655fedec48139a72e44264503bc5",
+    "report": ".harness/reports/latest.json"
+  },
   "admin": {
     "menu_parent": "users",
     "section": "registration",

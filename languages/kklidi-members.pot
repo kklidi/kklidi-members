@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the KKLIDI Members plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: KKLIDI Members 0.7.17\n"
+"Project-Id-Version: KKLIDI Members 0.7.18\n"
 "Report-Msgid-Bugs-To: https://kklidi.com/\n"
 "POT-Creation-Date: 2026-09-07 00:00+0000\n"
 "MIME-Version: 1.0\n"
@@ -962,6 +962,42 @@ msgid "Password reset"
 msgstr ""
 
 msgid "Registration"
+msgstr ""
+
+msgid "Registration fields"
+msgstr ""
+
+msgid "Choose whether each approved built-in field is required, optional, or hidden. Identity, password, display name, and required consent fields stay required."
+msgstr ""
+
+msgid "Required"
+msgstr ""
+
+msgid "Hidden"
+msgstr ""
+
+msgid "Registration field settings were not saved because they contained an unsupported field or state."
+msgstr ""
+
+msgid "Choose which approved profile fields appear during registration."
+msgstr ""
+
+msgid "Registration field settings updated"
+msgstr ""
+
+msgid "Configure only the approved built-in profile fields shown during registration. Existing users and profile values are not changed."
+msgstr ""
+
+msgid "Email, password, display name, and required consent stay required. Hidden fields are ignored even if they are added to a request manually."
+msgstr ""
+
+msgid "Save registration fields"
+msgstr ""
+
+msgid "Enter a first name of 200 characters or fewer."
+msgstr ""
+
+msgid "Enter a last name of 200 characters or fewer."
 msgstr ""
 
 msgid "Withdrawal request"

@@ -13,20 +13,23 @@ final class RegistrationController {
 		require_once KKLIDI_MEMBERS_DIR . 'includes/Security/GuestCsrf.php';
 		require_once KKLIDI_MEMBERS_DIR . 'includes/Consent/Documents.php';
 		require_once KKLIDI_MEMBERS_DIR . 'includes/Consent/Repository.php';
+		require_once KKLIDI_MEMBERS_DIR . 'includes/Registration/RegistrationFields.php';
 		nocache_headers();
 		header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, private');
 		$enabled = (bool) get_option('users_can_register', false)
 			&& \KKLIDI\Members\Consent\Documents::required_ready();
 		$message = $enabled ? '' : __('New registrations are currently closed.', 'kklidi-members');
 		$field_errors = array();
-		$values = self::safe_values();
+		$field_settings = RegistrationFields::settings();
+		$field_states = $field_settings['fields'];
+		$values = self::safe_values($field_states);
 		$request_id = self::text('request_id');
 		if (!wp_is_uuid($request_id)) {
 			$request_id = wp_generate_uuid4();
 		}
 
 		if ($enabled && strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
-			$result = self::process($request_id);
+			$result = self::process($request_id, $field_states);
 			if (is_wp_error($result)) {
 				$message = $result->get_error_message();
 				$field_errors = self::field_errors($result);
@@ -53,7 +56,7 @@ final class RegistrationController {
 		exit;
 	}
 
-	private static function process(string $request_id) {
+	private static function process(string $request_id, array $field_states) {
 		$nonce = self::text('_kklidi_members_register_nonce');
 		if ($nonce === '' || !wp_verify_nonce($nonce, self::ACTION)
 			|| !\KKLIDI\Members\Security\GuestCsrf::verify(self::ACTION)) {
@@ -77,21 +80,26 @@ final class RegistrationController {
 		$email = strtolower(sanitize_email(self::text('email')));
 		$password = self::raw('password');
 		$confirm = self::raw('password_confirm');
-		$first = self::text('first_name');
-		$last = self::text('last_name');
+		$first = self::visible($field_states, 'first_name') ? self::text('first_name') : '';
+		$last = self::visible($field_states, 'last_name') ? self::text('last_name') : '';
 		$display = self::text('display_name');
-		$phone = self::text('phone');
+		$phone = self::visible($field_states, 'phone') ? self::text('phone') : '';
 		$invalid_fields = array();
 		if (!is_email($email)) {
 			$invalid_fields[] = 'email';
 		}
-		if ($first === '') {
+		if ((self::required($field_states, 'first_name') && $first === '')
+			|| ($first !== '' && self::text_length($first) > 200)) {
 			$invalid_fields[] = 'first_name';
+		}
+		if ((self::required($field_states, 'last_name') && $last === '')
+			|| ($last !== '' && self::text_length($last) > 200)) {
+			$invalid_fields[] = 'last_name';
 		}
 		if ($display === '' || strlen($display) > 200) {
 			$invalid_fields[] = 'display_name';
 		}
-		if (!self::valid_phone($phone)) {
+		if ((self::required($field_states, 'phone') && $phone === '') || !self::valid_phone($phone)) {
 			$invalid_fields[] = 'phone';
 		}
 		if ($invalid_fields) {
@@ -202,13 +210,13 @@ final class RegistrationController {
 		return $phone === '' || (strlen($phone) <= 30 && preg_match('/^[0-9+() .-]{7,30}$/', $phone));
 	}
 
-	private static function safe_values(): array {
+	private static function safe_values(array $field_states): array {
 		return array(
 			'email' => strtolower(sanitize_email(self::text('email'))),
-			'first_name' => self::text('first_name'),
-			'last_name' => self::text('last_name'),
+			'first_name' => self::visible($field_states, 'first_name') ? self::text('first_name') : '',
+			'last_name' => self::visible($field_states, 'last_name') ? self::text('last_name') : '',
 			'display_name' => self::text('display_name'),
-			'phone' => self::text('phone'),
+			'phone' => self::visible($field_states, 'phone') ? self::text('phone') : '',
 		);
 	}
 
@@ -218,7 +226,8 @@ final class RegistrationController {
 			? $data['fields'] : array();
 		$messages = array(
 			'email' => __('Enter a valid email address.', 'kklidi-members'),
-			'first_name' => __('Enter your first name.', 'kklidi-members'),
+			'first_name' => __('Enter a first name of 200 characters or fewer.', 'kklidi-members'),
+			'last_name' => __('Enter a last name of 200 characters or fewer.', 'kklidi-members'),
 			'display_name' => __('Enter a display name of 200 characters or fewer.', 'kklidi-members'),
 			'phone' => __('Enter a valid phone number or leave this field blank.', 'kklidi-members'),
 			'password' => __('Use at least 12 characters.', 'kklidi-members'),
@@ -233,6 +242,18 @@ final class RegistrationController {
 			}
 		}
 		return $errors;
+	}
+
+	private static function visible(array $states, string $field): bool {
+		return isset($states[$field]) && in_array($states[$field], array('required', 'optional'), true);
+	}
+
+	private static function required(array $states, string $field): bool {
+		return isset($states[$field]) && $states[$field] === 'required';
+	}
+
+	private static function text_length(string $value): int {
+		return function_exists('mb_strlen') ? mb_strlen($value, 'UTF-8') : strlen($value);
 	}
 
 	private static function text(string $key): string {

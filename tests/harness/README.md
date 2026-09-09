@@ -70,7 +70,7 @@ The `AUTH-UI-001` unit guard verifies that every current Members frontend route 
 
 `AUTH-ADMIN-UX-001` keeps the route controller canonical and makes administrator setup easier without creating pages or mutating site menus. The contract is guarded by the unit suite and the MAMP lifecycle runner; it does not claim external mailbox delivery.
 
-`AUTH-REGISTER-FIELDS-001` specifies the 0.7.18 registration-only field policy. Email, password, display name and required consent stay locked; only first name, last name and phone may be required, optional or hidden. The current runtime does not consume this setting yet, so its unit guard verifies the design and default-compatibility boundary without claiming implementation.
+`AUTH-REGISTER-FIELDS-001` implements the 0.7.18 registration-only field policy. Email, password, display name and required consent stay locked; only first name, last name and phone may be required, optional or hidden. The disposable runner verifies Settings API capability/nonce, non-autoload storage, invalid-state rejection, required validation, hidden POST rejection, fixed role, both prefixes, and exact synthetic-user cleanup.
 
 The fixed MAMP LMS fixture exercises actual Woo order reconciliation into KKLIDI LMS enrollment, WordPress ID continuity across progress/certificate/private-question rows, learner/outsider access, route-scoped Members profile delegation, Members-off LMS/Core fallback, and exact cleanup. It creates only tagged synthetic data and sinks notification mail.
 

@@ -105,6 +105,18 @@
 				</table>
 			</section>
 		<?php endforeach; ?>
+	<?php elseif ($section === 'registration') : ?>
+		<section class="kklidi-members-admin-card">
+			<h2><?php esc_html_e('Registration fields', 'kklidi-members'); ?></h2>
+			<p><?php esc_html_e('Configure only the approved built-in profile fields shown during registration. Existing users and profile values are not changed.', 'kklidi-members'); ?></p>
+			<p class="description"><?php esc_html_e('Email, password, display name, and required consent stay required. Hidden fields are ignored even if they are added to a request manually.', 'kklidi-members'); ?></p>
+			<?php settings_errors(\KKLIDI\Members\Registration\RegistrationFields::OPTION_NAME); ?>
+			<form action="<?php echo esc_url(admin_url('options.php')); ?>" method="post">
+				<?php settings_fields(\KKLIDI\Members\Registration\RegistrationFields::OPTION_GROUP); ?>
+				<?php do_settings_sections(\KKLIDI\Members\Registration\RegistrationFields::SETTINGS_PAGE); ?>
+				<?php submit_button(__('Save registration fields', 'kklidi-members')); ?>
+			</form>
+		</section>
 	<?php elseif ($section === 'notifications') : ?>
 		<section class="kklidi-members-admin-card">
 			<h2><?php esc_html_e('Account notification messages', 'kklidi-members'); ?></h2>

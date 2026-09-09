@@ -84,7 +84,63 @@ if ($action === 'notification-settings-summary') {
             'notification_settings_update'
         )) > 0,
     ));
-    exit;
+	exit;
+}
+if ($action === 'registration-fields-summary') {
+	require_once KKLIDI_MEMBERS_DIR . 'includes/Registration/RegistrationFields.php';
+	$option_name = \KKLIDI\Members\Registration\RegistrationFields::OPTION_NAME;
+	$stored = get_option($option_name, array());
+	$autoload = $wpdb->get_var($wpdb->prepare(
+		"SELECT autoload FROM {$wpdb->options} WHERE option_name = %s",
+		$option_name
+	));
+	$audit_table = $wpdb->prefix . 'kklidi_mem_login_audit';
+	$field_email = getenv('KKH_FIELDS_EMAIL') ?: '';
+	$field_user = $field_email !== '' ? get_user_by('email', $field_email) : false;
+	$consent_table = $wpdb->prefix . 'kklidi_mem_consents';
+	echo wp_json_encode(array(
+		'autoload' => $autoload,
+		'stored' => $stored,
+		'effective' => \KKLIDI\Members\Registration\RegistrationFields::settings(),
+		'settings_audit_count' => (int) $wpdb->get_var($wpdb->prepare(
+			"SELECT COUNT(*) FROM {$audit_table} WHERE event_type = %s",
+			'registration_fields_update'
+		)),
+		'settings_audit_has_digest' => (int) $wpdb->get_var($wpdb->prepare(
+			"SELECT COUNT(*) FROM {$audit_table}
+			 WHERE event_type = %s AND subject_digest IS NOT NULL",
+			'registration_fields_update'
+		)) > 0,
+		'field_user' => $field_user ? array(
+			'id' => (int) $field_user->ID,
+			'roles' => array_values($field_user->roles),
+			'first_name' => (string) $field_user->first_name,
+			'last_name' => (string) $field_user->last_name,
+			'phone' => (string) get_user_meta($field_user->ID, 'billing_phone', true),
+			'required_consents' => (int) $wpdb->get_var($wpdb->prepare(
+				"SELECT COUNT(*) FROM {$consent_table}
+				 WHERE user_id = %d AND consent_type IN ('service', 'privacy') AND action = 'accept'",
+				$field_user->ID
+			)),
+		) : null,
+	));
+	exit;
+}
+if ($action === 'cleanup-registration-fields-user') {
+	$field_email = getenv('KKH_FIELDS_EMAIL') ?: '';
+	$field_user = $field_email !== '' ? get_user_by('email', $field_email) : false;
+	if (!$field_user) { exit('Missing synthetic registration-fields user.'); }
+	$consent_table = $wpdb->prefix . 'kklidi_mem_consents';
+	$audit_table = $wpdb->prefix . 'kklidi_mem_login_audit';
+	$wpdb->delete($consent_table, array('user_id' => $field_user->ID), array('%d'));
+	$wpdb->delete($audit_table, array('user_id' => $field_user->ID), array('%d'));
+	require_once ABSPATH . 'wp-admin/includes/user.php';
+	$deleted = wp_delete_user($field_user->ID);
+	echo wp_json_encode(array(
+		'deleted' => (bool) $deleted,
+		'remaining' => get_user_by('email', $field_email) ? 1 : 0,
+	));
+	exit;
 }
 if ($action === 'expire-audit') {
     $table = $wpdb->prefix . 'kklidi_mem_login_audit';

@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the KKLIDI Members plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: KKLIDI Members 0.7.17\n"
+"Project-Id-Version: KKLIDI Members 0.7.18\n"
 "Language: ko_KR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -868,6 +868,42 @@ msgstr "비밀번호 재설정"
 
 msgid "Registration"
 msgstr "회원가입"
+
+msgid "Registration fields"
+msgstr "회원가입 필드"
+
+msgid "Choose whether each approved built-in field is required, optional, or hidden. Identity, password, display name, and required consent fields stay required."
+msgstr "승인된 기본 필드를 필수, 선택 또는 숨김으로 설정하세요. 계정 식별, 비밀번호, 표시명 및 필수 동의 필드는 계속 필수입니다."
+
+msgid "Required"
+msgstr "필수"
+
+msgid "Hidden"
+msgstr "숨김"
+
+msgid "Registration field settings were not saved because they contained an unsupported field or state."
+msgstr "지원하지 않는 필드 또는 상태가 포함되어 회원가입 필드 설정을 저장하지 않았습니다."
+
+msgid "Choose which approved profile fields appear during registration."
+msgstr "회원가입할 때 표시할 승인된 프로필 필드를 선택합니다."
+
+msgid "Registration field settings updated"
+msgstr "회원가입 필드 설정 변경"
+
+msgid "Configure only the approved built-in profile fields shown during registration. Existing users and profile values are not changed."
+msgstr "회원가입에 표시할 승인된 기본 프로필 필드만 설정합니다. 기존 회원과 프로필 값은 변경되지 않습니다."
+
+msgid "Email, password, display name, and required consent stay required. Hidden fields are ignored even if they are added to a request manually."
+msgstr "이메일, 비밀번호, 표시명 및 필수 동의는 계속 필수입니다. 숨긴 필드를 요청에 직접 추가해도 무시됩니다."
+
+msgid "Save registration fields"
+msgstr "회원가입 필드 저장"
+
+msgid "Enter a first name of 200 characters or fewer."
+msgstr "이름을 200자 이내로 입력하세요."
+
+msgid "Enter a last name of 200 characters or fewer."
+msgstr "성을 200자 이내로 입력하세요."
 
 msgid "Withdrawal request"
 msgstr "탈퇴 요청"
