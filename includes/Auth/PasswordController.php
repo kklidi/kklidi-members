@@ -28,9 +28,12 @@ final class PasswordController {
 			} elseif ($new !== $confirm || strlen($new) < 12 || strlen($new) > 1024) {
 				$message = __('The new password must be at least 12 characters and match the confirmation.', 'kklidi-members');
 			} else {
+				$request_id = wp_generate_uuid4();
 				wp_set_password($new, $user->ID);
 				\KKLIDI\Members\Security\AccountState::revoke_access((int) $user->ID);
-				\KKLIDI\Members\Audit\Recorder::record('password_change', 'success', 'self', (int) $user->ID);
+				\KKLIDI\Members\Audit\Recorder::record('password_change', 'success', 'self', (int) $user->ID, '', $request_id);
+				require_once KKLIDI_MEMBERS_DIR . 'includes/Notifications/AccountMailer.php';
+				\KKLIDI\Members\Notifications\AccountMailer::send('password_changed', (int) $user->ID, $request_id);
 				wp_clear_auth_cookie();
 				wp_set_current_user(0);
 				wp_safe_redirect(kklidi_members_login_url());

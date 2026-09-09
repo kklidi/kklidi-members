@@ -86,6 +86,8 @@ final class AdminController {
 		\KKLIDI\Members\Security\AccountState::revoke_access($user_id);
 		\KKLIDI\Members\Audit\Recorder::record('withdrawal_disabled', 'success', 'admin_review', $user_id, '', $request_id);
 		do_action('kklidi_members_account_state_changed', $user_id, 'withdrawal_pending', 'disabled', $request_id);
+		require_once KKLIDI_MEMBERS_DIR . 'includes/Notifications/AccountMailer.php';
+		\KKLIDI\Members\Notifications\AccountMailer::send('withdrawal_finalized', $user_id, $request_id);
 	}
 
 	public static function render(): void {

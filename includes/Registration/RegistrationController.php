@@ -92,6 +92,7 @@ final class RegistrationController {
 		if ((int) $wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, 3)', $lock)) !== 1) {
 			return new \WP_Error('registration_busy', __('Another registration request is being processed. Please try again later.', 'kklidi-members'));
 		}
+		$completed_user_id = 0;
 		try {
 			$binding = \KKLIDI\Members\Security\GuestCsrf::binding_digest();
 			$user = get_user_by('email', $email);
@@ -147,10 +148,14 @@ final class RegistrationController {
 			delete_user_meta($user_id, '_kklidi_members_registration_binding');
 			\KKLIDI\Members\Audit\Recorder::record('registration_success', 'success', 'completed', $user_id, '', $request_id);
 			do_action('kklidi_members_account_state_changed', $user_id, 'registration_pending', 'active', $request_id);
-			return $user_id;
+			$completed_user_id = $user_id;
 		} finally {
 			$wpdb->get_var($wpdb->prepare('SELECT RELEASE_LOCK(%s)', $lock));
 		}
+
+		require_once KKLIDI_MEMBERS_DIR . 'includes/Notifications/AccountMailer.php';
+		\KKLIDI\Members\Notifications\AccountMailer::send('registration_completed', $completed_user_id, $request_id);
+		return $completed_user_id;
 	}
 
 	private static function unique_login(): string {

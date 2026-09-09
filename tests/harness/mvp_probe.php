@@ -31,6 +31,19 @@ if ($action === 'expire-audit') {
     $wpdb->query("UPDATE {$table} SET occurred_at_utc = '2000-01-01 00:00:00'");
     do_action('kklidi_members_daily_cleanup');
 }
+if ($action === 'replay-registration-notification') {
+    if (!$user) { exit('Missing synthetic notification user.'); }
+    $request_id = (string) get_user_meta($user->ID, '_kklidi_members_registration_request_id', true);
+    require_once KKLIDI_MEMBERS_DIR . 'includes/Notifications/AccountMailer.php';
+    echo wp_json_encode(array(
+        'sent' => \KKLIDI\Members\Notifications\AccountMailer::send(
+            'registration_completed',
+            (int) $user->ID,
+            $request_id
+        ),
+    ));
+    exit;
+}
 
 $consent_table = $wpdb->prefix . 'kklidi_mem_consents';
 $audit_table = $wpdb->prefix . 'kklidi_mem_login_audit';
@@ -41,6 +54,9 @@ $summary = array(
     'consent_rows' => (int) $wpdb->get_var("SELECT COUNT(*) FROM {$consent_table}"),
     'audit_rows' => count($audit_rows),
     'audit_events' => array_values(array_map(static fn($row) => $row['event_type'], $audit_rows)),
+    'mail_audit' => array_values(array_filter($audit_rows, static function ($row) {
+        return str_starts_with($row['event_type'], 'mail_');
+    })),
     'audit_contains_raw_email' => $email !== '' && stripos($serialized_audit, $email) !== false,
     'audit_contains_raw_ip' => stripos($serialized_audit, '127.0.0.1') !== false,
     'rate_option_count' => (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE '\\_kklidi\\_members\\_rate\\_%'"),

@@ -2,8 +2,14 @@
   "contract": "AUTH-NOTIFY-001",
   "version": 1,
   "status": "SPECIFIED",
-  "implementation_status": "NOT_IMPLEMENTED",
+  "implementation_status": "IMPLEMENTED_AND_SYNTHETIC_VERIFIED",
   "implementation_phase": "P0-2",
+  "verification": {
+    "status": "PASS",
+    "scope": "synthetic_wordpress",
+    "prefixes": ["wp_", "non_default"],
+    "report": ".harness/reports/latest.json"
+  },
   "transport": {
     "api": "wp_mail",
     "format": "text/plain",

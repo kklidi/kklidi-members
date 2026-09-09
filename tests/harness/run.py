@@ -44,6 +44,7 @@ PRODUCTION_FILES = [
     'includes/Core/Url.php',
     'includes/Frontend/AccountController.php',
     'includes/Migration/LegacyConsentImporter.php',
+    'includes/Notifications/AccountMailer.php',
     'includes/Profile/ProfileController.php',
     'includes/Registration/RegistrationController.php',
     'includes/Security/AccountState.php',
@@ -279,6 +280,26 @@ def events(path):
     return [json.loads(line) for line in path.read_text().splitlines()] if path.exists() else []
 
 
+def read_mailbox(path):
+    return [json.loads(line) for line in path.read_text(encoding='utf-8').splitlines()] \
+        if path.exists() else []
+
+
+def assert_account_notice(row, recipient, subject_fragment, required_fragments, forbidden_fragments):
+    recipients = row.get('to', [])
+    headers = row.get('headers', [])
+    content = html_module.unescape(str(row.get('subject', '')) + '\n' + str(row.get('message', '')))
+    require(recipients == [recipient], 'Account notice did not use the current Core user email')
+    require(any(header.lower().startswith('content-type: text/plain;') for header in headers),
+            'Account notice did not declare its plain-text format')
+    require(subject_fragment in str(row.get('subject', '')),
+            'Account notice used the wrong preset subject')
+    require(all(fragment in content for fragment in required_fragments),
+            'Account notice omitted required preset content')
+    require(not any(fragment and fragment in content for fragment in forbidden_fragments),
+            'Account notice exposed forbidden account data')
+
+
 def hidden_input(document, name):
     match = re.search(r'<input\b[^>]*\bname=["\']' + re.escape(name)
                       + r'["\'][^>]*\bvalue=["\']([^"\']*)["\']', document, re.IGNORECASE)
@@ -509,6 +530,7 @@ def run_mvp_cases(base, env, fixture, command, php_cli):
     results = {}
     key = env['KKH_PROBE_KEY']
     active = ['kklidi-members/kklidi-members.php']
+    mailbox_path = Path(env['KKH_MAILBOX'])
 
     missing_documents = command(php_cli + [HERE / 'mvp_setup.php', 'core-on-no-documents'], json_result=True)
     require(missing_documents == {'required_ready': False, 'legacy_registration_option': '1',
@@ -529,6 +551,7 @@ def run_mvp_cases(base, env, fixture, command, php_cli):
     setup = command(php_cli + [HERE / 'mvp_setup.php', 'core-on'], json_result=True)
     require(setup == {'required_ready': True, 'legacy_registration_option': '0',
                       'users_can_register': True}, 'MVP setup failed')
+    initial_mail_count = len(read_mailbox(mailbox_path))
 
     allowed_destinations = [
         base + '/checkout/?step=payment',
@@ -631,6 +654,14 @@ def run_mvp_cases(base, env, fixture, command, php_cli):
     require(status == 302 and 'registered=1' in headers.get('Location', '')
             and registration.observe(key)['logged_in'] is False,
             'Registration did not complete without auto-login')
+    registration_mail = read_mailbox(mailbox_path)
+    require(len(registration_mail) == initial_mail_count + 1,
+            'Registration success did not create exactly one account notice')
+    assert_account_notice(
+        registration_mail[-1], env['KKH_MVP_EMAIL'], 'Registration complete',
+        ['Your account registration is complete.', 'Sign in:', base],
+        [env['KKH_USER_PASSWORD'], request_id, env['KKH_MVP_EMAIL'], 'user_id', 'role=']
+    )
     probe = command(php_cli + [HERE / 'mvp_probe.php'], json_result=True)
     new_user = probe.get('user', {})
     require(probe['users_count'] == 4 and new_user.get('login_is_private') is True
@@ -649,7 +680,13 @@ def run_mvp_cases(base, env, fixture, command, php_cli):
     status, _, duplicate_body = duplicate.request('/?kklidi_members_register=1', data=duplicate_fields)
     duplicate_probe = command(php_cli + [HERE / 'mvp_probe.php'], json_result=True)
     require(status == 200 and 'We could not complete the registration. Please use login or password reset.' in duplicate_body
-            and duplicate_probe['users_count'] == 4, 'Duplicate registration changed identity state')
+            and duplicate_probe['users_count'] == 4
+            and len(read_mailbox(mailbox_path)) == len(registration_mail),
+            'Duplicate registration changed identity state or sent another notice')
+    replay = command(php_cli + [HERE / 'mvp_probe.php', 'replay-registration-notification'],
+                     json_result=True)
+    require(replay == {'sent': False} and len(read_mailbox(mailbox_path)) == len(registration_mail),
+            'Logical notification replay was not idempotent')
     results['AUTH-REGISTER-001'] = {'status': 'PASS', 'users_created': 1,
                                     'required_consents': 2, 'auto_login': False,
                                     'core_registration_authority': True,
@@ -817,6 +854,20 @@ def run_mvp_cases(base, env, fixture, command, php_cli):
     first, first_response, _ = members_login(base, env, env['KKH_MVP_EMAIL'], env['KKH_USER_PASSWORD'])
     second, second_response, _ = members_login(base, env, env['KKH_MVP_EMAIL'], env['KKH_USER_PASSWORD'])
     require(first_response[0] == second_response[0] == 302, 'Password test sessions failed')
+    password_mail_count = len(read_mailbox(mailbox_path))
+    _, _, password_form = first.request('/?kklidi_members_password=1')
+    invalid_password_fields = {
+        'kklidi_members_password': '1',
+        '_kklidi_members_password_nonce': hidden_input(password_form, '_kklidi_members_password_nonce'),
+        'current_password': 'incorrect-current-password',
+        'new_password': env['KKH_NEW_PASSWORD'],
+        'new_password_confirm': env['KKH_NEW_PASSWORD'],
+    }
+    invalid_status, _, invalid_body = first.request(
+        '/?kklidi_members_password=1', data=invalid_password_fields)
+    require(invalid_status == 200 and 'Please check your current password.' in invalid_body
+            and len(read_mailbox(mailbox_path)) == password_mail_count,
+            'Rejected password change sent an account notice')
     _, _, password_form = first.request('/?kklidi_members_password=1')
     password_fields = {
         'kklidi_members_password': '1',
@@ -832,12 +883,23 @@ def run_mvp_cases(base, env, fixture, command, php_cli):
             and password_probe['user']['old_password_valid'] is False
             and password_probe['user']['new_password_valid'] is True,
             'Password change did not use Core hash/session revocation')
+    password_mail = read_mailbox(mailbox_path)
+    require(len(password_mail) == password_mail_count + 1,
+            'Password change did not create exactly one account notice')
+    assert_account_notice(
+        password_mail[-1], env['KKH_MVP_EMAIL'], 'Password changed',
+        ['The password for your account was changed.', 'reset your password immediately:',
+         '/wp-login.php?action=lostpassword'],
+        [env['KKH_USER_PASSWORD'], env['KKH_NEW_PASSWORD'], env['KKH_RESET_PASSWORD'],
+         env['KKH_MVP_EMAIL'], 'key=', 'user_id', 'auth_cookie']
+    )
     results['AUTH-RESET-001']['self_change_core_hash'] = 'PASS'
     results['AUTH-RESET-001']['all_sessions_revoked_on_self_change'] = True
 
     # Withdrawal preserves the Core ID and queues the user while revoking access.
     withdrawing, login_response, _ = members_login(base, env, env['KKH_MVP_EMAIL'], env['KKH_NEW_PASSWORD'])
     require(login_response[0] == 302, 'New password login failed')
+    withdrawal_mail_count = len(read_mailbox(mailbox_path))
     _, _, withdrawal_form = withdrawing.request('/?kklidi_members_withdrawal=1')
     withdrawal_fields = {
         'kklidi_members_withdrawal': '1',
@@ -854,6 +916,16 @@ def run_mvp_cases(base, env, fixture, command, php_cli):
             and withdrawal_probe['user']['state'] == 'withdrawal_pending'
             and blocked_response[0] == 200 and blocked.observe(key)['logged_in'] is False,
             'Withdrawal failed to preserve ID and block access')
+    withdrawal_mail = read_mailbox(mailbox_path)
+    require(len(withdrawal_mail) == withdrawal_mail_count + 1,
+            'Withdrawal request did not create exactly one account notice')
+    assert_account_notice(
+        withdrawal_mail[-1], env['KKH_MVP_EMAIL'], 'Withdrawal request received',
+        ['We received your account withdrawal request.', 'Sign-in access has been blocked',
+         'site administrator and service owners'],
+        [env['KKH_NEW_PASSWORD'], withdrawal_fields['request_id'], env['KKH_MVP_EMAIL'],
+         'all personal data has been deleted', 'orders were deleted', 'learning records were deleted']
+    )
 
     # The administrator sees the queue, finalizes only the pending state, and replay is idempotent.
     queued_user_id = withdrawal_probe['user']['id']
@@ -870,11 +942,29 @@ def run_mvp_cases(base, env, fixture, command, php_cli):
     finalize_status, _, _ = admin.request('/wp-admin/tools.php?page=kklidi-members', data=finalize_fields)
     finalized_probe = command(php_cli + [HERE / 'mvp_probe.php'], json_result=True)
     disabled_events = finalized_probe['audit_events'].count('withdrawal_disabled')
+    expected_mail_events = {
+        'mail_registration_completed', 'mail_password_changed',
+        'mail_withdrawal_requested', 'mail_withdrawal_finalized',
+    }
+    mail_audit = finalized_probe['mail_audit']
     require(finalize_status == 302 and finalized_probe['users_count'] == 4
             and finalized_probe['user']['id'] == queued_user_id
             and finalized_probe['user']['state'] == 'disabled'
-            and disabled_events == 1,
+            and disabled_events == 1
+            and {row['event_type'] for row in mail_audit} == expected_mail_events
+            and all(row['result'] == 'success' and row['reason_code'] == 'wp_mail_accepted'
+                    for row in mail_audit),
             'Administrator withdrawal finalization changed identity or missed the disabled transition')
+    finalized_mail = read_mailbox(mailbox_path)
+    require(len(finalized_mail) == len(withdrawal_mail) + 1,
+            'Withdrawal finalization did not create exactly one account notice')
+    assert_account_notice(
+        finalized_mail[-1], env['KKH_MVP_EMAIL'], 'Withdrawal processing complete',
+        ['has been processed', 'sign-in access remains blocked',
+         'account ID and related order or learning records may be retained'],
+        [env['KKH_NEW_PASSWORD'], env['KKH_MVP_EMAIL'], 'all personal data has been deleted',
+         'orders were deleted', 'learning records were deleted']
+    )
 
     after_status, _, after_page = admin.request('/wp-admin/tools.php?page=kklidi-members')
     replay_status, _, _ = admin.request('/wp-admin/tools.php?page=kklidi-members', data=dict(
@@ -885,13 +975,22 @@ def run_mvp_cases(base, env, fixture, command, php_cli):
     require(after_status == 200 and replay_status == 302
             and f'name="user_id" value="{queued_user_id}"' not in after_page
             and replay_probe['user']['state'] == 'disabled'
-            and replay_probe['audit_events'].count('withdrawal_disabled') == disabled_events,
+            and replay_probe['audit_events'].count('withdrawal_disabled') == disabled_events
+            and len(read_mailbox(mailbox_path)) == len(finalized_mail),
             'Administrator withdrawal finalization was not idempotent')
     results['AUTH-WITHDRAW-001'] = {'status': 'PASS', 'identity_preserved': True,
                                     'requested_state': 'withdrawal_pending',
                                     'final_state': 'disabled', 'sessions_revoked': True,
                                     'admin_queue': 'PASS', 'admin_replay_idempotent': True,
                                     'automatic_pii_deletion': False}
+    results['AUTH-NOTIFY-001'] = {
+        'status': 'PASS', 'account_notice_events': 4,
+        'current_core_recipient': True, 'fixed_plain_text_presets': True,
+        'post_success_only': True, 'logical_replay_idempotent': True,
+        'credentials_and_tokens_absent': True, 'order_lms_details_absent': True,
+        'minimal_audit_results': 'wp_mail_accepted',
+        'members_off_no_hard_dependency': 'checked_after_account_cases',
+    }
 
     # Repeated failures eventually return a standards-visible throttle response.
     statuses = []
@@ -1015,7 +1114,8 @@ def run_domain_boundary_cases(env, fixture, command, php_cli):
         require(query.get('redirect_to') == [destination],
                 'Members did not preserve the ' + domain + ' destination')
     off = command(php_cli + [HERE / 'integration_off.php'], json_result=True)
-    require(off['members_helper_exists'] is False and off['core_fallback_is_wp_login'] is True
+    require(off['members_helper_exists'] is False and off['notification_class_exists'] is False
+            and off['core_fallback_is_wp_login'] is True
             and off['fingerprints'] == on['fingerprints']
             and all(ids == [on['user_id']] for ids in off['user_ids'].values()),
             'Members deactivation changed domain ownership or caused a hard dependency')
@@ -1147,6 +1247,7 @@ def execute(php, mysqld, one_prefix=False, skip_perf=False):
               'modes': {'core_baseline': {'status': 'FAIL', 'variants': []},
                         'members_on': {'status': 'FAIL', 'variants': []}},
               'contracts_total': 24, 'contracts_exercised': 24,
+              'extension_contracts_total': 1, 'extension_contracts_exercised': 1,
               'not_run': ['actual WooCommerce/LMS full-stack browser regression',
                           'KBoard removal-period compatibility smoke/no-fatal',
                           'device-limit WooCommerce login entry', 'TLS/Secure cookie deployment',
@@ -1288,9 +1389,10 @@ def execute(php, mysqld, one_prefix=False, skip_perf=False):
             mvp_results['AUTH-RATE-LIMIT-001']['shared_database_nodes'] = 8
             mvp_results['AUTH-RATE-LIMIT-001']['object_cache_outage'] = 'PASS'
             mvp_results['AUTH-RATE-LIMIT-001']['storage_failure'] = 'FAIL_CLOSED'
+            boundary_results = run_domain_boundary_cases(env, fixture, command, php_cli)
+            mvp_results['AUTH-NOTIFY-001']['members_off_no_hard_dependency'] = True
             for contract, result in mvp_results.items():
                 report['mvp_contracts'].setdefault(contract, []).append(dict(result, prefix=prefix))
-            boundary_results = run_domain_boundary_cases(env, fixture, command, php_cli)
             for contract, result in boundary_results.items():
                 report['mvp_contracts'].setdefault(contract, []).append(dict(result, prefix=prefix))
             if index == 0 and not skip_perf:
@@ -1386,7 +1488,8 @@ def execute(php, mysqld, one_prefix=False, skip_perf=False):
         (output / 'latest.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
     core_total = sum(len(v['cases']) for v in report['modes']['core_baseline']['variants'])
     members_total = sum(len(v['cases']) for v in report['modes']['members_on']['variants'])
-    print(f'{report["status"]}: MVP contracts=24, AUTH-LOGIN-001 Core={core_total}, '
+    print(f'{report["status"]}: MVP contracts=24 + extension contracts=1, '
+          f'AUTH-LOGIN-001 Core={core_total}, '
           f'Members={members_total}; release evidence PARTIAL. Report: .harness/reports/latest.json')
     if 'error' in report:
         print(report['error'])

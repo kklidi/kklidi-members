@@ -17,7 +17,13 @@ add_filter('pre_wp_mail', function ($return, $attributes) {
     kkh_record(['type' => 'mail_sunk']);
     $mailbox = getenv('KKH_MAILBOX');
     if ($mailbox && dirname($mailbox) === dirname(rtrim(ABSPATH, '/\\')) && is_array($attributes)) {
+		$recipients = $attributes['to'] ?? array();
+		$recipients = is_array($recipients) ? array_values($recipients) : array((string) $recipients);
+		$headers = $attributes['headers'] ?? array();
+		$headers = is_array($headers) ? array_values($headers) : array((string) $headers);
         file_put_contents($mailbox, wp_json_encode(array(
+			'to' => $recipients,
+			'headers' => $headers,
             'subject' => (string) ($attributes['subject'] ?? ''),
             'message' => (string) ($attributes['message'] ?? ''),
         )) . "\n", FILE_APPEND | LOCK_EX);

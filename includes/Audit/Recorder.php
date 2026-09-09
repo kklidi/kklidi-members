@@ -47,6 +47,50 @@ final class Recorder {
 		return $inserted !== false || self::is_duplicate($table, $request_id, $event);
 	}
 
+	/**
+	 * Atomically claim one logical notification without storing its recipient or body.
+	 */
+	public static function claim_notification(string $event, int $user_id, string $request_id): bool {
+		if ($user_id < 1 || !wp_is_uuid($request_id)) {
+			return false;
+		}
+
+		global $wpdb;
+		$table = $wpdb->prefix . 'kklidi_mem_login_audit';
+		$event = substr('mail_' . sanitize_key($event), 0, 40);
+		$inserted = $wpdb->query($wpdb->prepare(
+			"INSERT INTO {$table}
+			(user_id, occurred_at_utc, event_type, result, reason_code, request_id, subject_digest, network_digest)
+			VALUES (%d, %s, %s, 'pending', 'dispatch_claimed', %s, NULL, %s)",
+			$user_id,
+			current_time('mysql', true),
+			$event,
+			$request_id,
+			self::digest(\KKLIDI\Members\Security\RateLimiter::network())
+		));
+
+		return $inserted === 1;
+	}
+
+	public static function complete_notification(string $event, string $request_id, bool $sent): bool {
+		if (!wp_is_uuid($request_id)) {
+			return false;
+		}
+
+		global $wpdb;
+		$table = $wpdb->prefix . 'kklidi_mem_login_audit';
+		$updated = $wpdb->query($wpdb->prepare(
+			"UPDATE {$table} SET result = %s, reason_code = %s
+			WHERE request_id = %s AND event_type = %s AND result = 'pending'",
+			$sent ? 'success' : 'failure',
+			$sent ? 'wp_mail_accepted' : 'wp_mail_failed',
+			$request_id,
+			substr('mail_' . sanitize_key($event), 0, 40)
+		));
+
+		return $updated === 1;
+	}
+
 	public static function cleanup(): void {
 		global $wpdb;
 		$table = $wpdb->prefix . 'kklidi_mem_login_audit';

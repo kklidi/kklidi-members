@@ -39,6 +39,8 @@ final class WithdrawalController {
 					\KKLIDI\Members\Audit\Recorder::record('withdrawal_request', 'success', 'self', (int) $user->ID, '', $request_id);
 					do_action('kklidi_members_account_state_changed', (int) $user->ID, 'active', 'withdrawal_pending', $request_id);
 					\KKLIDI\Members\Security\AccountState::revoke_access((int) $user->ID);
+					require_once KKLIDI_MEMBERS_DIR . 'includes/Notifications/AccountMailer.php';
+					\KKLIDI\Members\Notifications\AccountMailer::send('withdrawal_requested', (int) $user->ID, $request_id);
 					wp_clear_auth_cookie();
 					wp_set_current_user(0);
 					wp_safe_redirect(add_query_arg('withdrawal', 'requested', kklidi_members_login_url()));

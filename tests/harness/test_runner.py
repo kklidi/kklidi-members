@@ -89,6 +89,7 @@ class HarnessGuards(unittest.TestCase):
         builder = (repository / 'tests/harness/build_release.py').read_text(encoding='utf-8')
         self.assertIn("not path.startswith('docs/evidence/')", builder)
         self.assertNotIn('evidence_doc', builder)
+        self.assertIn("'docs/NOTIFICATIONS.md'", builder)
         exporter = (repository / 'tests/harness/export_release_evidence.py').read_text(encoding='utf-8')
         self.assertIn("package_manifest['archive_sha256'] == package_sha256", exporter)
         self.assertIn("lifecycle['new_archive_sha256'] == package_sha256", exporter)
@@ -187,7 +188,7 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('현재 판정은 최신 릴리스 문서', harness)
         self.assertNotIn('현재 실행 결과는 §5와 0.5.0 릴리스 문서', harness)
 
-    def test_auth_notify_001_is_bounded_and_not_yet_implemented(self):
+    def test_auth_notify_001_runtime_is_bounded(self):
         repository = Path(__file__).resolve().parents[2]
         contract = json.loads(
             (repository / 'tests/harness/notification_contract.json').read_text(encoding='utf-8')
@@ -196,8 +197,14 @@ class HarnessGuards(unittest.TestCase):
         self.assertEqual(contract['contract'], 'AUTH-NOTIFY-001')
         self.assertEqual(contract['version'], 1)
         self.assertEqual(contract['status'], 'SPECIFIED')
-        self.assertEqual(contract['implementation_status'], 'NOT_IMPLEMENTED')
+        self.assertEqual(contract['implementation_status'], 'IMPLEMENTED_AND_SYNTHETIC_VERIFIED')
         self.assertEqual(contract['implementation_phase'], 'P0-2')
+        self.assertEqual(contract['verification'], {
+            'status': 'PASS',
+            'scope': 'synthetic_wordpress',
+            'prefixes': ['wp_', 'non_default'],
+            'report': '.harness/reports/latest.json',
+        })
         self.assertEqual(contract['transport'], {
             'api': 'wp_mail',
             'format': 'text/plain',
@@ -257,16 +264,39 @@ class HarnessGuards(unittest.TestCase):
         notification_doc = (repository / 'docs/NOTIFICATIONS.md').read_text(encoding='utf-8')
         product_doc = (repository / 'docs/PRODUCT.md').read_text(encoding='utf-8')
         self.assertIn('AUTH-NOTIFY-001', notification_doc)
-        self.assertIn('Runtime 상태 | **NOT_IMPLEMENTED**', notification_doc)
+        self.assertIn('Runtime 상태 | **IMPLEMENTED_AND_SYNTHETIC_VERIFIED**', notification_doc)
         self.assertIn('| D08 | **DECIDED 2026-09-09**', product_doc)
 
-        production_files = [repository / 'kklidi-members.php']
-        production_files.extend((repository / 'includes').rglob('*.php'))
-        production_files.extend((repository / 'templates').rglob('*.php'))
-        production_source = '\n'.join(
-            path.read_text(encoding='utf-8') for path in production_files
+        mailer = (repository / 'includes/Notifications/AccountMailer.php').read_text(encoding='utf-8')
+        self.assertEqual(mailer.count('wp_mail('), 1)
+        self.assertIn("Content-Type: text/plain; charset=", mailer)
+        self.assertIn('switch_to_user_locale($user_id)', mailer)
+        self.assertIn("get_user_by('id', $user_id)", mailer)
+        self.assertIn("Recorder::claim_notification($event, $user_id, $event_id)", mailer)
+
+        plugin = (repository / 'includes/Core/Plugin.php').read_text(encoding='utf-8')
+        self.assertNotIn('Notifications/AccountMailer.php', plugin)
+        self.assertNotIn('wp_mail(', plugin)
+        for path, event in {
+            'includes/Registration/RegistrationController.php': 'registration_completed',
+            'includes/Auth/PasswordController.php': 'password_changed',
+            'includes/Withdrawal/WithdrawalController.php': 'withdrawal_requested',
+            'includes/Admin/AdminController.php': 'withdrawal_finalized',
+        }.items():
+            with self.subTest(path=path):
+                source = (repository / path).read_text(encoding='utf-8')
+                self.assertIn('includes/Notifications/AccountMailer.php', source)
+                self.assertIn("AccountMailer::send('" + event + "'", source)
+
+        registration = (repository / 'includes/Registration/RegistrationController.php').read_text(
+            encoding='utf-8'
         )
-        self.assertNotIn('wp_mail(', production_source)
+        self.assertLess(registration.index('SELECT RELEASE_LOCK'),
+                        registration.index("AccountMailer::send('registration_completed'"))
+
+        harness = (repository / 'tests/harness/run.py').read_text(encoding='utf-8')
+        self.assertIn("'includes/Notifications/AccountMailer.php'", harness)
+        self.assertIn("results['AUTH-NOTIFY-001']", harness)
 
     def test_tls_runner_confines_openssl_random_state_to_run_directory(self):
         repository = Path(__file__).resolve().parents[2]

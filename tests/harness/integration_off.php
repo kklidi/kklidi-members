@@ -19,6 +19,7 @@ foreach ($tables as $domain => $table) {
 }
 echo wp_json_encode(array(
     'members_helper_exists' => function_exists('kklidi_members_login_url'),
+    'notification_class_exists' => class_exists('KKLIDI\\Members\\Notifications\\AccountMailer'),
     'core_fallback_is_wp_login' => str_contains(wp_login_url('/synthetic'), 'wp-login.php'),
     'fingerprints' => $fingerprints, 'user_ids' => $user_ids,
 ));

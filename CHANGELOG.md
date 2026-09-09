@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased — next 0.7.3
+
+- Added route-scoped account notices for completed registration, self-service password
+  changes, withdrawal requests, and administrator-finalized withdrawals.
+- Used the current WordPress user email, explicit plain-text presets, user locale, and
+  the existing audit unique key for one logical dispatch claim per event.
+- Verified the four presets, rejected/replayed requests, data minimization, arbitrary
+  database prefixes, and Members-off behavior in disposable WordPress installations.
+- Korean message catalogs and injected mail-failure behavior remain the P0-3 and P0-4
+  gates before the 0.7.3 package is built.
+
 ## 0.7.2 — 2026-09-09
 
 - Clarified that `AUTH-UI-002` is implemented and verified in MAMP and Chrome.
