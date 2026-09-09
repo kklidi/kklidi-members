@@ -659,6 +659,29 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
     status, headers, form = registration.request('/?kklidi_members_register=1')
     require(status == 200 and 'name="email"' in form and 'no-store' in headers.get('Cache-Control', '').lower(),
             'Enabled registration form missing or cacheable')
+    require('가입 후 가입할 때 사용한 이메일 주소로 로그인해야 하며 가입 직후 자동 로그인은 수행되지 않습니다.' in form,
+            'Korean registration sign-in guidance was not rendered')
+
+    # The Members reset wrapper renders the Korean generic guidance and keeps
+    # matching/non-matching request responses indistinguishable.
+    reset_ux = Browser(base)
+    reset_status, _, reset_request_form = reset_ux.request('/?kklidi_members_password_reset=1')
+    require(reset_status == 200 and 'name="user_login"' in reset_request_form
+            and '사용자명 또는 이메일을 입력하세요. 일치하는 계정이 있으면 WordPress가 비밀번호 재설정 링크를 보냅니다.' in reset_request_form,
+            'Members reset wrapper Korean guidance was not rendered')
+    reset_fields = {
+        'kklidi_members_password_reset': '1',
+        'reset_action': 'request',
+        'user_login': 'absent-reset-user@example.invalid',
+        '_kklidi_members_password_reset_nonce': hidden_input(
+            reset_request_form, '_kklidi_members_password_reset_nonce'),
+        '_kklidi_members_guest_exp': hidden_input(reset_request_form, '_kklidi_members_guest_exp'),
+        '_kklidi_members_guest_token': hidden_input(reset_request_form, '_kklidi_members_guest_token'),
+    }
+    reset_status, _, reset_body = reset_ux.request('/?kklidi_members_password_reset=1', data=reset_fields)
+    require(reset_status == 200
+            and '입력한 정보와 일치하는 계정이 있으면 WordPress가 비밀번호 재설정 링크를 보냅니다.' in reset_body,
+            'Members reset wrapper leaked a missing-account response')
     request_id = hidden_input(form, 'request_id')
     registration_fields = {
         'kklidi_members_register': '1',
@@ -691,6 +714,24 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
         ['회원가입이 완료되었습니다.', '로그인:', base],
         [env['KKH_USER_PASSWORD'], request_id, env['KKH_MVP_EMAIL'], 'user_id', 'role=']
     )
+    reset_mailbox_snapshot = mailbox_path.read_bytes()
+    existing_reset = Browser(base)
+    _, _, existing_reset_form = existing_reset.request('/?kklidi_members_password_reset=1')
+    existing_reset_fields = {
+        'kklidi_members_password_reset': '1',
+        'reset_action': 'request',
+        'user_login': env['KKH_MVP_EMAIL'],
+        '_kklidi_members_password_reset_nonce': hidden_input(
+            existing_reset_form, '_kklidi_members_password_reset_nonce'),
+        '_kklidi_members_guest_exp': hidden_input(existing_reset_form, '_kklidi_members_guest_exp'),
+        '_kklidi_members_guest_token': hidden_input(existing_reset_form, '_kklidi_members_guest_token'),
+    }
+    existing_status, _, existing_body = existing_reset.request(
+        '/?kklidi_members_password_reset=1', data=existing_reset_fields)
+    require(existing_status == 200
+            and '입력한 정보와 일치하는 계정이 있으면 WordPress가 비밀번호 재설정 링크를 보냅니다.' in existing_body,
+            'Members reset wrapper changed the matching-account response shape')
+    mailbox_path.write_bytes(reset_mailbox_snapshot)
     english_site = command(php_cli + [HERE / 'mvp_setup.php', 'set-site-locale', 'en_US'],
                            json_result=True)
     require(english_site.get('locale') == 'en_US' and english_site.get('option') in ('', 'en_US'),
