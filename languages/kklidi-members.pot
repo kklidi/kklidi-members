@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the KKLIDI Members plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: KKLIDI Members 0.7.7\n"
+"Project-Id-Version: KKLIDI Members 0.7.8\n"
 "Report-Msgid-Bugs-To: https://kklidi.com/\n"
 "POT-Creation-Date: 2026-09-07 00:00+0000\n"
 "MIME-Version: 1.0\n"
@@ -683,4 +683,130 @@ msgid "Required consent complete"
 msgstr ""
 
 msgid "Required consent incomplete"
+msgstr ""
+
+msgid "The account remains blocked and the withdrawal was finalized."
+msgstr ""
+
+msgid "Account access was restored. Existing sessions remain revoked."
+msgstr ""
+
+msgid "The withdrawal could not be updated. Check the current state and restoration reason."
+msgstr ""
+
+msgid "Finalizing keeps the account blocked. Restoring requires a reason and does not revive any previous WordPress session."
+msgstr ""
+
+msgid "Requested at (UTC)"
+msgstr ""
+
+msgid "Review actions"
+msgstr ""
+
+msgid "Finalize and keep blocked"
+msgstr ""
+
+msgid "Restoration reason"
+msgstr ""
+
+msgid "Restore account access"
+msgstr ""
+
+msgid "Audit events"
+msgstr ""
+
+msgid "Successful events are retained for %1$d days and security failures for %2$d days. These values are read-only until an operating policy is approved."
+msgstr ""
+
+msgid "Event"
+msgstr ""
+
+msgid "All events"
+msgstr ""
+
+msgid "All results"
+msgstr ""
+
+msgid "UTC date"
+msgstr ""
+
+msgid "Filter"
+msgstr ""
+
+msgid "%d matching events"
+msgstr ""
+
+msgid "Login"
+msgstr ""
+
+msgid "Logout"
+msgstr ""
+
+msgid "Registration completed"
+msgstr ""
+
+msgid "Registration failed"
+msgstr ""
+
+msgid "Profile updated"
+msgstr ""
+
+msgid "Password changed"
+msgstr ""
+
+msgid "Consent updated"
+msgstr ""
+
+msgid "Withdrawal requested"
+msgstr ""
+
+msgid "Withdrawal restored"
+msgstr ""
+
+msgid "Withdrawal finalized"
+msgstr ""
+
+msgid "Registration notice"
+msgstr ""
+
+msgid "Password-change notice"
+msgstr ""
+
+msgid "Withdrawal-request notice"
+msgstr ""
+
+msgid "Withdrawal-finalized notice"
+msgstr ""
+
+msgid "Success"
+msgstr ""
+
+msgid "Failure"
+msgstr ""
+
+msgid "Pending"
+msgstr ""
+
+msgid "WordPress Core"
+msgstr ""
+
+msgid "Administrator confirmed access block"
+msgstr ""
+
+msgid "Administrator restored access with a reason"
+msgstr ""
+
+msgid "WordPress accepted the email for delivery"
+msgstr ""
+
+msgid "WordPress rejected the email submission"
+msgstr ""
+
+msgid "Member request"
+msgstr ""
+
+msgid "Completed"
+msgstr ""
+
+msgid "Member logout request"
 msgstr ""

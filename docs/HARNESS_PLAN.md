@@ -67,6 +67,8 @@ reference와 독립된 WP DB/filesystem에 synthetic 사용자 A/B, subscriber/a
 
 0.7.7은 Users 영역 관리자 정보 구조, 읽기 전용 overview 진단, 저장 전 문서 preview와 immutable history, Core Users의 account state·현재 필수 consent 컬럼/필터를 구현했다. executable guard는 네 section, legacy Tools redirect, capability, bounded history, route-scoped admin asset과 Woo/LMS domain read 부재를 검사한다. 탈퇴 복구와 audit 조회 workflow는 0.7.8, MAMP/browser 반복은 0.7.9가 소유한다.
 
+0.7.8은 `withdrawal_pending→active` 사유 있는 복구와 `withdrawal_pending→disabled` 확정, 기존 Core session 재철회, 재실행 멱등성을 구현했다. audit은 event/result/UTC date/user ID filter, 25건 page limit, 번역된 event/result/reason과 읽기 전용 mail 결과를 제공한다. 단위 계약 28개와 PHP 파일 57개 검증이 PASS했고, 합성 WordPress 실행 `d9256bc16d5843e98164623feffb3b03`은 두 prefix에서 24개 MVP 계약, 알림 확장 계약, Core/Members 로그인 각 12건을 통과했다. 이 검증은 복구와 확정 모두에서 WordPress ID 보존, 외부 domain 삭제 부재, session 0과 최소 audit을 검사하며 브라우저 반복은 0.7.9가 소유한다.
+
 ### 2.2 계정 알림 계약
 
 `AUTH-NOTIFY-001`은 [NOTIFICATIONS.md](NOTIFICATIONS.md)와 `tests/harness/notification_contract.json`에서 가입 완료·비밀번호 변경·탈퇴 접수·탈퇴 처리 완료의 사용자 알림을 고정한다. 기존 24개 MVP runtime 계약 집계에는 추가하지 않는다. 상태는 **SPECIFIED**, runtime은 **IMPLEMENTED_AND_SYNTHETIC_VERIFIED**다.

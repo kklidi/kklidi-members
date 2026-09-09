@@ -72,8 +72,12 @@ final class AdminController {
 			return;
 		}
 		if ($action === 'finalize_withdrawal') {
-			self::finalize_withdrawal();
-			self::redirect('withdrawals', 'withdrawal_updated');
+			$updated = self::review_withdrawal('disabled');
+			self::redirect('withdrawals', $updated ? 'withdrawal_disabled' : 'withdrawal_not_updated');
+		}
+		if ($action === 'restore_withdrawal') {
+			$updated = self::review_withdrawal('active');
+			self::redirect('withdrawals', $updated ? 'withdrawal_restored' : 'withdrawal_not_updated');
 		}
 	}
 
@@ -115,18 +119,28 @@ final class AdminController {
 		);
 	}
 
-	private static function finalize_withdrawal(): void {
+	private static function review_withdrawal(string $target_state): bool {
 		$user_id = isset($_POST['user_id']) ? absint($_POST['user_id']) : 0;
-		if ($user_id < 1 || user_can($user_id, 'manage_options')
-			|| !\KKLIDI\Members\Security\AccountState::transition($user_id, 'withdrawal_pending', 'disabled')) {
-			return;
+		$reason = isset($_POST['review_reason']) && is_string($_POST['review_reason'])
+			? trim(sanitize_textarea_field(wp_unslash($_POST['review_reason']))) : '';
+		if (!in_array($target_state, array('active', 'disabled'), true)
+			|| $user_id < 1 || !get_userdata($user_id) || user_can($user_id, 'manage_options')
+			|| \KKLIDI\Members\Security\AccountState::get($user_id) !== 'withdrawal_pending'
+			|| ($target_state === 'active' && ($reason === '' || self::text_length($reason) > 500))
+			|| !\KKLIDI\Members\Security\AccountState::transition($user_id, 'withdrawal_pending', $target_state)) {
+			return false;
 		}
 		$request_id = wp_generate_uuid4();
 		\KKLIDI\Members\Security\AccountState::revoke_access($user_id);
-		\KKLIDI\Members\Audit\Recorder::record('withdrawal_disabled', 'success', 'admin_review', $user_id, '', $request_id);
-		do_action('kklidi_members_account_state_changed', $user_id, 'withdrawal_pending', 'disabled', $request_id);
-		require_once KKLIDI_MEMBERS_DIR . 'includes/Notifications/AccountMailer.php';
-		\KKLIDI\Members\Notifications\AccountMailer::send('withdrawal_finalized', $user_id, $request_id);
+		$event = $target_state === 'active' ? 'withdrawal_restored' : 'withdrawal_disabled';
+		$reason_code = $target_state === 'active' ? 'admin_restore' : 'admin_review';
+		\KKLIDI\Members\Audit\Recorder::record($event, 'success', $reason_code, $user_id, $reason, $request_id);
+		do_action('kklidi_members_account_state_changed', $user_id, 'withdrawal_pending', $target_state, $request_id);
+		if ($target_state === 'disabled') {
+			require_once KKLIDI_MEMBERS_DIR . 'includes/Notifications/AccountMailer.php';
+			\KKLIDI\Members\Notifications\AccountMailer::send('withdrawal_finalized', $user_id, $request_id);
+		}
+		return true;
 	}
 
 	public static function user_columns(array $columns): array {
@@ -249,7 +263,7 @@ final class AdminController {
 		$documents = array();
 		$document_history = array();
 		$queue = array();
-		$audit_rows = array();
+		$audit_view = array();
 
 		if ($section === 'overview') {
 			$overview = self::overview();
@@ -267,12 +281,133 @@ final class AdminController {
 				'fields' => array('ID', 'display_name'),
 			));
 		} else {
-			global $wpdb;
-			$audit_table = $wpdb->prefix . 'kklidi_mem_login_audit';
-			$audit_rows = $wpdb->get_results("SELECT id, user_id, occurred_at_utc, event_type, result, reason_code FROM {$audit_table} ORDER BY id DESC LIMIT 50");
+			$audit_view = self::audit_view();
 		}
 		$document_preview = self::$document_preview;
 		require KKLIDI_MEMBERS_DIR . 'templates/admin.php';
+	}
+
+	private static function audit_view(): array {
+		global $wpdb;
+		$table = $wpdb->prefix . 'kklidi_mem_login_audit';
+		$events = self::audit_event_labels();
+		$results = self::audit_result_labels();
+		$filters = array(
+			'event' => self::requested_filter('audit_event'),
+			'result' => self::requested_filter('audit_result'),
+			'date' => self::requested_text('audit_date'),
+			'user_id' => isset($_GET['audit_user_id']) ? absint($_GET['audit_user_id']) : 0,
+		);
+		if (!isset($events[$filters['event']])) {
+			$filters['event'] = '';
+		}
+		if (!isset($results[$filters['result']])) {
+			$filters['result'] = '';
+		}
+		if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $filters['date'])) {
+			$filters['date'] = '';
+		} else {
+			list($year, $month, $day) = array_map('intval', explode('-', $filters['date']));
+			if (!checkdate($month, $day, $year)) {
+				$filters['date'] = '';
+			}
+		}
+
+		$where = array('1 = 1');
+		$args = array();
+		if ($filters['event'] !== '') {
+			$where[] = 'event_type = %s';
+			$args[] = $filters['event'];
+		}
+		if ($filters['result'] !== '') {
+			$where[] = 'result = %s';
+			$args[] = $filters['result'];
+		}
+		if ($filters['user_id'] > 0) {
+			$where[] = 'user_id = %d';
+			$args[] = $filters['user_id'];
+		}
+		if ($filters['date'] !== '') {
+			$where[] = 'occurred_at_utc >= %s AND occurred_at_utc < %s';
+			$args[] = $filters['date'] . ' 00:00:00';
+			$args[] = gmdate('Y-m-d 00:00:00', strtotime($filters['date'] . ' +1 day'));
+		}
+		$where_sql = implode(' AND ', $where);
+		$count_sql = "SELECT COUNT(*) FROM {$table} WHERE {$where_sql}";
+		if ($args) {
+			$count_sql = $wpdb->prepare($count_sql, $args);
+		}
+		$total = (int) $wpdb->get_var($count_sql);
+		$per_page = 25;
+		$pages = max(1, min(100, (int) ceil($total / $per_page)));
+		$page = isset($_GET['paged']) ? absint($_GET['paged']) : 1;
+		$page = max(1, min($pages, $page));
+		$list_args = array_merge($args, array($per_page, ($page - 1) * $per_page));
+		$list_sql = "SELECT id, user_id, occurred_at_utc, event_type, result, reason_code
+			FROM {$table} WHERE {$where_sql} ORDER BY id DESC LIMIT %d OFFSET %d";
+		$rows = $wpdb->get_results($wpdb->prepare($list_sql, $list_args));
+		return array(
+			'rows' => $rows,
+			'filters' => $filters,
+			'events' => $events,
+			'results' => $results,
+			'page' => $page,
+			'pages' => $pages,
+			'total' => $total,
+			'success_days' => max(1, (int) get_option('kklidi_members_audit_success_days', 30)),
+			'security_days' => max(1, (int) get_option('kklidi_members_audit_security_days', 90)),
+		);
+	}
+
+	public static function audit_event_label(string $event): string {
+		$labels = self::audit_event_labels();
+		return $labels[$event] ?? $event;
+	}
+
+	public static function audit_result_label(string $result): string {
+		$labels = self::audit_result_labels();
+		return $labels[$result] ?? $result;
+	}
+
+	public static function audit_reason_label(string $reason): string {
+		$labels = array(
+			'core' => __('WordPress Core', 'kklidi-members'),
+			'admin_review' => __('Administrator confirmed access block', 'kklidi-members'),
+			'admin_restore' => __('Administrator restored access with a reason', 'kklidi-members'),
+			'wp_mail_accepted' => __('WordPress accepted the email for delivery', 'kklidi-members'),
+			'wp_mail_failed' => __('WordPress rejected the email submission', 'kklidi-members'),
+			'self' => __('Member request', 'kklidi-members'),
+			'completed' => __('Completed', 'kklidi-members'),
+			'user_request' => __('Member logout request', 'kklidi-members'),
+		);
+		return $labels[$reason] ?? $reason;
+	}
+
+	private static function audit_event_labels(): array {
+		return array(
+			'login' => __('Login', 'kklidi-members'),
+			'logout' => __('Logout', 'kklidi-members'),
+			'registration_success' => __('Registration completed', 'kklidi-members'),
+			'registration_failed' => __('Registration failed', 'kklidi-members'),
+			'profile_update' => __('Profile updated', 'kklidi-members'),
+			'password_change' => __('Password changed', 'kklidi-members'),
+			'consent_update' => __('Consent updated', 'kklidi-members'),
+			'withdrawal_request' => __('Withdrawal requested', 'kklidi-members'),
+			'withdrawal_restored' => __('Withdrawal restored', 'kklidi-members'),
+			'withdrawal_disabled' => __('Withdrawal finalized', 'kklidi-members'),
+			'mail_registration_completed' => __('Registration notice', 'kklidi-members'),
+			'mail_password_changed' => __('Password-change notice', 'kklidi-members'),
+			'mail_withdrawal_requested' => __('Withdrawal-request notice', 'kklidi-members'),
+			'mail_withdrawal_finalized' => __('Withdrawal-finalized notice', 'kklidi-members'),
+		);
+	}
+
+	private static function audit_result_labels(): array {
+		return array(
+			'success' => __('Success', 'kklidi-members'),
+			'failure' => __('Failure', 'kklidi-members'),
+			'pending' => __('Pending', 'kklidi-members'),
+		);
 	}
 
 	private static function overview(): array {
@@ -309,6 +444,15 @@ final class AdminController {
 	private static function requested_filter(string $key): string {
 		return isset($_GET[$key]) && is_string($_GET[$key])
 			? sanitize_key(wp_unslash($_GET[$key])) : '';
+	}
+
+	private static function requested_text(string $key): string {
+		return isset($_GET[$key]) && is_string($_GET[$key])
+			? sanitize_text_field(wp_unslash($_GET[$key])) : '';
+	}
+
+	private static function text_length(string $value): int {
+		return function_exists('mb_strlen') ? mb_strlen($value, 'UTF-8') : strlen($value);
 	}
 
 	private static function requested_section(): string {

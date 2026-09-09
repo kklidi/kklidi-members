@@ -34,6 +34,21 @@ if ($action === 'set-user-locale') {
     echo wp_json_encode(array('user_id' => (int) $user->ID, 'locale' => get_user_locale($user)));
     exit;
 }
+if ($action === 'user-state-summary') {
+    $target = get_user_by('email', $argv[2] ?? '');
+    if (!$target) { exit('Missing synthetic state-summary user.'); }
+    $audit_table = $wpdb->prefix . 'kklidi_mem_login_audit';
+    echo wp_json_encode(array(
+        'user_id' => (int) $target->ID,
+        'state' => \KKLIDI\Members\Security\AccountState::get((int) $target->ID),
+        'session_count' => count(\WP_Session_Tokens::get_instance($target->ID)->get_all()),
+        'events' => $wpdb->get_col($wpdb->prepare(
+            "SELECT event_type FROM {$audit_table} WHERE user_id = %d ORDER BY id",
+            $target->ID
+        )),
+    ));
+    exit;
+}
 if ($action === 'translation-check') {
     $catalog = WP_PLUGIN_DIR . '/kklidi-members/languages/kklidi-members-ko_KR.mo';
     echo wp_json_encode(array(

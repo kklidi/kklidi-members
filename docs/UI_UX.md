@@ -7,14 +7,14 @@
 - 계약 ID: `AUTH-UI-001`
 - `AUTH-UI-001` 상태: **SPECIFIED**
 - `AUTH-UI-002` 상태: **IMPLEMENTED_AND_VERIFIED**
-- `AUTH-UX-003` 상태: **0.7.7_ADMIN_INFORMATION_ARCHITECTURE_IMPLEMENTED**
+- `AUTH-UX-003` 상태: **0.7.8_WITHDRAWAL_AUDIT_OPERATIONS_IMPLEMENTED**
 - 범위: 로그인, 가입, 계정 홈, 프로필, 비밀번호 변경, 동의, 탈퇴 요청, 로그아웃 확인, Members 관리자 화면
 
 `AUTH-UI-001`은 화면 구현 전에 사용자에게 보이는 상태와 완료 기준을 고정한다. 현재 템플릿이 HTTP에서 렌더링된 사실만으로 이 계약이 구현되었다고 판정하지 않는다. CSS 적용, 반응형 브라우저 검증, 키보드 조작 검증은 `AUTH-UI-002`에서 수행한다.
 
 `AUTH-UI-002`는 2026-09-07에 구현했다. 당시 공통 frontend stylesheet, 관리자 전용 stylesheet, 8개 frontend page shell, route 전용 asset hook을 추가했으며 JavaScript는 없었다. MAMP sandbox에서 가입·로그인 오류·로그인 회원의 6개 계정 화면·관리자 화면을 확인했고, 2026-09-09의 0.7.1 패키지를 Chrome 360px viewport에서 다시 확인해 한국어 번역 적용, route 전용 0.7.1 자산, focus 규칙과 가로 overflow 부재를 검증했다. 0.7.5는 로그인·가입 route 전용 password enhancement를, 0.7.6은 아홉 번째 frontend reset shell과 변경·reset route의 같은 enhancement를 추가했다. 후속 화면의 브라우저 회귀는 0.7.9 gate가 소유한다.
 
-`AUTH-UX-003`은 0.7.4에서 승인한 UI·운영 구현의 전략 계약이다. 0.7.5의 로그인·회원가입, 0.7.6의 계정·재설정 단계에 이어 0.7.7은 Users 영역의 관리자 정보 구조, overview 진단, 약관 preview/history와 Core Users 상태 컬럼·필터를 구현했다. 탈퇴 복구와 상세 audit workflow는 0.7.8에 남아 있다. 실행 가능한 manifest는 `tests/harness/ux_strategy_contract.json`이다.
+`AUTH-UX-003`은 0.7.4에서 승인한 UI·운영 구현의 전략 계약이다. 0.7.5의 로그인·회원가입, 0.7.6의 계정·재설정, 0.7.7의 관리자 정보 구조에 이어 0.7.8은 탈퇴 복구·확정과 상세 audit workflow를 구현했다. 남은 구현 순서는 0.7.9 브라우저·접근성·release gate다. 실행 가능한 manifest는 `tests/harness/ux_strategy_contract.json`이다.
 
 ## 2. 공통 원칙
 
@@ -149,7 +149,19 @@
 
 탈퇴 pending→active 복구, 처리 사유, audit filter/pagination과 읽기 전용 알림 결과는 0.7.8 범위다. 브라우저 반복검증은 0.7.9에 수행한다.
 
-## 12. 범위 밖
+## 12. 0.7.8 구현 상태
+
+0.7.8은 8.3의 네 번째 단계를 구현한다.
+
+- 탈퇴 queue는 현재 상태를 다시 확인하고 `withdrawal_pending→disabled` 확정 또는 500자 이하 사유가 있는 `withdrawal_pending→active` 복구만 허용한다.
+- 두 처리 모두 기존 Core session과 application password를 다시 철회한다. 복구는 새 로그인에서만 새 Core session을 만들 수 있고, WordPress user ID나 Woo/LMS/KBoard 행을 삭제하지 않는다.
+- 복구 사유 원문은 audit에 저장하지 않고 HMAC digest만 남긴다. 상태·event·result·reason code와 request ID만 기존 최소 audit 계약에 기록한다.
+- audit 화면은 알려진 event와 result, UTC 날짜, WordPress user ID 필터와 페이지당 25건·최대 100페이지의 제한을 사용한다. 알림 사건은 성공/실패 결과만 읽기 전용으로 표시한다.
+- audit retention 30일/90일 값은 현황으로만 보여주며 편집 설정, SMTP, 재시도 queue, 관리자 알림은 추가하지 않았다.
+
+합성 WordPress 하네스는 복구 사유 필수, 이전 session 0, 복구와 확정 재실행의 멱등성, 네 audit 필터와 25건 page limit을 검사한다. 실제 키보드·no-JS·모바일·Members-off 화면 회귀는 0.7.9에 남는다.
+
+## 13. 범위 밖
 
 - site theme 전체 redesign과 page builder 통합
 - WooCommerce 주문/결제 화면 및 LMS 학습 화면 UI

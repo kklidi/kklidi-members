@@ -82,6 +82,30 @@
 	margin: 0;
 }
 
+.kklidi-members-review-form {
+	display: grid;
+	gap: 6px;
+	margin-bottom: 12px !important;
+}
+
+.kklidi-members-review-form textarea {
+	width: min(100%, 420px);
+}
+
+.kklidi-members-audit-filters {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: end;
+	gap: 12px;
+	margin: 18px 0;
+}
+
+.kklidi-members-audit-filters label {
+	display: grid;
+	gap: 4px;
+	font-weight: 600;
+}
+
 @media (max-width: 600px) {
 	.kklidi-members-admin .kklidi-members-admin-card {
 		padding: 16px;

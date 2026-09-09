@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.8 — 2026-09-09
+
+- Added capability- and nonce-protected withdrawal restoration with a required
+  reason, and retained explicit pending-to-disabled finalization.
+- Kept all Core sessions revoked after either review decision, preserved WordPress
+  user IDs and external domain rows, and made repeated review actions idempotent.
+- Added translated audit event/result/reason labels, event/result/date/user filters,
+  bounded 25-row pagination, retention status, and read-only notification outcomes.
+
 ## 0.7.7 — 2026-09-09
 
 - Moved the administrator surface to the WordPress Users area and split it into

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timezone
 import hashlib
 import html as html_module
 import http.cookiejar
@@ -967,14 +968,44 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
 
     # The administrator sees the queue, finalizes only the pending state, and replay is idempotent.
     queued_user_id = withdrawal_probe['user']['id']
+    restore_email = fixture['fixtures']['separate_username']['email']
+    restore_state = command(php_cli + [HERE / 'mvp_probe.php', 'set-fixture-state',
+                                       restore_email, 'withdrawal_pending'], json_result=True)
+    restore_user_id = restore_state['user_id']
     queue_status, _, queue_page = admin.request('/wp-admin/users.php?page=kklidi-members&section=withdrawals')
     require(queue_status == 200
             and f'name="user_id" value="{queued_user_id}"' in queue_page
+            and f'name="user_id" value="{restore_user_id}"' in queue_page
+            and 'value="restore_withdrawal"' in queue_page
             and 'value="finalize_withdrawal"' in queue_page,
             'Pending withdrawal was not visible in the administrator queue')
+    restore_fields = {
+        'kklidi_members_admin_action': 'restore_withdrawal',
+        '_kklidi_members_admin_nonce': hidden_input(queue_page, '_kklidi_members_admin_nonce'),
+        'user_id': str(restore_user_id),
+        'review_reason': 'Synthetic administrator review',
+    }
+    restore_status, _, _ = admin.request(
+        '/wp-admin/users.php?page=kklidi-members&section=withdrawals', data=restore_fields)
+    restored = command(php_cli + [HERE / 'mvp_probe.php', 'user-state-summary', restore_email],
+                       json_result=True)
+    restored_page_status, _, restored_page = admin.request(
+        '/wp-admin/users.php?page=kklidi-members&section=withdrawals')
+    restore_replay_status, _, _ = admin.request(
+        '/wp-admin/users.php?page=kklidi-members&section=withdrawals', data=restore_fields)
+    restored_replay = command(
+        php_cli + [HERE / 'mvp_probe.php', 'user-state-summary', restore_email], json_result=True)
+    require(restore_status == 302 and restored_page_status == 200 and restore_replay_status == 302
+            and restored['state'] == 'active' and restored['session_count'] == 0
+            and restored['events'].count('withdrawal_restored') == 1
+            and restored_replay['state'] == 'active'
+            and restored_replay['events'].count('withdrawal_restored') == 1
+            and f'name="user_id" value="{restore_user_id}"' not in restored_page
+            and f'name="user_id" value="{queued_user_id}"' in restored_page,
+            'Administrator withdrawal restoration was not reasoned, session-safe, or idempotent')
     finalize_fields = {
         'kklidi_members_admin_action': 'finalize_withdrawal',
-        '_kklidi_members_admin_nonce': hidden_input(queue_page, '_kklidi_members_admin_nonce'),
+        '_kklidi_members_admin_nonce': hidden_input(restored_page, '_kklidi_members_admin_nonce'),
         'user_id': str(queued_user_id),
     }
     finalize_status, _, _ = admin.request('/wp-admin/users.php?page=kklidi-members&section=withdrawals', data=finalize_fields)
@@ -1014,6 +1045,16 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
             and replay_probe['audit_events'].count('withdrawal_disabled') == disabled_events
             and len(read_mailbox(mailbox_path)) == len(finalized_mail),
             'Administrator withdrawal finalization was not idempotent')
+    audit_date = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+    audit_status, _, audit_page = admin.request(
+        '/wp-admin/users.php?page=kklidi-members&section=audit'
+        + '&audit_event=withdrawal_restored&audit_result=success'
+        + f'&audit_user_id={restore_user_id}&audit_date={audit_date}')
+    require(audit_status == 200 and 'Withdrawal restored' in audit_page
+            and 'Administrator restored access with a reason' in audit_page
+            and 'name="audit_event"' in audit_page and 'name="audit_result"' in audit_page
+            and 'name="audit_date"' in audit_page and 'name="audit_user_id"' in audit_page,
+            'Bounded administrator audit filters did not render the restored event')
 
     # P0-4: inject wp_mail() failure through the synthetic WordPress boundary and
     # repeat all four real account workflows. Committed account/security state
@@ -1160,6 +1201,8 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
                                     'requested_state': 'withdrawal_pending',
                                     'final_state': 'disabled', 'sessions_revoked': True,
                                     'admin_queue': 'PASS', 'admin_replay_idempotent': True,
+                                    'admin_restore_with_reason': True,
+                                    'restored_sessions': False,
                                     'automatic_pii_deletion': False}
     results['AUTH-NOTIFY-001'] = {
         'status': 'PASS', 'account_notice_events': 4,
@@ -1197,7 +1240,9 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
     cleaned = command(php_cli + [HERE / 'mvp_probe.php', 'expire-audit'], json_result=True)
     require(cleaned['audit_rows'] < before_cleanup, 'Audit retention cleanup failed')
     results['AUTH-AUDIT-001'] = {'status': 'PASS', 'raw_email': False, 'raw_ip': False,
-                                 'retention_cleanup': True}
+                                 'retention_cleanup': True,
+                                 'admin_filters': ['event', 'result', 'date', 'user_id'],
+                                 'bounded_page_size': 25}
 
     migration = command(php_cli + [HERE / 'migration_case.php'], json_result=True)
     require(migration == {'dry_eligible': 3, 'dry_writes': 0, 'first_imported': 3,

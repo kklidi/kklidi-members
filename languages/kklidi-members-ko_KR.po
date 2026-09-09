@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the KKLIDI Members plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: KKLIDI Members 0.7.7\n"
+"Project-Id-Version: KKLIDI Members 0.7.8\n"
 "Language: ko_KR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -585,3 +585,129 @@ msgstr "필수 동의 완료"
 
 msgid "Required consent incomplete"
 msgstr "필수 동의 미완료"
+
+msgid "The account remains blocked and the withdrawal was finalized."
+msgstr "계정 차단을 유지하고 탈퇴 처리를 완료했습니다."
+
+msgid "Account access was restored. Existing sessions remain revoked."
+msgstr "계정 접근을 복구했습니다. 기존 로그인 세션은 계속 해제된 상태입니다."
+
+msgid "The withdrawal could not be updated. Check the current state and restoration reason."
+msgstr "탈퇴 상태를 변경하지 못했습니다. 현재 상태와 복구 사유를 확인하세요."
+
+msgid "Finalizing keeps the account blocked. Restoring requires a reason and does not revive any previous WordPress session."
+msgstr "처리를 완료하면 계정 차단이 유지됩니다. 복구에는 사유가 필요하며 이전 WordPress 로그인 세션은 되살아나지 않습니다."
+
+msgid "Requested at (UTC)"
+msgstr "요청 시각(UTC)"
+
+msgid "Review actions"
+msgstr "검토 작업"
+
+msgid "Finalize and keep blocked"
+msgstr "차단 유지 및 처리 완료"
+
+msgid "Restoration reason"
+msgstr "복구 사유"
+
+msgid "Restore account access"
+msgstr "계정 접근 복구"
+
+msgid "Audit events"
+msgstr "감사 기록"
+
+msgid "Successful events are retained for %1$d days and security failures for %2$d days. These values are read-only until an operating policy is approved."
+msgstr "성공 기록은 %1$d일, 보안 실패 기록은 %2$d일 보관됩니다. 운영 정책이 승인되기 전까지 이 값은 읽기 전용입니다."
+
+msgid "Event"
+msgstr "사건"
+
+msgid "All events"
+msgstr "모든 사건"
+
+msgid "All results"
+msgstr "모든 결과"
+
+msgid "UTC date"
+msgstr "UTC 날짜"
+
+msgid "Filter"
+msgstr "필터 적용"
+
+msgid "%d matching events"
+msgstr "조건에 맞는 기록 %d건"
+
+msgid "Login"
+msgstr "로그인"
+
+msgid "Logout"
+msgstr "로그아웃"
+
+msgid "Registration completed"
+msgstr "회원가입 완료"
+
+msgid "Registration failed"
+msgstr "회원가입 실패"
+
+msgid "Profile updated"
+msgstr "프로필 변경"
+
+msgid "Password changed"
+msgstr "비밀번호 변경"
+
+msgid "Consent updated"
+msgstr "동의 변경"
+
+msgid "Withdrawal requested"
+msgstr "탈퇴 요청"
+
+msgid "Withdrawal restored"
+msgstr "탈퇴 요청 복구"
+
+msgid "Withdrawal finalized"
+msgstr "탈퇴 처리 완료"
+
+msgid "Registration notice"
+msgstr "회원가입 안내 메일"
+
+msgid "Password-change notice"
+msgstr "비밀번호 변경 안내 메일"
+
+msgid "Withdrawal-request notice"
+msgstr "탈퇴 요청 안내 메일"
+
+msgid "Withdrawal-finalized notice"
+msgstr "탈퇴 완료 안내 메일"
+
+msgid "Success"
+msgstr "성공"
+
+msgid "Failure"
+msgstr "실패"
+
+msgid "Pending"
+msgstr "처리 중"
+
+msgid "WordPress Core"
+msgstr "워드프레스 코어"
+
+msgid "Administrator confirmed access block"
+msgstr "관리자 계정 차단 확정"
+
+msgid "Administrator restored access with a reason"
+msgstr "관리자 사유 확인 후 접근 복구"
+
+msgid "WordPress accepted the email for delivery"
+msgstr "WordPress가 메일 발송을 접수함"
+
+msgid "WordPress rejected the email submission"
+msgstr "WordPress가 메일 발송을 접수하지 못함"
+
+msgid "Member request"
+msgstr "회원 요청"
+
+msgid "Completed"
+msgstr "완료"
+
+msgid "Member logout request"
+msgstr "회원 로그아웃 요청"

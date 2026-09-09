@@ -160,9 +160,9 @@ class HarnessGuards(unittest.TestCase):
         product = (repository / 'docs/PRODUCT.md').read_text(encoding='utf-8')
 
         self.assertEqual(contract['contract'], 'AUTH-UX-003')
-        self.assertEqual(contract['version'], 3)
-        self.assertEqual(contract['status'], 'IMPLEMENTED_THROUGH_0.7.7')
-        self.assertIn('`AUTH-UX-003` 상태: **0.7.7_ADMIN_INFORMATION_ARCHITECTURE_IMPLEMENTED**', ui_ux)
+        self.assertEqual(contract['version'], 4)
+        self.assertEqual(contract['status'], 'IMPLEMENTED_THROUGH_0.7.8')
+        self.assertIn('`AUTH-UX-003` 상태: **0.7.8_WITHDRAWAL_AUDIT_OPERATIONS_IMPLEMENTED**', ui_ux)
         self.assertNotIn('email을 Core `user_login`으로 사용하는 신규 회원', ui_ux)
         self.assertIn('비공개 후보', ui_ux)
         self.assertIn('D09 | **DECIDED FOR 0.7.4', product)
@@ -212,7 +212,7 @@ class HarnessGuards(unittest.TestCase):
         self.assertFalse(boundaries['future_features_implemented'])
         self.assertEqual(list(contract['implementation_order']),
                          ['0.7.5', '0.7.6', '0.7.7', '0.7.8', '0.7.9'])
-        self.assertEqual(contract['implementation']['completed'], ['0.7.5', '0.7.6', '0.7.7'])
+        self.assertEqual(contract['implementation']['completed'], ['0.7.5', '0.7.6', '0.7.7', '0.7.8'])
 
     def test_auth_ui_002_uses_scoped_styles_and_accessible_shells(self):
         repository = Path(__file__).resolve().parents[2]
@@ -326,6 +326,42 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('Published history', template)
         self.assertNotIn('wp_delete_user(', admin)
         self.assertNotRegex(admin, r'WC_|WooCommerce|kklidi_lms|enrollment|progress')
+
+    def test_auth_ux_003_078_withdrawal_and_audit_operations_are_bounded(self):
+        repository = Path(__file__).resolve().parents[2]
+        admin = (repository / 'includes/Admin/AdminController.php').read_text(encoding='utf-8')
+        template = (repository / 'templates/admin.php').read_text(encoding='utf-8')
+        harness = (repository / 'tests/harness/run.py').read_text(encoding='utf-8')
+
+        self.assertIn("review_withdrawal('disabled')", admin)
+        self.assertIn("review_withdrawal('active')", admin)
+        self.assertIn("$target_state === 'active' && ($reason === '' || self::text_length($reason) > 500)", admin)
+        self.assertIn("function_exists('mb_strlen') ? mb_strlen($value, 'UTF-8') : strlen($value)", admin)
+        self.assertIn("AccountState::get($user_id) !== 'withdrawal_pending'", admin)
+        self.assertIn("AccountState::revoke_access($user_id)", admin)
+        self.assertIn("'withdrawal_restored'", admin)
+        self.assertIn("'withdrawal_disabled'", admin)
+        self.assertIn("Recorder::record($event, 'success'", admin)
+        self.assertIn("if ($target_state === 'disabled')", admin)
+        self.assertIn("AccountMailer::send('withdrawal_finalized'", admin)
+        self.assertIn("'event' => self::requested_filter('audit_event')", admin)
+        self.assertIn("'result' => self::requested_filter('audit_result')", admin)
+        self.assertIn("'date' => self::requested_text('audit_date')", admin)
+        self.assertIn("'user_id' => isset($_GET['audit_user_id'])", admin)
+        self.assertIn('$per_page = 25;', admin)
+        self.assertIn('min(100,', admin)
+        self.assertNotIn('subject_digest', template)
+        self.assertNotIn('network_digest', template)
+        self.assertIn('value="restore_withdrawal"', template)
+        self.assertIn('name="review_reason"', template)
+        self.assertIn('name="audit_event"', template)
+        self.assertIn('name="audit_result"', template)
+        self.assertIn('name="audit_date"', template)
+        self.assertIn('name="audit_user_id"', template)
+        self.assertIn("'admin_restore_with_reason': True", harness)
+        self.assertIn("'bounded_page_size': 25", harness)
+        for forbidden in ('wp_delete_user(', 'wp_set_auth_cookie(', 'session_start('):
+            self.assertNotIn(forbidden, admin)
 
     def test_phase_zero_documents_do_not_report_completed_ui_as_pending(self):
         repository = Path(__file__).resolve().parents[2]
@@ -570,7 +606,7 @@ class HarnessGuards(unittest.TestCase):
 
         lifecycle = (repository / 'tests/harness/mamp_lifecycle_run.py').read_text(encoding='utf-8')
         self.assertIn("SANDBOX = Path('C:/MAMP/htdocs/kklidi-members-mamp-sandbox')", lifecycle)
-        self.assertIn("PREVIOUS_VERSION = '0.7.6'", lifecycle)
+        self.assertIn("PREVIOUS_VERSION = '0.7.7'", lifecycle)
         self.assertIn("ALLOWED_INITIAL_VERSIONS = ('0.7.0', PREVIOUS_VERSION, CURRENT_VERSION)", lifecycle)
         self.assertIn("CURRENT_VERSION = re.search(", lifecycle)
         self.assertIn("OLD_ARCHIVE = ROOT / ('dist/kklidi-members-' + PREVIOUS_VERSION + '.zip')", lifecycle)
@@ -675,7 +711,7 @@ class HarnessGuards(unittest.TestCase):
         ready = json.loads(json.dumps(example))
         ready['environment']['base_url'] = 'https://staging.kklidi.com'
         ready['versions'].update(
-            wordpress='7.1', php='8.3', members='0.7.7', woocommerce='11.1.0')
+            wordpress='7.1', php='8.3', members='0.7.8', woocommerce='11.1.0')
         ready['owners'] = {key: 'approved-' + key for key in ready['owners']}
         ready['backup'].update(
             artifact_sha256='a' * 64,

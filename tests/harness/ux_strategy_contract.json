@@ -1,7 +1,7 @@
 {
   "contract": "AUTH-UX-003",
-  "version": 3,
-  "status": "IMPLEMENTED_THROUGH_0.7.7",
+  "version": 4,
+  "status": "IMPLEMENTED_THROUGH_0.7.8",
   "decision_date": "2026-09-09",
   "frontend": {
     "surface": "standalone_branded_members_shell",
@@ -57,7 +57,7 @@
     }
   },
   "admin": {
-    "implementation_status": "INFORMATION_ARCHITECTURE_IMPLEMENTED",
+    "implementation_status": "WITHDRAWAL_AND_AUDIT_OPERATIONS_IMPLEMENTED",
     "menu_parent": "users",
     "sections": ["overview", "documents", "withdrawals", "audit"],
     "overview_checks": ["core_public_registration", "required_documents", "route_collisions", "url_ownership", "owned_tables", "cleanup_schedule"],
@@ -116,7 +116,7 @@
     "0.7.9": "browser_accessibility_and_release_gate"
   },
   "implementation": {
-    "completed": ["0.7.5", "0.7.6", "0.7.7"],
-    "remaining": ["0.7.8", "0.7.9"]
+    "completed": ["0.7.5", "0.7.6", "0.7.7", "0.7.8"],
+    "remaining": ["0.7.9"]
   }
 }

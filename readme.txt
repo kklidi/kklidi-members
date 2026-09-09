@@ -3,7 +3,7 @@ Contributors: kklidi
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.7.7
+Stable tag: 0.7.8
 
 Core-based member accounts with scoped UI, consent records and safe withdrawal handling.
 
@@ -14,9 +14,9 @@ KKLIDI Members adds login, registration, profile, consent and account management
 WooCommerce orders and LMS enrollment/progress stay with their respective plugins.
 Korean UI uses WordPress gettext translation catalogs.
 
-0.7.7 adds the Users-area administrator information architecture, read-only system
-diagnostics, immutable document preview/history, and Core Users account-state and
-required-consent columns. See docs/RELEASE-0.7.7.md.
+0.7.8 adds reasoned withdrawal recovery/finalization and bounded, translated audit
+filters and notification results to the Users-area administration screen. See
+docs/RELEASE-0.7.8.md.
 
 == Installation ==
 
@@ -25,6 +25,11 @@ required-consent columns. See docs/RELEASE-0.7.7.md.
 3. Review registration and consent policy before changing the closed defaults.
 
 == Changelog ==
+
+= 0.7.8 =
+* Added reason-required withdrawal restoration and explicit finalization while preserving Core user IDs and external domain rows.
+* Kept all previous sessions revoked after restoration and made repeated review actions idempotent.
+* Added translated audit event/result labels, event/result/date/user filters, 25-row pages, and read-only notification outcomes.
 
 = 0.7.7 =
 * Moved the Members administration screen under Users with overview, documents, withdrawals, and audit sections.
