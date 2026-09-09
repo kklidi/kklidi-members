@@ -1010,6 +1010,148 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
             and replay_probe['audit_events'].count('withdrawal_disabled') == disabled_events
             and len(read_mailbox(mailbox_path)) == len(finalized_mail),
             'Administrator withdrawal finalization was not idempotent')
+
+    # P0-4: inject wp_mail() failure through the synthetic WordPress boundary and
+    # repeat all four real account workflows. Committed account/security state
+    # must survive, while the failed attempts must never enter the delivery sink.
+    failure_marker = Path(env['KKH_MAIL_FAILURE'])
+    failure_mail_count = len(read_mailbox(mailbox_path))
+    failure_journal = Path(env['KKH_EVENTS'])
+    initial_failed_event_count = sum(
+        event['type'] == 'mail_failed' for event in events(failure_journal))
+    failure_email = env['KKH_FAILURE_EMAIL']
+    try:
+        failure_marker.write_text('fail account notices\n', encoding='utf-8')
+
+        failed_registration = Browser(base)
+        status, _, failure_form = failed_registration.request('/?kklidi_members_register=1')
+        failure_registration_fields = {
+            'kklidi_members_register': '1',
+            'request_id': hidden_input(failure_form, 'request_id'),
+            '_kklidi_members_register_nonce': hidden_input(
+                failure_form, '_kklidi_members_register_nonce'),
+            '_kklidi_members_guest_exp': hidden_input(failure_form, '_kklidi_members_guest_exp'),
+            '_kklidi_members_guest_token': hidden_input(failure_form, '_kklidi_members_guest_token'),
+            'email': failure_email,
+            'password': env['KKH_USER_PASSWORD'],
+            'password_confirm': env['KKH_USER_PASSWORD'],
+            'first_name': 'Failure',
+            'last_name': 'Injection',
+            'display_name': 'Synthetic Mail Failure',
+            'phone': '',
+            'consent_service': '1',
+            'consent_privacy': '1',
+            'role': 'administrator',
+            'user_id': str(fixture['fixtures']['email_identity']['id']),
+            '_kklidi_members_account_state': 'disabled',
+        }
+        status, headers, _ = failed_registration.request(
+            '/?kklidi_members_register=1', data=failure_registration_fields)
+        registration_failure_probe = command(
+            php_cli + [HERE / 'mvp_probe.php', 'notification-failure-summary'],
+            json_result=True)
+        require(status == 302 and 'registered=1' in headers.get('Location', '')
+                and registration_failure_probe['state'] == 'active'
+                and registration_failure_probe['required_consents'] == 2
+                and registration_failure_probe['original_password_valid'] is True
+                and len(read_mailbox(mailbox_path)) == failure_mail_count,
+                'Mail failure rolled back registration state or appeared delivered')
+        failure_user_id = registration_failure_probe['user_id']
+
+        failure_first, first_response, _ = members_login(
+            base, env, failure_email, env['KKH_USER_PASSWORD'])
+        failure_second, second_response, _ = members_login(
+            base, env, failure_email, env['KKH_USER_PASSWORD'])
+        require(first_response[0] == second_response[0] == 302,
+                'Mail-failure password test sessions failed')
+        _, _, failure_password_form = failure_first.request('/?kklidi_members_password=1')
+        failure_password_fields = {
+            'kklidi_members_password': '1',
+            '_kklidi_members_password_nonce': hidden_input(
+                failure_password_form, '_kklidi_members_password_nonce'),
+            'current_password': env['KKH_USER_PASSWORD'],
+            'new_password': env['KKH_FAILURE_PASSWORD'],
+            'new_password_confirm': env['KKH_FAILURE_PASSWORD'],
+        }
+        status, _, _ = failure_first.request(
+            '/?kklidi_members_password=1', data=failure_password_fields)
+        password_failure_probe = command(
+            php_cli + [HERE / 'mvp_probe.php', 'notification-failure-summary'],
+            json_result=True)
+        require(status == 302 and failure_first.observe(key)['logged_in'] is False
+                and failure_second.observe(key)['logged_in'] is False
+                and password_failure_probe['user_id'] == failure_user_id
+                and password_failure_probe['state'] == 'active'
+                and password_failure_probe['original_password_valid'] is False
+                and password_failure_probe['changed_password_valid'] is True
+                and password_failure_probe['session_count'] == 0
+                and len(read_mailbox(mailbox_path)) == failure_mail_count,
+                'Mail failure rolled back password state, sessions, or appeared delivered')
+
+        failure_withdrawing, login_response, _ = members_login(
+            base, env, failure_email, env['KKH_FAILURE_PASSWORD'])
+        require(login_response[0] == 302, 'Changed password failed before mail-failure withdrawal')
+        _, _, failure_withdrawal_form = failure_withdrawing.request(
+            '/?kklidi_members_withdrawal=1')
+        failure_withdrawal_fields = {
+            'kklidi_members_withdrawal': '1',
+            '_kklidi_members_withdrawal_nonce': hidden_input(
+                failure_withdrawal_form, '_kklidi_members_withdrawal_nonce'),
+            'request_id': hidden_input(failure_withdrawal_form, 'request_id'),
+            'current_password': env['KKH_FAILURE_PASSWORD'],
+            'user_id': str(fixture['fixtures']['email_identity']['id']),
+        }
+        status, headers, _ = failure_withdrawing.request(
+            '/?kklidi_members_withdrawal=1', data=failure_withdrawal_fields)
+        withdrawal_failure_probe = command(
+            php_cli + [HERE / 'mvp_probe.php', 'notification-failure-summary'],
+            json_result=True)
+        blocked_failure, blocked_response, _ = members_login(
+            base, env, failure_email, env['KKH_FAILURE_PASSWORD'])
+        require(status == 302 and 'withdrawal=requested' in headers.get('Location', '')
+                and failure_withdrawing.observe(key)['logged_in'] is False
+                and blocked_response[0] == 200 and blocked_failure.observe(key)['logged_in'] is False
+                and withdrawal_failure_probe['user_id'] == failure_user_id
+                and withdrawal_failure_probe['state'] == 'withdrawal_pending'
+                and withdrawal_failure_probe['session_count'] == 0
+                and len(read_mailbox(mailbox_path)) == failure_mail_count,
+                'Mail failure rolled back withdrawal request, access revocation, or appeared delivered')
+
+        failure_queue_status, _, failure_queue_page = admin.request(
+            '/wp-admin/tools.php?page=kklidi-members')
+        require(failure_queue_status == 200
+                and f'name="user_id" value="{failure_user_id}"' in failure_queue_page,
+                'Mail-failure withdrawal was absent from the administrator queue')
+        failure_finalize_fields = {
+            'kklidi_members_admin_action': 'finalize_withdrawal',
+            '_kklidi_members_admin_nonce': hidden_input(
+                failure_queue_page, '_kklidi_members_admin_nonce'),
+            'user_id': str(failure_user_id),
+        }
+        status, _, _ = admin.request(
+            '/wp-admin/tools.php?page=kklidi-members', data=failure_finalize_fields)
+        finalized_failure_probe = command(
+            php_cli + [HERE / 'mvp_probe.php', 'notification-failure-summary'],
+            json_result=True)
+        failed_mail_audit = finalized_failure_probe['mail_audit']
+        injected_failure_events = sum(
+            event['type'] == 'mail_failed' for event in events(failure_journal)
+        ) - initial_failed_event_count
+        require(status == 302 and finalized_failure_probe['user_id'] == failure_user_id
+                and finalized_failure_probe['state'] == 'disabled'
+                and finalized_failure_probe['session_count'] == 0
+                and [row['event_type'] for row in failed_mail_audit] == [
+                    'mail_registration_completed', 'mail_password_changed',
+                    'mail_withdrawal_requested', 'mail_withdrawal_finalized']
+                and all(row['result'] == 'failure'
+                        and row['reason_code'] == 'wp_mail_failed'
+                        for row in failed_mail_audit)
+                and injected_failure_events == 4
+                and len(read_mailbox(mailbox_path)) == failure_mail_count,
+                'Failed account mail was reported as delivered or final state rolled back')
+    finally:
+        failure_marker.unlink(missing_ok=True)
+
     results['AUTH-WITHDRAW-001'] = {'status': 'PASS', 'identity_preserved': True,
                                     'requested_state': 'withdrawal_pending',
                                     'final_state': 'disabled', 'sessions_revoked': True,
@@ -1020,7 +1162,14 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
         'current_core_recipient': True, 'fixed_plain_text_presets': True,
         'post_success_only': True, 'logical_replay_idempotent': True,
         'credentials_and_tokens_absent': True, 'order_lms_details_absent': True,
-        'minimal_audit_results': 'wp_mail_accepted',
+        'minimal_audit_results': ['wp_mail_accepted', 'wp_mail_failed'],
+        'mail_failure_events': 4, 'mail_failure_injected_attempts': 4,
+        'mail_failure_delivery_records': 0,
+        'mail_failure_audit_result': 'failure/wp_mail_failed',
+        'mail_failure_committed_state_preserved': True,
+        'mail_failure_sessions_remain_revoked': True,
+        'mail_failure_user_response': 'committed_operation_success',
+        'mail_failure_retry_attempts': 0,
         'members_off_no_hard_dependency': 'checked_after_account_cases',
         'korean_site_fallback': True, 'korean_user_locale': True,
         'catalog_rendered': True, 'catalog_msgids': 12,
@@ -1271,8 +1420,11 @@ def execute(php, mysqld, one_prefix=False, skip_perf=False):
                KKH_NEW_PASSWORD=secrets.token_urlsafe(36),
                KKH_RESET_PASSWORD=secrets.token_urlsafe(38),
                KKH_MVP_EMAIL='mvp-' + run_id[:12] + '@example.invalid',
+               KKH_FAILURE_EMAIL='notify-failure-' + run_id[:12] + '@example.invalid',
+               KKH_FAILURE_PASSWORD=secrets.token_urlsafe(40),
                KKH_SALT=secrets.token_hex(48), KKH_PROBE_KEY=secrets.token_hex(32),
-               KKH_MAILBOX=str(root / 'mailbox.jsonl'))
+               KKH_MAILBOX=str(root / 'mailbox.jsonl'),
+               KKH_MAIL_FAILURE=str(root / 'mail-failure.enabled'))
     flags = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
     report = {'contract': 'KKLIDI-MEMBERS-MVP', 'scope': 'SYNTHETIC_WORDPRESS_BEHAVIOR', 'run_id': run_id,
               'status': 'FAIL', 'wordpress': LOCK['version'], 'archive_sha256': LOCK['archive_sha256'],
@@ -1293,7 +1445,8 @@ def execute(php, mysqld, one_prefix=False, skip_perf=False):
                                    timeout=timeout, creationflags=flags)
         def diagnostic():
             message = (completed.stderr + completed.stdout).decode('utf-8', errors='replace')
-            for name in ('KKH_DB_PASSWORD', 'KKH_USER_PASSWORD', 'KKH_NEW_PASSWORD', 'KKH_RESET_PASSWORD', 'KKH_SALT', 'KKH_PROBE_KEY'):
+            for name in ('KKH_DB_PASSWORD', 'KKH_USER_PASSWORD', 'KKH_NEW_PASSWORD',
+                         'KKH_RESET_PASSWORD', 'KKH_FAILURE_PASSWORD', 'KKH_SALT', 'KKH_PROBE_KEY'):
                 message = message.replace(env[name], '[redacted]')
             return message[-2500:]
         require(completed.returncode == 0, 'Isolated subprocess failed: ' + diagnostic())
@@ -1507,7 +1660,8 @@ def execute(php, mysqld, one_prefix=False, skip_perf=False):
             handle.flush()
         diagnostics = '\n'.join(p.read_text(encoding='utf-8', errors='replace')[-2500:]
                                 for p in root.glob('php-*.log'))
-        for name in ('KKH_DB_PASSWORD', 'KKH_USER_PASSWORD', 'KKH_NEW_PASSWORD', 'KKH_RESET_PASSWORD', 'KKH_SALT', 'KKH_PROBE_KEY'):
+        for name in ('KKH_DB_PASSWORD', 'KKH_USER_PASSWORD', 'KKH_NEW_PASSWORD',
+                     'KKH_RESET_PASSWORD', 'KKH_FAILURE_PASSWORD', 'KKH_SALT', 'KKH_PROBE_KEY'):
             diagnostics = diagnostics.replace(env[name], '[redacted]')
         report['diagnostics'] = diagnostics
     finally:

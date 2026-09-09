@@ -198,14 +198,16 @@ class HarnessGuards(unittest.TestCase):
         )
 
         self.assertEqual(contract['contract'], 'AUTH-NOTIFY-001')
-        self.assertEqual(contract['version'], 1)
+        self.assertEqual(contract['version'], 2)
         self.assertEqual(contract['status'], 'SPECIFIED')
         self.assertEqual(contract['implementation_status'], 'IMPLEMENTED_AND_SYNTHETIC_VERIFIED')
-        self.assertEqual(contract['implementation_phase'], 'P0-3')
+        self.assertEqual(contract['implementation_phase'], 'P0-4')
         self.assertEqual(contract['verification'], {
             'status': 'PASS',
             'scope': 'synthetic_wordpress',
             'prefixes': ['wp_', 'non_default'],
+            'mail_failure_injection': 'PASS',
+            'evidence_id': 'c5c2488e1b154cb6bef7bd010d85ae81',
             'report': '.harness/reports/latest.json',
         })
         self.assertEqual(contract['transport'], {
@@ -250,6 +252,18 @@ class HarnessGuards(unittest.TestCase):
         self.assertFalse(delivery['exactly_once_delivery_claimed'])
         self.assertTrue(delivery['mail_failure_must_not_rollback_security_state'])
         self.assertTrue(delivery['mail_failure_must_not_be_reported_as_delivered'])
+        self.assertEqual(delivery['mail_failure_behavior'], {
+            'events': [
+                'registration_completed', 'password_changed',
+                'withdrawal_requested', 'withdrawal_finalized',
+            ],
+            'injected_wp_mail_return': False,
+            'committed_operation_response': 'success',
+            'audit_result': 'failure',
+            'audit_reason_code': 'wp_mail_failed',
+            'delivery_records': 0,
+            'retry_attempts': 0,
+        })
 
         boundaries = contract['boundaries']
         self.assertTrue(boundaries['wordpress_core_auth_preserved'])
@@ -304,6 +318,14 @@ class HarnessGuards(unittest.TestCase):
         harness = (repository / 'tests/harness/run.py').read_text(encoding='utf-8')
         self.assertIn("'includes/Notifications/AccountMailer.php'", harness)
         self.assertIn("results['AUTH-NOTIFY-001']", harness)
+        self.assertIn("KKH_MAIL_FAILURE=str(root / 'mail-failure.enabled')", harness)
+        self.assertIn("'mail_failure_events': 4", harness)
+        self.assertIn("'mail_failure_injected_attempts': 4", harness)
+        self.assertIn("'mail_failure_delivery_records': 0", harness)
+        self.assertIn("'mail_failure_retry_attempts': 0", harness)
+        observer = (repository / 'tests/harness/observer.php').read_text(encoding='utf-8')
+        self.assertIn("kkh_record(['type' => 'mail_failed'])", observer)
+        self.assertIn('return false;', observer)
 
     def test_auth_notify_001_catalog_covers_mail_presets(self):
         repository = Path(__file__).resolve().parents[2]

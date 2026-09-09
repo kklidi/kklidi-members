@@ -1,13 +1,15 @@
 {
   "contract": "AUTH-NOTIFY-001",
-  "version": 1,
+  "version": 2,
   "status": "SPECIFIED",
   "implementation_status": "IMPLEMENTED_AND_SYNTHETIC_VERIFIED",
-  "implementation_phase": "P0-3",
+  "implementation_phase": "P0-4",
   "verification": {
     "status": "PASS",
     "scope": "synthetic_wordpress",
     "prefixes": ["wp_", "non_default"],
+    "mail_failure_injection": "PASS",
+    "evidence_id": "c5c2488e1b154cb6bef7bd010d85ae81",
     "report": ".harness/reports/latest.json"
   },
   "transport": {
@@ -54,7 +56,21 @@
     "duplicate_request_must_not_duplicate_logical_notification": true,
     "exactly_once_delivery_claimed": false,
     "mail_failure_must_not_rollback_security_state": true,
-    "mail_failure_must_not_be_reported_as_delivered": true
+    "mail_failure_must_not_be_reported_as_delivered": true,
+    "mail_failure_behavior": {
+      "events": [
+        "registration_completed",
+        "password_changed",
+        "withdrawal_requested",
+        "withdrawal_finalized"
+      ],
+      "injected_wp_mail_return": false,
+      "committed_operation_response": "success",
+      "audit_result": "failure",
+      "audit_reason_code": "wp_mail_failed",
+      "delivery_records": 0,
+      "retry_attempts": 0
+    }
   },
   "localization": {
     "source_strings": "english_gettext",

@@ -62,6 +62,36 @@ if ($action === 'replay-registration-notification') {
     ));
     exit;
 }
+if ($action === 'notification-failure-summary') {
+    $failure_email = getenv('KKH_FAILURE_EMAIL') ?: '';
+    $failure_user = $failure_email !== '' ? get_user_by('email', $failure_email) : false;
+    if (!$failure_user) { exit('Missing synthetic mail-failure user.'); }
+    $audit_table = $wpdb->prefix . 'kklidi_mem_login_audit';
+    $mail_audit = $wpdb->get_results($wpdb->prepare(
+        "SELECT event_type, result, reason_code FROM {$audit_table}
+         WHERE user_id = %d AND event_type LIKE 'mail_%%' ORDER BY id ASC",
+        $failure_user->ID
+    ), ARRAY_A);
+    $consent_table = $wpdb->prefix . 'kklidi_mem_consents';
+    echo wp_json_encode(array(
+        'user_id' => (int) $failure_user->ID,
+        'state' => \KKLIDI\Members\Security\AccountState::get((int) $failure_user->ID),
+        'required_consents' => (int) $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$consent_table}
+             WHERE user_id = %d AND consent_type IN ('service', 'privacy') AND action = 'accept'",
+            $failure_user->ID
+        )),
+        'original_password_valid' => wp_check_password(
+            getenv('KKH_USER_PASSWORD'), $failure_user->user_pass, $failure_user->ID
+        ),
+        'changed_password_valid' => wp_check_password(
+            getenv('KKH_FAILURE_PASSWORD'), $failure_user->user_pass, $failure_user->ID
+        ),
+        'session_count' => count(\WP_Session_Tokens::get_instance($failure_user->ID)->get_all()),
+        'mail_audit' => $mail_audit,
+    ));
+    exit;
+}
 
 $consent_table = $wpdb->prefix . 'kklidi_mem_consents';
 $audit_table = $wpdb->prefix . 'kklidi_mem_login_audit';

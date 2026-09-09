@@ -21,6 +21,13 @@ function kkh_record(array $event): void {
     }
 }
 add_filter('pre_wp_mail', function ($return, $attributes) {
+    $failure_file = getenv('KKH_MAIL_FAILURE');
+    $owned_root = dirname(rtrim(ABSPATH, '/\\'));
+    if ($return === false || ($failure_file && dirname($failure_file) === $owned_root
+        && is_file($failure_file))) {
+        kkh_record(['type' => 'mail_failed']);
+        return false;
+    }
     kkh_record(['type' => 'mail_sunk']);
     $mailbox = getenv('KKH_MAILBOX');
     if ($mailbox && dirname($mailbox) === dirname(rtrim(ABSPATH, '/\\')) && is_array($attributes)) {

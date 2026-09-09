@@ -8,7 +8,9 @@
   the existing audit unique key for one logical dispatch claim per event.
 - Verified the four presets, rejected/replayed requests, data minimization, arbitrary
   database prefixes, and Members-off behavior in disposable WordPress installations.
-- Injected mail-failure behavior remains the P0-4 gate before the 0.7.3 package is built.
+- Completed the P0-4 injected `wp_mail()` failure gate across all four account events
+  and two database prefixes: committed state and session revocation survive, failed
+  attempts are audited as `failure/wp_mail_failed`, and no delivery or retry is recorded.
 
 ## 0.7.2 — 2026-09-09
 
