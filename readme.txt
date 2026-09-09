@@ -3,7 +3,7 @@ Contributors: kklidi
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.7.6
+Stable tag: 0.7.7
 
 Core-based member accounts with scoped UI, consent records and safe withdrawal handling.
 
@@ -14,17 +14,22 @@ KKLIDI Members adds login, registration, profile, consent and account management
 WooCommerce orders and LMS enrollment/progress stay with their respective plugins.
 Korean UI uses WordPress gettext translation catalogs.
 
-0.7.6 implements the account, profile, consent and password UX, a WordPress Core
-password-reset wrapper, and plugin-owned link-only account navigation slots. See
-docs/RELEASE-0.7.6.md.
+0.7.7 adds the Users-area administrator information architecture, read-only system
+diagnostics, immutable document preview/history, and Core Users account-state and
+required-consent columns. See docs/RELEASE-0.7.7.md.
 
 == Installation ==
 
 1. Upload the kklidi-members ZIP to a test WordPress single-site installation.
-2. Activate the plugin and open Tools > KKLIDI Members.
+2. Activate the plugin and open Users > KKLIDI Members.
 3. Review registration and consent policy before changing the closed defaults.
 
 == Changelog ==
+
+= 0.7.7 =
+* Moved the Members administration screen under Users with overview, documents, withdrawals, and audit sections.
+* Added read-only readiness diagnostics and server-rendered document preview/history without rewriting published snapshots.
+* Added administrator-only account-state and required-consent columns and filters to the Core Users list.
 
 = 0.7.6 =
 * Added the account, profile, consent and password UX states with linked validation errors and route-scoped password controls.

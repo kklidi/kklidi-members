@@ -61,6 +61,10 @@ final class Repository {
 			&& (string) $document['version'] === (string) $latest->document_version;
 	}
 
+	public static function has_current_required(int $user_id): bool {
+		return self::has_current($user_id, 'service') && self::has_current($user_id, 'privacy');
+	}
+
 	public static function latest(int $user_id, string $type) {
 		global $wpdb;
 		if (!in_array($type, self::TYPES, true)) {

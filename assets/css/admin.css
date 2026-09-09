@@ -11,6 +11,57 @@
 	background: #fff;
 }
 
+.kklidi-members-admin .nav-tab-wrapper {
+	margin-bottom: 20px;
+}
+
+.kklidi-members-diagnostics {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 16px;
+}
+
+.kklidi-members-diagnostic,
+.kklidi-members-document-preview {
+	padding: 16px;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	background: #f6f7f7;
+}
+
+.kklidi-members-diagnostic h3,
+.kklidi-members-diagnostic p:first-of-type,
+.kklidi-members-document-preview h3 {
+	margin-top: 0;
+}
+
+.kklidi-members-status {
+	display: inline-block;
+	padding: 3px 8px;
+	border-radius: 999px;
+	font-weight: 600;
+}
+
+.kklidi-members-status.is-ready {
+	background: #edfaef;
+	color: #135e24;
+}
+
+.kklidi-members-status.is-attention {
+	background: #fcf0f1;
+	color: #8a2424;
+}
+
+.kklidi-members-button-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.kklidi-members-admin code {
+	word-break: break-all;
+}
+
 .kklidi-members-admin .kklidi-members-admin-card h2:first-child,
 .kklidi-members-admin .kklidi-members-admin-card h3:first-child {
 	margin-top: 0;
@@ -34,5 +85,34 @@
 @media (max-width: 600px) {
 	.kklidi-members-admin .kklidi-members-admin-card {
 		padding: 16px;
+	}
+
+	.kklidi-members-diagnostics {
+		grid-template-columns: 1fr;
+	}
+
+	.kklidi-members-admin .kklidi-members-admin-table thead {
+		display: none;
+	}
+
+	.kklidi-members-admin .kklidi-members-admin-table,
+	.kklidi-members-admin .kklidi-members-admin-table tbody,
+	.kklidi-members-admin .kklidi-members-admin-table tr,
+	.kklidi-members-admin .kklidi-members-admin-table td {
+		display: block;
+		width: 100%;
+	}
+
+	.kklidi-members-admin .kklidi-members-admin-table tr {
+		padding: 8px 0;
+	}
+
+	.kklidi-members-admin .kklidi-members-admin-table td::before {
+		display: block;
+		margin-bottom: 3px;
+		color: #50575e;
+		content: attr(data-label);
+		font-size: 12px;
+		font-weight: 600;
 	}
 }

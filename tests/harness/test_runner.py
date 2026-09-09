@@ -160,9 +160,9 @@ class HarnessGuards(unittest.TestCase):
         product = (repository / 'docs/PRODUCT.md').read_text(encoding='utf-8')
 
         self.assertEqual(contract['contract'], 'AUTH-UX-003')
-        self.assertEqual(contract['version'], 2)
-        self.assertEqual(contract['status'], 'IMPLEMENTED_THROUGH_0.7.6')
-        self.assertIn('`AUTH-UX-003` 상태: **0.7.6_ACCOUNT_RESET_NAVIGATION_IMPLEMENTED**', ui_ux)
+        self.assertEqual(contract['version'], 3)
+        self.assertEqual(contract['status'], 'IMPLEMENTED_THROUGH_0.7.7')
+        self.assertIn('`AUTH-UX-003` 상태: **0.7.7_ADMIN_INFORMATION_ARCHITECTURE_IMPLEMENTED**', ui_ux)
         self.assertNotIn('email을 Core `user_login`으로 사용하는 신규 회원', ui_ux)
         self.assertIn('비공개 후보', ui_ux)
         self.assertIn('D09 | **DECIDED FOR 0.7.4', product)
@@ -212,7 +212,7 @@ class HarnessGuards(unittest.TestCase):
         self.assertFalse(boundaries['future_features_implemented'])
         self.assertEqual(list(contract['implementation_order']),
                          ['0.7.5', '0.7.6', '0.7.7', '0.7.8', '0.7.9'])
-        self.assertEqual(contract['implementation']['completed'], ['0.7.5', '0.7.6'])
+        self.assertEqual(contract['implementation']['completed'], ['0.7.5', '0.7.6', '0.7.7'])
 
     def test_auth_ui_002_uses_scoped_styles_and_accessible_shells(self):
         repository = Path(__file__).resolve().parents[2]
@@ -244,7 +244,7 @@ class HarnessGuards(unittest.TestCase):
                       (repository / 'includes/Core/Url.php').read_text(encoding='utf-8'))
 
         self.assertIn("add_action('admin_enqueue_scripts'", admin_source)
-        self.assertIn("tools_page_kklidi-members", admin_source)
+        self.assertIn("users_page_kklidi-members", admin_source)
         production_source = '\n'.join(path.read_text(encoding='utf-8') for path in (
             repository / 'kklidi-members.php',
             repository / 'includes/Core/Plugin.php',
@@ -291,6 +291,41 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn("'kklidi_members_password_reset'", plugin)
         self.assertIn("'includes/Auth/PasswordResetController.php'", package)
         self.assertIn("'templates/password-reset.php'", package)
+
+    def test_auth_ux_003_077_admin_information_architecture_is_bounded(self):
+        repository = Path(__file__).resolve().parents[2]
+        admin = (repository / 'includes/Admin/AdminController.php').read_text(encoding='utf-8')
+        documents = (repository / 'includes/Consent/Documents.php').read_text(encoding='utf-8')
+        consent = (repository / 'includes/Consent/Repository.php').read_text(encoding='utf-8')
+        template = (repository / 'templates/admin.php').read_text(encoding='utf-8')
+
+        self.assertIn('add_users_page(', admin)
+        self.assertIn("admin_url('users.php')", admin)
+        self.assertIn("$pagenow === 'tools.php'", admin)
+        self.assertIn("users_page_kklidi-members", admin)
+        for section in ('overview', 'documents', 'withdrawals', 'audit'):
+            self.assertIn("'" + section + "'", admin)
+        for check in ('users_can_register', 'cleanRoutePreflight',
+                      'kklidi_mem_login_audit', 'kklidi_mem_consents',
+                      'kklidi_members_daily_cleanup'):
+            self.assertIn(check, admin)
+        self.assertIn('Documents::preview(', admin)
+        self.assertIn('Documents::history(', admin)
+        self.assertIn('public static function preview(', documents)
+        self.assertIn('public static function history(', documents)
+        self.assertIn("add_option($name, $snapshot, '', 'no')", documents)
+        self.assertIn('public static function has_current_required(', consent)
+        self.assertIn("manage_users_columns", admin)
+        self.assertIn("manage_users_custom_column", admin)
+        self.assertIn("restrict_manage_users", admin)
+        self.assertIn("pre_get_users", admin)
+        self.assertIn("pre_user_query", admin)
+        self.assertIn('manage_kklidi_members', admin)
+        self.assertIn('nav-tab-wrapper', template)
+        self.assertIn('Unpublished preview', template)
+        self.assertIn('Published history', template)
+        self.assertNotIn('wp_delete_user(', admin)
+        self.assertNotRegex(admin, r'WC_|WooCommerce|kklidi_lms|enrollment|progress')
 
     def test_phase_zero_documents_do_not_report_completed_ui_as_pending(self):
         repository = Path(__file__).resolve().parents[2]
@@ -535,7 +570,7 @@ class HarnessGuards(unittest.TestCase):
 
         lifecycle = (repository / 'tests/harness/mamp_lifecycle_run.py').read_text(encoding='utf-8')
         self.assertIn("SANDBOX = Path('C:/MAMP/htdocs/kklidi-members-mamp-sandbox')", lifecycle)
-        self.assertIn("PREVIOUS_VERSION = '0.7.4'", lifecycle)
+        self.assertIn("PREVIOUS_VERSION = '0.7.6'", lifecycle)
         self.assertIn("ALLOWED_INITIAL_VERSIONS = ('0.7.0', PREVIOUS_VERSION, CURRENT_VERSION)", lifecycle)
         self.assertIn("CURRENT_VERSION = re.search(", lifecycle)
         self.assertIn("OLD_ARCHIVE = ROOT / ('dist/kklidi-members-' + PREVIOUS_VERSION + '.zip')", lifecycle)
@@ -576,7 +611,7 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn("delete_option('kklidi_members_registration_enabled');", admin)
         self.assertIn("delete_option('kklidi_members_registration_enabled');", installer)
         self.assertNotIn('name="registration_enabled"', template)
-        self.assertIn('WordPress registration is allowed', template)
+        self.assertIn('Public registration remains controlled by the WordPress General Settings screen.', template)
         self.assertIn("$mode === 'core-on-no-documents'", setup)
         self.assertIn("$mode === 'documents-ready-core-off'", setup)
         self.assertIn("$mode === 'core-on'", setup)
@@ -640,7 +675,7 @@ class HarnessGuards(unittest.TestCase):
         ready = json.loads(json.dumps(example))
         ready['environment']['base_url'] = 'https://staging.kklidi.com'
         ready['versions'].update(
-            wordpress='7.1', php='8.3', members='0.7.6', woocommerce='11.1.0')
+            wordpress='7.1', php='8.3', members='0.7.7', woocommerce='11.1.0')
         ready['owners'] = {key: 'approved-' + key for key in ready['owners']}
         ready['backup'].update(
             artifact_sha256='a' * 64,

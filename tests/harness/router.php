@@ -6,7 +6,7 @@ if (PHP_SAPI !== 'cli-server' || ($_SERVER['REMOTE_ADDR'] ?? '') !== '127.0.0.1'
     exit;
 }
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-if (!in_array($path, ['/', '/wp-login.php', '/index.php', '/wp-admin/tools.php'], true)) {
+if (!in_array($path, ['/', '/wp-login.php', '/index.php', '/wp-admin/tools.php', '/wp-admin/users.php'], true)) {
     http_response_code(404);
     exit;
 }

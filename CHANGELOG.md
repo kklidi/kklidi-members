@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.7 — 2026-09-09
+
+- Moved the administrator surface to the WordPress Users area and split it into
+  overview, documents, withdrawals, and audit sections with a safe legacy redirect.
+- Added read-only registration, document, route, URL ownership, table, and cleanup
+  diagnostics without loading WooCommerce or LMS domains.
+- Added immutable document preview/history and administrator-only Core Users columns
+  and filters for Members account state and current required consent.
+
 ## 0.7.6 — 2026-09-09
 
 - Implemented the approved account, profile, consent, and password UX slice with

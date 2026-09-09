@@ -7,14 +7,14 @@
 - 계약 ID: `AUTH-UI-001`
 - `AUTH-UI-001` 상태: **SPECIFIED**
 - `AUTH-UI-002` 상태: **IMPLEMENTED_AND_VERIFIED**
-- `AUTH-UX-003` 상태: **0.7.6_ACCOUNT_RESET_NAVIGATION_IMPLEMENTED**
+- `AUTH-UX-003` 상태: **0.7.7_ADMIN_INFORMATION_ARCHITECTURE_IMPLEMENTED**
 - 범위: 로그인, 가입, 계정 홈, 프로필, 비밀번호 변경, 동의, 탈퇴 요청, 로그아웃 확인, Members 관리자 화면
 
 `AUTH-UI-001`은 화면 구현 전에 사용자에게 보이는 상태와 완료 기준을 고정한다. 현재 템플릿이 HTTP에서 렌더링된 사실만으로 이 계약이 구현되었다고 판정하지 않는다. CSS 적용, 반응형 브라우저 검증, 키보드 조작 검증은 `AUTH-UI-002`에서 수행한다.
 
 `AUTH-UI-002`는 2026-09-07에 구현했다. 당시 공통 frontend stylesheet, 관리자 전용 stylesheet, 8개 frontend page shell, route 전용 asset hook을 추가했으며 JavaScript는 없었다. MAMP sandbox에서 가입·로그인 오류·로그인 회원의 6개 계정 화면·관리자 화면을 확인했고, 2026-09-09의 0.7.1 패키지를 Chrome 360px viewport에서 다시 확인해 한국어 번역 적용, route 전용 0.7.1 자산, focus 규칙과 가로 overflow 부재를 검증했다. 0.7.5는 로그인·가입 route 전용 password enhancement를, 0.7.6은 아홉 번째 frontend reset shell과 변경·reset route의 같은 enhancement를 추가했다. 후속 화면의 브라우저 회귀는 0.7.9 gate가 소유한다.
 
-`AUTH-UX-003`은 0.7.4에서 승인한 UI·운영 구현의 전략 계약이다. 0.7.5의 로그인·회원가입 단계에 이어 0.7.6은 계정 홈·프로필·동의·비밀번호 UX, Core 재설정 래퍼와 plugin-owned link-only navigation slot을 구현했다. 관리자 정보 구조와 처리 workflow는 아직 구현하지 않았다. 실행 가능한 manifest는 `tests/harness/ux_strategy_contract.json`이다.
+`AUTH-UX-003`은 0.7.4에서 승인한 UI·운영 구현의 전략 계약이다. 0.7.5의 로그인·회원가입, 0.7.6의 계정·재설정 단계에 이어 0.7.7은 Users 영역의 관리자 정보 구조, overview 진단, 약관 preview/history와 Core Users 상태 컬럼·필터를 구현했다. 탈퇴 복구와 상세 audit workflow는 0.7.8에 남아 있다. 실행 가능한 manifest는 `tests/harness/ux_strategy_contract.json`이다.
 
 ## 2. 공통 원칙
 
@@ -137,7 +137,19 @@
 
 단위 계약, PHP lint, 번역/package 검사를 이번 단계의 로컬 증거로 남긴다. MAMP/브라우저의 실제 메일 링크, 키보드, no-JS, 모바일 반복 검증은 계획된 0.7.9 gate이며 이 구현 완료 주장에 포함하지 않는다.
 
-## 11. 범위 밖
+## 11. 0.7.7 구현 상태
+
+0.7.7은 8.3의 세 번째 단계를 구현한다.
+
+- 관리자 화면을 WordPress `사용자` 메뉴 아래로 옮기고 overview, documents, withdrawals, audit 구역을 분리했다. 기존 Tools URL은 권한을 확인한 뒤 새 로컬 URL로 이동한다.
+- overview는 Core 공개 가입, 필수 문서, clean route 충돌, Members URL 소유권, 소유 table과 cleanup schedule을 읽기 전용으로 진단한다.
+- 약관 작성은 저장 전 서버 렌더링 preview와 최대 20개 immutable snapshot history를 제공한다. preview는 option을 쓰지 않고 기존 snapshot과 consent row를 수정하지 않는다.
+- Core Users 목록에는 권한 있는 관리자에게만 account state와 현재 필수 consent 상태 컬럼·필터를 추가한다. 별도 사용자 원장이나 Woo/LMS 데이터 조회는 없다.
+- 관리자 stylesheet는 `users_page_kklidi-members`에서만 로드되며 작은 화면의 표는 각 셀 label을 유지한다.
+
+탈퇴 pending→active 복구, 처리 사유, audit filter/pagination과 읽기 전용 알림 결과는 0.7.8 범위다. 브라우저 반복검증은 0.7.9에 수행한다.
+
+## 12. 범위 밖
 
 - site theme 전체 redesign과 page builder 통합
 - WooCommerce 주문/결제 화면 및 LMS 학습 화면 UI

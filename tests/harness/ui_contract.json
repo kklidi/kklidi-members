@@ -71,7 +71,7 @@
     },
     "admin": {
       "template": "templates/admin.php",
-      "route": "wp-admin/tools.php?page=kklidi-members",
+      "route": "wp-admin/users.php?page=kklidi-members",
       "audiences": ["administrator"],
       "states": ["capability_denied", "settings_default", "settings_saved", "withdrawal_queue_empty", "withdrawal_queue_populated", "audit_empty", "audit_populated"],
       "requirements": ["manage_kklidi_members", "server_capability_check", "admin_nonce"]

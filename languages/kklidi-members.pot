@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the KKLIDI Members plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: KKLIDI Members 0.7.6\n"
+"Project-Id-Version: KKLIDI Members 0.7.7\n"
 "Report-Msgid-Bugs-To: https://kklidi.com/\n"
 "POT-Creation-Date: 2026-09-07 00:00+0000\n"
 "MIME-Version: 1.0\n"
@@ -11,6 +11,9 @@ msgstr ""
 "X-Domain: kklidi-members\n"
 
 msgid "KKLIDI Members"
+msgstr ""
+
+msgid "KKLIDI Members currently supports single-site installations only."
 msgstr ""
 
 msgid "You do not have permission to access this page."
@@ -506,4 +509,178 @@ msgid "Show document"
 msgstr ""
 
 msgid "Consent navigation"
+msgstr ""
+
+msgid "Members administration"
+msgstr ""
+
+msgid "Overview"
+msgstr ""
+
+msgid "Documents"
+msgstr ""
+
+msgid "Withdrawals"
+msgstr ""
+
+msgid "Audit"
+msgstr ""
+
+msgid "Review the current account-system prerequisites without changing WordPress or external plugin data."
+msgstr ""
+
+msgid "Needs attention"
+msgstr ""
+
+msgid "WordPress public registration"
+msgstr ""
+
+msgid "Allowed by WordPress"
+msgstr ""
+
+msgid "Closed by WordPress"
+msgstr ""
+
+msgid "Required documents"
+msgstr ""
+
+msgid "Ready"
+msgstr ""
+
+msgid "Service terms or privacy policy is missing"
+msgstr ""
+
+msgid "Clean route preflight"
+msgstr ""
+
+msgid "No page collisions found"
+msgstr ""
+
+msgid "%d page collisions found"
+msgstr ""
+
+msgid "Members URL ownership"
+msgstr ""
+
+msgid "Login: %1$s / Registration: %2$s"
+msgstr ""
+
+msgid "Owned"
+msgstr ""
+
+msgid "Core fallback"
+msgstr ""
+
+msgid "Members tables"
+msgstr ""
+
+msgid "Both owned tables are available"
+msgstr ""
+
+msgid "An owned table is missing"
+msgstr ""
+
+msgid "Daily cleanup schedule"
+msgstr ""
+
+msgid "Next run: %s UTC"
+msgstr ""
+
+msgid "Cleanup is not scheduled"
+msgstr ""
+
+msgid "URL ownership"
+msgstr ""
+
+msgid "Public registration remains controlled by the WordPress General Settings screen."
+msgstr ""
+
+msgid "Save URL settings"
+msgstr ""
+
+msgid "Current version"
+msgstr ""
+
+msgid "No published version."
+msgstr ""
+
+msgid "Preview"
+msgstr ""
+
+msgid "Publish new version"
+msgstr ""
+
+msgid "Unpublished preview"
+msgstr ""
+
+msgid "Published history"
+msgstr ""
+
+msgid "Version"
+msgstr ""
+
+msgid "Published at (UTC)"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Current"
+msgstr ""
+
+msgid "Previous"
+msgstr ""
+
+msgid "No published history."
+msgstr ""
+
+msgid "Withdrawal status updated."
+msgstr ""
+
+msgid "No audit events."
+msgstr ""
+
+msgid "Account state"
+msgstr ""
+
+msgid "Required consent"
+msgstr ""
+
+msgid "Complete"
+msgstr ""
+
+msgid "Incomplete"
+msgstr ""
+
+msgid "Filter by account state"
+msgstr ""
+
+msgid "All account states"
+msgstr ""
+
+msgid "Active"
+msgstr ""
+
+msgid "Registration pending"
+msgstr ""
+
+msgid "Withdrawal pending"
+msgstr ""
+
+msgid "Disabled"
+msgstr ""
+
+msgid "Unknown"
+msgstr ""
+
+msgid "Filter by required consent"
+msgstr ""
+
+msgid "All consent states"
+msgstr ""
+
+msgid "Required consent complete"
+msgstr ""
+
+msgid "Required consent incomplete"
 msgstr ""

@@ -742,17 +742,19 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
     _, _, core_admin_form = admin.request('/wp-login.php')
     admin_status, _, _ = admin.request('/wp-login.php', data={
         'log': 'fixture_admin', 'pwd': env['KKH_USER_PASSWORD'], 'testcookie': '1',
-        'redirect_to': base + '/wp-admin/tools.php?page=kklidi-members', 'wp-submit': 'Log In',
+        'redirect_to': base + '/wp-admin/users.php?page=kklidi-members', 'wp-submit': 'Log In',
     })
     require(admin_status == 302, 'Synthetic administrator login failed')
-    admin_status, _, admin_page = admin.request('/wp-admin/tools.php?page=kklidi-members')
+    admin_status, _, admin_page = admin.request('/wp-admin/users.php?page=kklidi-members&section=documents')
     require(admin_status == 200 and 'name="kklidi_members_admin_action"' in admin_page,
-            'Members administrator page/capability unavailable')
+            'Members administrator page/capability unavailable: '
+            + repr({'status': admin_status, 'has_action': 'name="kklidi_members_admin_action"' in admin_page,
+                    'has_title': 'KKLIDI Members' in admin_page}))
     admin_nonce = hidden_input(admin_page, '_kklidi_members_admin_nonce')
     denied_get_status, _, denied_get_page = profile_browser.request(
-        '/wp-admin/tools.php?page=kklidi-members')
-    denied_status, _, _ = profile_browser.request('/wp-admin/tools.php?page=kklidi-members', data={
-        'kklidi_members_admin_action': 'save_settings',
+        '/wp-admin/users.php?page=kklidi-members')
+    denied_status, _, _ = profile_browser.request('/wp-admin/users.php?page=kklidi-members', data={
+        'kklidi_members_admin_action': 'save_url_settings',
         '_kklidi_members_admin_nonce': admin_nonce,
         'own_login_url': '1',
     })
@@ -965,7 +967,7 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
 
     # The administrator sees the queue, finalizes only the pending state, and replay is idempotent.
     queued_user_id = withdrawal_probe['user']['id']
-    queue_status, _, queue_page = admin.request('/wp-admin/tools.php?page=kklidi-members')
+    queue_status, _, queue_page = admin.request('/wp-admin/users.php?page=kklidi-members&section=withdrawals')
     require(queue_status == 200
             and f'name="user_id" value="{queued_user_id}"' in queue_page
             and 'value="finalize_withdrawal"' in queue_page,
@@ -975,7 +977,7 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
         '_kklidi_members_admin_nonce': hidden_input(queue_page, '_kklidi_members_admin_nonce'),
         'user_id': str(queued_user_id),
     }
-    finalize_status, _, _ = admin.request('/wp-admin/tools.php?page=kklidi-members', data=finalize_fields)
+    finalize_status, _, _ = admin.request('/wp-admin/users.php?page=kklidi-members&section=withdrawals', data=finalize_fields)
     finalized_probe = command(php_cli + [HERE / 'mvp_probe.php'], json_result=True)
     disabled_events = finalized_probe['audit_events'].count('withdrawal_disabled')
     expected_mail_events = {
@@ -1002,11 +1004,9 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
          'orders were deleted', 'learning records were deleted']
     )
 
-    after_status, _, after_page = admin.request('/wp-admin/tools.php?page=kklidi-members')
-    replay_status, _, _ = admin.request('/wp-admin/tools.php?page=kklidi-members', data=dict(
-        finalize_fields,
-        _kklidi_members_admin_nonce=hidden_input(after_page, '_kklidi_members_admin_nonce'),
-    ))
+    after_status, _, after_page = admin.request('/wp-admin/users.php?page=kklidi-members&section=withdrawals')
+    replay_status, _, _ = admin.request(
+        '/wp-admin/users.php?page=kklidi-members&section=withdrawals', data=finalize_fields)
     replay_probe = command(php_cli + [HERE / 'mvp_probe.php'], json_result=True)
     require(after_status == 200 and replay_status == 302
             and f'name="user_id" value="{queued_user_id}"' not in after_page
@@ -1122,7 +1122,7 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
                 'Mail failure rolled back withdrawal request, access revocation, or appeared delivered')
 
         failure_queue_status, _, failure_queue_page = admin.request(
-            '/wp-admin/tools.php?page=kklidi-members')
+            '/wp-admin/users.php?page=kklidi-members&section=withdrawals')
         require(failure_queue_status == 200
                 and f'name="user_id" value="{failure_user_id}"' in failure_queue_page,
                 'Mail-failure withdrawal was absent from the administrator queue')
@@ -1133,7 +1133,7 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
             'user_id': str(failure_user_id),
         }
         status, _, _ = admin.request(
-            '/wp-admin/tools.php?page=kklidi-members', data=failure_finalize_fields)
+            '/wp-admin/users.php?page=kklidi-members&section=withdrawals', data=failure_finalize_fields)
         finalized_failure_probe = command(
             php_cli + [HERE / 'mvp_probe.php', 'notification-failure-summary'],
             json_result=True)
@@ -1401,7 +1401,7 @@ def assert_production_shape():
 			and 'if (self::is_password_enhancement_route())' in plugin_source,
             'Authentication script must stay scoped to login and registration routes')
     require("add_action('admin_enqueue_scripts'" in admin_source
-            and "tools_page_kklidi-members" in admin_source
+            and "users_page_kklidi-members" in admin_source
             and 'wp_enqueue_style(' in admin_source,
             'Admin stylesheet must stay scoped to the Members admin page')
     cookie_sources = [name for name in PRODUCTION_FILES

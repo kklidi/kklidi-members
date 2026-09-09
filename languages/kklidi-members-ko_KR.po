@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the KKLIDI Members plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: KKLIDI Members 0.7.6\n"
+"Project-Id-Version: KKLIDI Members 0.7.7\n"
 "Language: ko_KR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -411,3 +411,177 @@ msgstr "문서 보기"
 
 msgid "Consent navigation"
 msgstr "동의 탐색"
+
+msgid "Members administration"
+msgstr "회원 관리"
+
+msgid "Overview"
+msgstr "개요"
+
+msgid "Documents"
+msgstr "약관 문서"
+
+msgid "Withdrawals"
+msgstr "탈퇴 처리"
+
+msgid "Audit"
+msgstr "감사 기록"
+
+msgid "Review the current account-system prerequisites without changing WordPress or external plugin data."
+msgstr "WordPress나 외부 플러그인 데이터를 변경하지 않고 현재 계정 시스템 준비 상태를 확인합니다."
+
+msgid "Needs attention"
+msgstr "확인 필요"
+
+msgid "WordPress public registration"
+msgstr "WordPress 공개 회원가입"
+
+msgid "Allowed by WordPress"
+msgstr "WordPress에서 허용됨"
+
+msgid "Closed by WordPress"
+msgstr "WordPress에서 닫힘"
+
+msgid "Required documents"
+msgstr "필수 약관 문서"
+
+msgid "Ready"
+msgstr "준비됨"
+
+msgid "Service terms or privacy policy is missing"
+msgstr "서비스 약관 또는 개인정보 처리방침이 없습니다"
+
+msgid "Clean route preflight"
+msgstr "고유주소 경로 사전 검사"
+
+msgid "No page collisions found"
+msgstr "페이지 경로 충돌 없음"
+
+msgid "%d page collisions found"
+msgstr "%d개의 페이지 경로 충돌 발견"
+
+msgid "Members URL ownership"
+msgstr "Members URL 소유권"
+
+msgid "Login: %1$s / Registration: %2$s"
+msgstr "로그인: %1$s / 회원가입: %2$s"
+
+msgid "Owned"
+msgstr "Members 소유"
+
+msgid "Core fallback"
+msgstr "Core 기본 경로"
+
+msgid "Members tables"
+msgstr "Members 테이블"
+
+msgid "Both owned tables are available"
+msgstr "소유 테이블 2개를 사용할 수 있습니다"
+
+msgid "An owned table is missing"
+msgstr "필요한 소유 테이블이 없습니다"
+
+msgid "Daily cleanup schedule"
+msgstr "일일 정리 일정"
+
+msgid "Next run: %s UTC"
+msgstr "다음 실행: %s UTC"
+
+msgid "Cleanup is not scheduled"
+msgstr "정리 작업이 예약되지 않았습니다"
+
+msgid "URL ownership"
+msgstr "URL 소유권"
+
+msgid "Public registration remains controlled by the WordPress General Settings screen."
+msgstr "공개 회원가입은 WordPress 일반 설정 화면에서 계속 관리합니다."
+
+msgid "Save URL settings"
+msgstr "URL 설정 저장"
+
+msgid "Current version"
+msgstr "현재 버전"
+
+msgid "No published version."
+msgstr "게시된 버전이 없습니다."
+
+msgid "Preview"
+msgstr "미리보기"
+
+msgid "Publish new version"
+msgstr "새 버전 게시"
+
+msgid "Unpublished preview"
+msgstr "게시 전 미리보기"
+
+msgid "Published history"
+msgstr "게시 이력"
+
+msgid "Version"
+msgstr "버전"
+
+msgid "Published at (UTC)"
+msgstr "게시 시각(UTC)"
+
+msgid "Status"
+msgstr "상태"
+
+msgid "Current"
+msgstr "현재"
+
+msgid "Previous"
+msgstr "이전"
+
+msgid "No published history."
+msgstr "게시 이력이 없습니다."
+
+msgid "Withdrawal status updated."
+msgstr "탈퇴 상태를 변경했습니다."
+
+msgid "No audit events."
+msgstr "감사 기록이 없습니다."
+
+msgid "Account state"
+msgstr "계정 상태"
+
+msgid "Required consent"
+msgstr "필수 동의"
+
+msgid "Complete"
+msgstr "완료"
+
+msgid "Incomplete"
+msgstr "미완료"
+
+msgid "Filter by account state"
+msgstr "계정 상태로 필터"
+
+msgid "All account states"
+msgstr "모든 계정 상태"
+
+msgid "Active"
+msgstr "활성"
+
+msgid "Registration pending"
+msgstr "가입 처리 중"
+
+msgid "Withdrawal pending"
+msgstr "탈퇴 검토 중"
+
+msgid "Disabled"
+msgstr "비활성"
+
+msgid "Unknown"
+msgstr "알 수 없음"
+
+msgid "Filter by required consent"
+msgstr "필수 동의 상태로 필터"
+
+msgid "All consent states"
+msgstr "모든 동의 상태"
+
+msgid "Required consent complete"
+msgstr "필수 동의 완료"
+
+msgid "Required consent incomplete"
+msgstr "필수 동의 미완료"
