@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.7.10 — 2026-09-09
+
+- Added a Users-area notification section backed by the WordPress Settings API and
+  one versioned, non-autoload option.
+- Limited edits to the subject and plain-text body of the four existing account
+  notices, with event-specific placeholders and gettext fallback.
+- Kept sender identity, SMTP/provider configuration, Core reset mail, WooCommerce
+  mail, LMS mail, delivery queues, and test sending outside Members.
+
+## 0.7.9 — 2026-09-09
+
+- Added the route-scoped `AUTH-UX-004` typography tokens and bounded title, body,
+  control, metadata, and consent-document scales.
+- Verified desktop and 360px layouts, visible keyboard focus, server-rendered forms,
+  and homepage asset isolation in the fixed MAMP sandbox.
+
 ## 0.7.8 — 2026-09-09
 
 - Added capability- and nonce-protected withdrawal restoration with a required

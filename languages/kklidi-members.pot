@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the KKLIDI Members plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: KKLIDI Members 0.7.9\n"
+"Project-Id-Version: KKLIDI Members 0.7.10\n"
 "Report-Msgid-Bugs-To: https://kklidi.com/\n"
 "POT-Creation-Date: 2026-09-07 00:00+0000\n"
 "MIME-Version: 1.0\n"
@@ -809,4 +809,61 @@ msgid "Completed"
 msgstr ""
 
 msgid "Member logout request"
+msgstr ""
+
+msgid "Notifications"
+msgstr ""
+
+msgid "Account notification messages"
+msgstr ""
+
+msgid "Edit only the four approved account notices. WordPress still controls identity, recipients, authentication, and mail delivery."
+msgstr ""
+
+msgid "Save notification messages"
+msgstr ""
+
+msgid "Delivery policy"
+msgstr ""
+
+msgid "Notification settings were not saved because the submitted data was invalid."
+msgstr ""
+
+msgid "Messages use WordPress wp_mail() as plain text. The active WordPress or site mail transport controls the sender name and address."
+msgstr ""
+
+msgid "Sender policy"
+msgstr ""
+
+msgid "Inherited from the WordPress or site mail transport (read only)"
+msgstr ""
+
+msgid "Leave a field empty to use the translated default message for the recipient locale."
+msgstr ""
+
+msgid "Subject"
+msgstr ""
+
+msgid "Message body"
+msgstr ""
+
+msgid "Allowed placeholders: %s"
+msgstr ""
+
+msgid "A notification subject exceeds the 200 character limit."
+msgstr ""
+
+msgid "A notification message exceeds the 5,000 character limit."
+msgstr ""
+
+msgid "Notification messages must be plain text without HTML, shortcodes, or PHP."
+msgstr ""
+
+msgid "A notification message contains an unknown placeholder."
+msgstr ""
+
+msgid "Administrator updated notification messages"
+msgstr ""
+
+msgid "Notification settings updated"
 msgstr ""

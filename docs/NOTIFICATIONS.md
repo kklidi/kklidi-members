@@ -49,12 +49,12 @@ WooCommerce 주문·결제·환불 메일은 WooCommerce가 소유한다. LMS �
 | 항목 | 값 |
 | --- | --- |
 | Contract ID | `AUTH-NOTIFY-002` |
-| 계약 상태 | **SPECIFIED_NOT_IMPLEMENTED** |
+| 계약 상태 | **IMPLEMENTED_AND_SYNTHETIC_VERIFIED** |
 | 목표 릴리스 | `0.7.10` |
 | 선행 계약 | `AUTH-NOTIFY-001` |
 | 승인 범위 | 기존 네 사건의 plain-text 제목과 본문을 관리자 설정으로 덮어쓰기 |
 
-이 계약은 `AUTH-NOTIFY-001`의 사건, 수신자, 성공 후 발송, 중복 방지, 실패 처리 및 domain 소유권을 변경하지 않는다. 0.7.9 runtime의 고정 gettext preset은 구현 전까지 계속 source of truth다.
+이 계약은 `AUTH-NOTIFY-001`의 사건, 수신자, 성공 후 발송, 중복 방지, 실패 처리 및 domain 소유권을 변경하지 않는다. 0.7.10 runtime과 단위 guard를 구현했고 합성 WordPress의 Settings API 저장·권한·fallback·메일 회귀를 검증했다.
 
 ### 5.1 관리자와 저장 계약
 
@@ -81,4 +81,4 @@ WooCommerce 주문·결제·환불 메일은 WooCommerce가 소유한다. LMS �
 3. WordPress Core 비밀번호 재설정 메일은 Core 소유로 유지한다. Members의 `password_changed` 안내만 이 설정 범위에 포함하며 Core reset 메일의 제목·본문을 가로채지 않는다.
 4. 저장된 문구는 사이트별 plain text override다. override가 없을 때 영어 gettext 원문과 사용자 locale 우선·사이트 locale fallback의 번역 catalog를 그대로 사용한다.
 
-실행 가능한 설계 manifest는 `tests/harness/notification_settings_contract.json`이다. Runtime 구현, 관리자 브라우저 검증과 실제 메일 전달 판정은 후속 단계에서 별도 증거를 요구한다.
+실행 가능한 설계 manifest는 `tests/harness/notification_settings_contract.json`이다. 합성 실행 `d28853b554c5497eb50df18d7f24dffe`는 `wp_`와 임의 prefix에서 Settings API nonce·capability, non-autoload 저장, 허용 placeholder 치환, 미허용 placeholder 원자적 거부, 빈 값 gettext fallback, 문구 원문을 남기지 않는 감사와 기존 네 메일·실패 경계를 PASS했다. 실제 mailbox 전달 판정과 운영 메일 provider 설정은 배포 환경의 별도 책임이다.

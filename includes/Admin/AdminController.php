@@ -7,19 +7,33 @@ if (!defined('ABSPATH')) {
 }
 
 final class AdminController {
-	private const SECTIONS = array('overview', 'documents', 'withdrawals', 'audit');
+	private const SECTIONS = array('overview', 'documents', 'notifications', 'withdrawals', 'audit');
 	private static $document_preview = null;
 	private static $consent_status_cache = array();
 
 	public static function boot(): void {
 		add_action('admin_menu', array(__CLASS__, 'menu'));
+		add_action('admin_init', array(__CLASS__, 'register_notification_settings'));
 		add_action('admin_init', array(__CLASS__, 'handle_admin_request'));
 		add_action('admin_enqueue_scripts', array(__CLASS__, 'enqueue_assets'));
+		add_filter('option_page_capability_kklidi_members_notifications', array(
+			'\KKLIDI\Members\Notifications\NotificationTemplates',
+			'settings_capability',
+		));
+		add_action('update_option_kklidi_members_notification_templates', array(
+			'\KKLIDI\Members\Notifications\NotificationTemplates',
+			'audit_update',
+		), 10, 2);
 		add_filter('manage_users_columns', array(__CLASS__, 'user_columns'));
 		add_filter('manage_users_custom_column', array(__CLASS__, 'user_column_value'), 10, 3);
 		add_action('restrict_manage_users', array(__CLASS__, 'user_filters'));
 		add_action('pre_get_users', array(__CLASS__, 'filter_users_by_state'));
 		add_action('pre_user_query', array(__CLASS__, 'filter_users_by_consent'));
+	}
+
+	public static function register_notification_settings(): void {
+		require_once KKLIDI_MEMBERS_DIR . 'includes/Notifications/NotificationTemplates.php';
+		\KKLIDI\Members\Notifications\NotificationTemplates::register_settings();
 	}
 
 	public static function enqueue_assets(string $hook_suffix): void {
@@ -256,6 +270,7 @@ final class AdminController {
 		$sections = array(
 			'overview' => __('Overview', 'kklidi-members'),
 			'documents' => __('Documents', 'kklidi-members'),
+			'notifications' => __('Notifications', 'kklidi-members'),
 			'withdrawals' => __('Withdrawals', 'kklidi-members'),
 			'audit' => __('Audit', 'kklidi-members'),
 		);
@@ -273,6 +288,8 @@ final class AdminController {
 				$documents[$type] = \KKLIDI\Members\Consent\Documents::current($type);
 				$document_history[$type] = \KKLIDI\Members\Consent\Documents::history($type);
 			}
+		} elseif ($section === 'notifications') {
+			require_once KKLIDI_MEMBERS_DIR . 'includes/Notifications/NotificationTemplates.php';
 		} elseif ($section === 'withdrawals') {
 			$queue = get_users(array(
 				'meta_key' => '_kklidi_members_account_state',
@@ -372,6 +389,7 @@ final class AdminController {
 	public static function audit_reason_label(string $reason): string {
 		$labels = array(
 			'core' => __('WordPress Core', 'kklidi-members'),
+			'admin_settings' => __('Administrator updated notification messages', 'kklidi-members'),
 			'admin_review' => __('Administrator confirmed access block', 'kklidi-members'),
 			'admin_restore' => __('Administrator restored access with a reason', 'kklidi-members'),
 			'wp_mail_accepted' => __('WordPress accepted the email for delivery', 'kklidi-members'),
@@ -399,6 +417,7 @@ final class AdminController {
 			'mail_password_changed' => __('Password-change notice', 'kklidi-members'),
 			'mail_withdrawal_requested' => __('Withdrawal-request notice', 'kklidi-members'),
 			'mail_withdrawal_finalized' => __('Withdrawal-finalized notice', 'kklidi-members'),
+			'notification_settings_update' => __('Notification settings updated', 'kklidi-members'),
 		);
 	}
 

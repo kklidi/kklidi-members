@@ -1,4 +1,4 @@
-/* Loaded only on Tools > KKLIDI Members. */
+/* Loaded only on Users > KKLIDI Members. */
 .kklidi-members-admin {
 	max-width: 1120px;
 }
@@ -104,6 +104,20 @@
 	display: grid;
 	gap: 4px;
 	font-weight: 600;
+}
+
+.kklidi-members-notification-fields {
+	display: grid;
+	max-width: 760px;
+	gap: 8px;
+}
+
+.kklidi-members-notification-fields label {
+	font-weight: 600;
+}
+
+.kklidi-members-notification-fields textarea {
+	resize: vertical;
 }
 
 @media (max-width: 600px) {

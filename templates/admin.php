@@ -90,6 +90,17 @@
 				</table>
 			</section>
 		<?php endforeach; ?>
+	<?php elseif ($section === 'notifications') : ?>
+		<section class="kklidi-members-admin-card">
+			<h2><?php esc_html_e('Account notification messages', 'kklidi-members'); ?></h2>
+			<p><?php esc_html_e('Edit only the four approved account notices. WordPress still controls identity, recipients, authentication, and mail delivery.', 'kklidi-members'); ?></p>
+			<?php settings_errors('kklidi_members_notifications'); ?>
+			<form action="<?php echo esc_url(admin_url('options.php')); ?>" method="post">
+				<?php settings_fields(\KKLIDI\Members\Notifications\NotificationTemplates::OPTION_GROUP); ?>
+				<?php do_settings_sections(\KKLIDI\Members\Notifications\NotificationTemplates::SETTINGS_PAGE); ?>
+				<?php submit_button(__('Save notification messages', 'kklidi-members')); ?>
+			</form>
+		</section>
 	<?php elseif ($section === 'withdrawals') : ?>
 		<section class="kklidi-members-admin-card">
 			<h2><?php esc_html_e('Pending withdrawals', 'kklidi-members'); ?></h2>

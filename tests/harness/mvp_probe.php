@@ -59,6 +59,33 @@ if ($action === 'translation-check') {
     ));
     exit;
 }
+if ($action === 'notification-settings-summary') {
+    require_once KKLIDI_MEMBERS_DIR . 'includes/Notifications/NotificationTemplates.php';
+    $option_name = \KKLIDI\Members\Notifications\NotificationTemplates::OPTION_NAME;
+    $stored = get_option($option_name, array());
+    $autoload = $wpdb->get_var($wpdb->prepare(
+        "SELECT autoload FROM {$wpdb->options} WHERE option_name = %s",
+        $option_name
+    ));
+    $audit_table = $wpdb->prefix . 'kklidi_mem_login_audit';
+    echo wp_json_encode(array(
+        'autoload' => $autoload,
+        'schema_version' => is_array($stored) ? (int) ($stored['version'] ?? 0) : 0,
+        'registration_content' => \KKLIDI\Members\Notifications\NotificationTemplates::content(
+            'registration_completed'
+        ),
+        'settings_audit_count' => (int) $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$audit_table} WHERE event_type = %s",
+            'notification_settings_update'
+        )),
+        'settings_audit_has_subject' => (int) $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$audit_table}
+             WHERE event_type = %s AND subject_digest IS NOT NULL",
+            'notification_settings_update'
+        )) > 0,
+    ));
+    exit;
+}
 if ($action === 'expire-audit') {
     $table = $wpdb->prefix . 'kklidi_mem_login_audit';
     $wpdb->query("UPDATE {$table} SET occurred_at_utc = '2000-01-01 00:00:00'");

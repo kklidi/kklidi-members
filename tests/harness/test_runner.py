@@ -326,7 +326,7 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn("admin_url('users.php')", admin)
         self.assertIn("$pagenow === 'tools.php'", admin)
         self.assertIn("users_page_kklidi-members", admin)
-        for section in ('overview', 'documents', 'withdrawals', 'audit'):
+        for section in ('overview', 'documents', 'notifications', 'withdrawals', 'audit'):
             self.assertIn("'" + section + "'", admin)
         for check in ('users_can_register', 'cleanRoutePreflight',
                       'kklidi_mem_login_audit', 'kklidi_mem_consents',
@@ -543,10 +543,17 @@ class HarnessGuards(unittest.TestCase):
 
         self.assertEqual(contract['contract'], 'AUTH-NOTIFY-002')
         self.assertEqual(contract['version'], 1)
-        self.assertEqual(contract['status'], 'SPECIFIED_NOT_IMPLEMENTED')
+        self.assertEqual(contract['status'], 'IMPLEMENTED_AND_SYNTHETIC_VERIFIED')
         self.assertEqual(contract['target_release'], '0.7.10')
         self.assertEqual(contract['depends_on'], 'AUTH-NOTIFY-001')
         self.assertEqual(contract['principle'], 'wordpress_core_first')
+        self.assertEqual(contract['verification'], {
+            'status': 'PASS',
+            'scope': 'synthetic_wordpress',
+            'prefixes': ['wp_', 'non_default'],
+            'evidence_id': 'd28853b554c5497eb50df18d7f24dffe',
+            'report': '.harness/reports/latest.json',
+        })
 
         admin = contract['admin']
         self.assertEqual(admin['menu_parent'], 'users')
@@ -635,15 +642,66 @@ class HarnessGuards(unittest.TestCase):
         product_doc = (repository / 'docs/PRODUCT.md').read_text(encoding='utf-8')
         architecture_doc = (repository / 'docs/ARCHITECTURE.md').read_text(encoding='utf-8')
         self.assertIn('AUTH-NOTIFY-002', notification_doc)
-        self.assertIn('SPECIFIED_NOT_IMPLEMENTED', notification_doc)
+        self.assertIn('IMPLEMENTED_AND_SYNTHETIC_VERIFIED', notification_doc)
         self.assertIn('| D10 | **DECIDED FOR 0.7.10 2026-09-09**', product_doc)
         self.assertIn('Settings API', architecture_doc)
         self.assertNotIn('wp_mail_from', architecture_doc)
 
+        settings = (repository / 'includes/Notifications/NotificationTemplates.php').read_text(
+            encoding='utf-8'
+        )
+        admin_source = (repository / 'includes/Admin/AdminController.php').read_text(
+            encoding='utf-8'
+        )
+        admin_template = (repository / 'templates/admin.php').read_text(encoding='utf-8')
+        installer = (repository / 'includes/Core/Installer.php').read_text(encoding='utf-8')
+        mailer = (repository / 'includes/Notifications/AccountMailer.php').read_text(
+            encoding='utf-8'
+        )
+        package = (repository / 'tests/harness/run.py').read_text(encoding='utf-8')
+
+        self.assertIn("register_setting(self::OPTION_GROUP, self::OPTION_NAME", settings)
+        self.assertIn("'sanitize_callback' => array(__CLASS__, 'sanitize')", settings)
+        self.assertIn("'show_in_rest' => false", settings)
+        self.assertIn("return 'manage_kklidi_members';", settings)
+        self.assertIn("sanitize_text_field($raw)", settings)
+        self.assertIn("sanitize_textarea_field($raw)", settings)
+        self.assertIn("wp_strip_all_tags($raw)", settings)
+        self.assertIn("strtr($value, self::placeholder_values($event))", settings)
+        self.assertIn("'notification_settings_update'", settings)
+        self.assertIn("'admin_settings'", settings)
+        self.assertNotRegex(settings, r'(?m)^\s*(?:return\s+)?wp_mail\(')
+        self.assertNotIn("add_filter('wp_mail_from", settings)
+        self.assertNotIn('WC_', settings)
+        self.assertNotIn('kklidi_lms', settings)
+        self.assertIn("add_option(self::OPTION_NAME, self::empty_settings(), '', false)", settings)
+        self.assertIn("add_option('kklidi_members_notification_templates'", installer)
+        self.assertIn("), '', false);", installer)
+        self.assertIn("'notifications'", admin_source)
+        self.assertIn('option_page_capability_kklidi_members_notifications', admin_source)
+        self.assertIn('update_option_kklidi_members_notification_templates', admin_source)
+        self.assertIn(
+            "settings_fields(\\KKLIDI\\Members\\Notifications\\NotificationTemplates::OPTION_GROUP)",
+            admin_template,
+        )
+        self.assertIn(
+            "do_settings_sections(\\KKLIDI\\Members\\Notifications\\NotificationTemplates::SETTINGS_PAGE)",
+            admin_template,
+        )
+        self.assertIn("NotificationTemplates::content($event)", mailer)
+        self.assertIn("'includes/Notifications/NotificationTemplates.php'", package)
+        self.assertIn("results['AUTH-NOTIFY-002']", package)
+        self.assertIn("'extension_contracts_total': 2", package)
+
     def test_auth_notify_001_catalog_covers_mail_presets(self):
         repository = Path(__file__).resolve().parents[2]
-        mailer = (repository / 'includes/Notifications/AccountMailer.php').read_text(encoding='utf-8')
-        msgids = re.findall(r"__\(\s*'([^']*)'\s*,\s*'kklidi-members'\s*\)", mailer)
+        templates = (repository / 'includes/Notifications/NotificationTemplates.php').read_text(
+            encoding='utf-8'
+        )
+        defaults = templates.split('private static function default_content', 1)[1].split(
+            'private static function placeholder_values', 1
+        )[0]
+        msgids = re.findall(r"__\(\s*'([^']*)'\s*,\s*'kklidi-members'\s*\)", defaults)
         self.assertEqual(len(msgids), 12)
         self.assertEqual(len(set(msgids)), len(msgids))
 
@@ -841,7 +899,7 @@ class HarnessGuards(unittest.TestCase):
         ready = json.loads(json.dumps(example))
         ready['environment']['base_url'] = 'https://staging.kklidi.com'
         ready['versions'].update(
-            wordpress='7.1', php='8.3', members='0.7.9', woocommerce='11.1.0')
+            wordpress='7.1', php='8.3', members='0.7.10', woocommerce='11.1.0')
         ready['owners'] = {key: 'approved-' + key for key in ready['owners']}
         ready['backup'].update(
             artifact_sha256='a' * 64,

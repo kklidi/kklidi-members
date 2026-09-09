@@ -47,6 +47,7 @@ PRODUCTION_FILES = [
     'includes/Frontend/AccountController.php',
     'includes/Migration/LegacyConsentImporter.php',
     'includes/Notifications/AccountMailer.php',
+    'includes/Notifications/NotificationTemplates.php',
     'includes/Profile/ProfileController.php',
     'includes/Registration/RegistrationController.php',
     'includes/Security/AccountState.php',
@@ -764,6 +765,75 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
             and denied_status in (401, 403) and 'name="email"' in
             Browser(base).request('/?kklidi_members_register=1')[2],
             'Subscriber used an administrator nonce to change Members settings')
+
+    notification_path = '/wp-admin/users.php?page=kklidi-members&section=notifications'
+    notification_status, _, notification_page = admin.request(notification_path)
+    require(notification_status == 200
+            and 'kklidi_members_notification_templates[events][registration_completed][subject]'
+            in notification_page
+            and hidden_input(notification_page, 'option_page') == 'kklidi_members_notifications',
+            'Notification Settings API screen is unavailable')
+    settings_nonce = hidden_input(notification_page, '_wpnonce')
+
+    def notification_settings_fields(subject='', body=''):
+        fields = {
+            'option_page': 'kklidi_members_notifications',
+            'action': 'update',
+            '_wpnonce': settings_nonce,
+            '_wp_http_referer': notification_path,
+        }
+        for event in ('registration_completed', 'password_changed',
+                      'withdrawal_requested', 'withdrawal_finalized'):
+            fields[f'kklidi_members_notification_templates[events][{event}][subject]'] = \
+                subject if event == 'registration_completed' else ''
+            fields[f'kklidi_members_notification_templates[events][{event}][body]'] = \
+                body if event == 'registration_completed' else ''
+        return fields
+
+    saved_status, _, _ = admin.request('/wp-admin/options.php', data=notification_settings_fields(
+        'Synthetic {site_name}', 'Open {login_url}'
+    ))
+    saved_settings = command(
+        php_cli + [HERE / 'mvp_probe.php', 'notification-settings-summary'], json_result=True)
+    require(saved_status == 302 and saved_settings['autoload'] in ('no', 'off')
+            and saved_settings['schema_version'] == 1
+            and saved_settings['registration_content'][0].startswith('Synthetic ')
+            and '{site_name}' not in saved_settings['registration_content'][0]
+            and saved_settings['registration_content'][1].startswith('Open ')
+            and base in saved_settings['registration_content'][1]
+            and saved_settings['settings_audit_count'] == 1
+            and saved_settings['settings_audit_has_subject'] is False,
+            'Valid notification settings did not save, resolve, or audit safely: '
+            + repr({'status': saved_status, 'summary': saved_settings}))
+
+    invalid_status, _, _ = admin.request('/wp-admin/options.php', data=notification_settings_fields(
+        'Invalid {user_id}', 'Open {login_url}'
+    ))
+    rejected_settings = command(
+        php_cli + [HERE / 'mvp_probe.php', 'notification-settings-summary'], json_result=True)
+    require(invalid_status == 302 and rejected_settings == saved_settings,
+            'Unknown notification placeholder was not rejected atomically')
+
+    denied_notification_status, _, _ = profile_browser.request(
+        '/wp-admin/options.php', data=notification_settings_fields('Denied', 'Denied'))
+    require(denied_notification_status == 403,
+            'Subscriber used a Settings API nonce without manage_kklidi_members')
+
+    reset_status, _, _ = admin.request(
+        '/wp-admin/options.php', data=notification_settings_fields())
+    reset_settings = command(
+        php_cli + [HERE / 'mvp_probe.php', 'notification-settings-summary'], json_result=True)
+    require(reset_status == 302 and reset_settings['settings_audit_count'] == 2
+            and 'Registration complete' in reset_settings['registration_content'][0]
+            and 'Sign in:' in reset_settings['registration_content'][1],
+            'Empty notification settings did not restore gettext defaults')
+    results['AUTH-NOTIFY-002'] = {
+        'status': 'PASS', 'settings_api': True, 'capability_and_nonce': True,
+        'non_autoload_option': True, 'placeholder_allowlist': True,
+        'unknown_placeholder_rejected': True, 'empty_uses_gettext_default': True,
+        'metadata_only_audit': True, 'plain_text': True,
+        'sender_and_transport_inherited': True,
+    }
     status, _, profile_form = profile_browser.request('/?kklidi_members_profile=1')
     require(status == 200, 'Profile form missing')
     profile_fields = {
@@ -1486,7 +1556,7 @@ def execute(php, mysqld, one_prefix=False, skip_perf=False):
               'modes': {'core_baseline': {'status': 'FAIL', 'variants': []},
                         'members_on': {'status': 'FAIL', 'variants': []}},
               'contracts_total': 24, 'contracts_exercised': 24,
-              'extension_contracts_total': 1, 'extension_contracts_exercised': 1,
+              'extension_contracts_total': 2, 'extension_contracts_exercised': 2,
               'not_run': ['actual WooCommerce/LMS full-stack browser regression',
                           'KBoard removal-period compatibility smoke/no-fatal',
                           'device-limit WooCommerce login entry', 'TLS/Secure cookie deployment',
@@ -1736,7 +1806,7 @@ def execute(php, mysqld, one_prefix=False, skip_perf=False):
         (output / 'latest.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
     core_total = sum(len(v['cases']) for v in report['modes']['core_baseline']['variants'])
     members_total = sum(len(v['cases']) for v in report['modes']['members_on']['variants'])
-    print(f'{report["status"]}: MVP contracts=24 + extension contracts=1, '
+    print(f'{report["status"]}: MVP contracts=24 + extension contracts=2, '
           f'AUTH-LOGIN-001 Core={core_total}, '
           f'Members={members_total}; release evidence PARTIAL. Report: .harness/reports/latest.json')
     if 'error' in report:

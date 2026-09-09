@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the KKLIDI Members plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: KKLIDI Members 0.7.9\n"
+"Project-Id-Version: KKLIDI Members 0.7.10\n"
 "Language: ko_KR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -711,3 +711,60 @@ msgstr "완료"
 
 msgid "Member logout request"
 msgstr "회원 로그아웃 요청"
+
+msgid "Notifications"
+msgstr "알림"
+
+msgid "Account notification messages"
+msgstr "계정 알림 문구"
+
+msgid "Edit only the four approved account notices. WordPress still controls identity, recipients, authentication, and mail delivery."
+msgstr "승인된 계정 알림 4개의 문구만 편집합니다. 사용자 식별, 수신자, 인증 및 메일 전송은 계속 WordPress가 관리합니다."
+
+msgid "Save notification messages"
+msgstr "알림 문구 저장"
+
+msgid "Delivery policy"
+msgstr "전송 정책"
+
+msgid "Notification settings were not saved because the submitted data was invalid."
+msgstr "제출한 데이터가 올바르지 않아 알림 설정을 저장하지 않았습니다."
+
+msgid "Messages use WordPress wp_mail() as plain text. The active WordPress or site mail transport controls the sender name and address."
+msgstr "알림은 WordPress wp_mail()을 통해 일반 텍스트로 전송됩니다. 발신 이름과 주소는 현재 활성화된 WordPress 또는 사이트 메일 전송 계층이 관리합니다."
+
+msgid "Sender policy"
+msgstr "발신자 정책"
+
+msgid "Inherited from the WordPress or site mail transport (read only)"
+msgstr "WordPress 또는 사이트 메일 전송 설정을 따름(읽기 전용)"
+
+msgid "Leave a field empty to use the translated default message for the recipient locale."
+msgstr "입력란을 비워 두면 수신자 언어에 맞는 기본 번역 문구를 사용합니다."
+
+msgid "Subject"
+msgstr "제목"
+
+msgid "Message body"
+msgstr "본문"
+
+msgid "Allowed placeholders: %s"
+msgstr "사용 가능한 치환값: %s"
+
+msgid "A notification subject exceeds the 200 character limit."
+msgstr "알림 제목이 200자 제한을 초과했습니다."
+
+msgid "A notification message exceeds the 5,000 character limit."
+msgstr "알림 본문이 5,000자 제한을 초과했습니다."
+
+msgid "Notification messages must be plain text without HTML, shortcodes, or PHP."
+msgstr "알림 문구에는 HTML, 쇼트코드 또는 PHP를 사용할 수 없으며 일반 텍스트만 허용됩니다."
+
+msgid "A notification message contains an unknown placeholder."
+msgstr "알림 문구에 허용되지 않은 치환값이 포함되어 있습니다."
+
+msgid "Administrator updated notification messages"
+msgstr "관리자가 알림 문구를 변경함"
+
+msgid "Notification settings updated"
+msgstr "알림 설정 변경"
