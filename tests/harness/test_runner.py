@@ -96,6 +96,7 @@ class HarnessGuards(unittest.TestCase):
         exporter = (repository / 'tests/harness/export_release_evidence.py').read_text(encoding='utf-8')
         self.assertIn("package_manifest['archive_sha256'] == package_sha256", exporter)
         self.assertIn("lifecycle['new_archive_sha256'] == package_sha256", exporter)
+        self.assertIn("'strategy_contract': ux_strategy", exporter)
 
     def test_auth_ui_001_covers_every_runtime_surface(self):
         repository = Path(__file__).resolve().parents[2]
@@ -115,6 +116,8 @@ class HarnessGuards(unittest.TestCase):
         self.assertEqual(contract['version'], 1)
         self.assertEqual(contract['status'], 'SPECIFIED')
         self.assertEqual(contract['implementation_contract'], 'AUTH-UI-002')
+        self.assertEqual(contract['strategy_contract'], 'AUTH-UX-003')
+        self.assertEqual(contract['strategy_manifest'], 'tests/harness/ux_strategy_contract.json')
         self.assertEqual(set(contract['screens']), set(routes) | {'admin'})
 
         plugin_source = (repository / 'includes/Core/Plugin.php').read_text(encoding='utf-8')
@@ -146,6 +149,65 @@ class HarnessGuards(unittest.TestCase):
             'email_verification_2fa_social', 'kboard_permission_engine',
         }
         self.assertTrue(required_exclusions.issubset(set(contract['out_of_scope'])))
+
+    def test_auth_ux_003_records_approved_strategy_without_runtime_claims(self):
+        repository = Path(__file__).resolve().parents[2]
+        contract = json.loads(
+            (repository / 'tests/harness/ux_strategy_contract.json').read_text(encoding='utf-8')
+        )
+        ui_ux = (repository / 'docs/UI_UX.md').read_text(encoding='utf-8')
+        product = (repository / 'docs/PRODUCT.md').read_text(encoding='utf-8')
+
+        self.assertEqual(contract['contract'], 'AUTH-UX-003')
+        self.assertEqual(contract['version'], 1)
+        self.assertEqual(contract['status'], 'SPECIFIED_FOR_0.7.4_NOT_IMPLEMENTED')
+        self.assertIn('`AUTH-UX-003` 상태: **SPECIFIED_FOR_0.7.4_NOT_IMPLEMENTED**', ui_ux)
+        self.assertNotIn('email을 Core `user_login`으로 사용하는 신규 회원', ui_ux)
+        self.assertIn('비공개 후보', ui_ux)
+        self.assertIn('D09 | **DECIDED FOR 0.7.4', product)
+
+        frontend = contract['frontend']
+        self.assertEqual(frontend['surface'], 'standalone_branded_members_shell')
+        self.assertFalse(frontend['theme_markup_dependency'])
+        self.assertEqual(frontend['routes']['canonical_family'], '/members/')
+        self.assertTrue(frontend['routes']['activation_requires_collision_preflight'])
+        self.assertTrue(frontend['routes']['existing_query_routes_remain_fallback'])
+        registration = frontend['registration']
+        self.assertEqual(registration['wordpress_user_login'], 'opaque_private_candidate')
+        self.assertEqual(registration['supported_login_identifiers'], ['email', 'legacy_username'])
+        self.assertTrue(registration['duplicate_display_name_allowed'])
+        self.assertFalse(registration['automatic_login'])
+        self.assertFalse(registration['email_verification'])
+        self.assertEqual(set(frontend['validation_recovery']['always_cleared']),
+                         {'password', 'password_confirm', 'nonce', 'guest_token'})
+        self.assertTrue(frontend['password_reset']['wordpress_core_keys_and_apis_only'])
+        self.assertFalse(frontend['password_reset']['custom_token_or_auth_system'])
+        self.assertFalse(frontend['account_navigation']['members_queries_woocommerce_or_lms_domain_data'])
+        self.assertTrue(frontend['account_navigation']['integrations_optional'])
+
+        admin = contract['admin']
+        self.assertEqual(admin['menu_parent'], 'users')
+        self.assertEqual(admin['sections'], ['overview', 'documents', 'withdrawals', 'audit'])
+        self.assertEqual(admin['withdrawals']['allowed_transitions'],
+                         ['withdrawal_pending_to_disabled',
+                          'withdrawal_pending_to_active_with_reason'])
+        self.assertTrue(admin['withdrawals']['wordpress_user_id_preserved'])
+        self.assertTrue(admin['withdrawals']['external_domain_rows_preserved'])
+        self.assertFalse(admin['notifications']['editable_templates'])
+        self.assertFalse(admin['notifications']['retry_queue'])
+        self.assertFalse(admin['core_users']['separate_user_registry'])
+        self.assertFalse(admin['retention']['editable_before_legal_policy'])
+        self.assertEqual(admin['capability'], 'manage_kklidi_members')
+
+        boundaries = contract['boundaries']
+        self.assertTrue(boundaries['wordpress_core_identity_and_auth'])
+        self.assertTrue(boundaries['wordpress_user_ids_preserved'])
+        self.assertFalse(boundaries['php_session_auth'])
+        self.assertFalse(boundaries['global_frontend_assets'])
+        self.assertTrue(boundaries['members_remains_optional_dependency'])
+        self.assertFalse(boundaries['future_features_implemented'])
+        self.assertEqual(list(contract['implementation_order']),
+                         ['0.7.5', '0.7.6', '0.7.7', '0.7.8', '0.7.9'])
 
     def test_auth_ui_002_uses_scoped_styles_and_accessible_shells(self):
         repository = Path(__file__).resolve().parents[2]
@@ -207,7 +269,7 @@ class HarnessGuards(unittest.TestCase):
             'scope': 'synthetic_wordpress',
             'prefixes': ['wp_', 'non_default'],
             'mail_failure_injection': 'PASS',
-            'evidence_id': 'aed831b84fe140708b6346e244a2190c',
+            'evidence_id': '5886351d4d39439993fae700b0cb610a',
             'report': '.harness/reports/latest.json',
         })
         self.assertEqual(contract['transport'], {
@@ -423,7 +485,7 @@ class HarnessGuards(unittest.TestCase):
 
         lifecycle = (repository / 'tests/harness/mamp_lifecycle_run.py').read_text(encoding='utf-8')
         self.assertIn("SANDBOX = Path('C:/MAMP/htdocs/kklidi-members-mamp-sandbox')", lifecycle)
-        self.assertIn("PREVIOUS_VERSION = '0.7.2'", lifecycle)
+        self.assertIn("PREVIOUS_VERSION = '0.7.3'", lifecycle)
         self.assertIn("ALLOWED_INITIAL_VERSIONS = ('0.7.0', PREVIOUS_VERSION, CURRENT_VERSION)", lifecycle)
         self.assertIn("CURRENT_VERSION = re.search(", lifecycle)
         self.assertIn("OLD_ARCHIVE = ROOT / ('dist/kklidi-members-' + PREVIOUS_VERSION + '.zip')", lifecycle)
@@ -528,7 +590,7 @@ class HarnessGuards(unittest.TestCase):
         ready = json.loads(json.dumps(example))
         ready['environment']['base_url'] = 'https://staging.kklidi.com'
         ready['versions'].update(
-            wordpress='7.1', php='8.3', members='0.7.3', woocommerce='11.1.0')
+            wordpress='7.1', php='8.3', members='0.7.4', woocommerce='11.1.0')
         ready['owners'] = {key: 'approved-' + key for key in ready['owners']}
         ready['backup'].update(
             artifact_sha256='a' * 64,
@@ -541,7 +603,7 @@ class HarnessGuards(unittest.TestCase):
         self.assertEqual(report['failed'], [])
 
         wrong_release = json.loads(json.dumps(ready))
-        wrong_release['versions']['members'] = '0.7.2'
+        wrong_release['versions']['members'] = '0.7.3'
         self.assertIn('current_members_version',
                       inspect_deployment_manifest(wrong_release)['failed'])
 

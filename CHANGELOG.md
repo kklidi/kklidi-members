@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.7.4 — 2026-09-09
+
+- Added the executable `AUTH-UX-003` strategy contract for the approved frontend and
+  administrator information architecture without implementing future runtime stages.
+- Corrected the UI source of truth to match the existing private opaque Core
+  `user_login` strategy while preserving email and legacy-username login.
+- Decided the standalone branded shell, collision-gated `/members/` route family,
+  safe form recovery, duplicate display names, Core reset wrapper boundary, and
+  plugin-owned account navigation slots.
+- Decided the Users-area administrator structure, diagnostics, immutable consent
+  history, bounded audit views, and reasoned withdrawal recovery/finalization.
+
 ## 0.7.3 — 2026-09-09
 
 - Added route-scoped account notices for completed registration, self-service password

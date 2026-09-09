@@ -67,7 +67,7 @@ reference와 독립된 WP DB/filesystem에 synthetic 사용자 A/B, subscriber/a
 
 WooCommerce 주문·결제 메일과 LMS 수강·진도·수료증 알림은 각 domain owner에 남는다. 이메일 가입 인증, 관리자 알림, 마케팅, 편집 가능한 template, SMTP/provider, 재시도 queue는 이 계약 범위가 아니다. P0-3은 gettext/한국어 catalog 검증을 완료했고, P0-4는 네 사건의 메일 실패 주입과 보안 상태 보존·실패 감사·전달 기록 0·재시도 0을 완료했다.
 
-2026-09-09 P0-2 실행 `0d31685ae4584e49af3aa5f54c0896a0`는 WordPress 7.1/PHP 8.3의 새 임시 설치에서 `wp_`와 임의 prefix를 각각 검사했다. P0-3 실행 `bacdd413b3444dd694baa26d725e7e9a`도 두 prefix에서 네 알림 preset, 현재 Core 수신자, 명시적 plain-text header, 성공 후 발송, `wp_mail` 수락 감사 결과, 거부·재실행 중복 0, credential/token·주문/LMS 상세 미포함, Members-off hard dependency 없음과 `ko_KR` 사이트 fallback/사용자 locale catalog 렌더링을 PASS했다. P0-4 릴리스 실행 `aed831b84fe140708b6346e244a2190c`는 두 prefix의 네 실제 HTTP 계정 경로에 실패를 정확히 4회 주입해 확정 상태·세션 철회·성공 응답 유지, `failure/wp_mail_failed` 4건, 전달 sink 0건, 자동 재시도 0건을 각각 PASS했고 성능 블록도 PASS했다. 모든 실행의 임시 DB/filesystem과 process가 정리됐고 reference에는 쓰지 않았다. 최신 로컬 증거는 `.harness/reports/latest.json`에 있다.
+2026-09-09 P0-2 실행 `0d31685ae4584e49af3aa5f54c0896a0`는 WordPress 7.1/PHP 8.3의 새 임시 설치에서 `wp_`와 임의 prefix를 각각 검사했다. P0-3 실행 `bacdd413b3444dd694baa26d725e7e9a`도 두 prefix에서 네 알림 preset, 현재 Core 수신자, 명시적 plain-text header, 성공 후 발송, `wp_mail` 수락 감사 결과, 거부·재실행 중복 0, credential/token·주문/LMS 상세 미포함, Members-off hard dependency 없음과 `ko_KR` 사이트 fallback/사용자 locale catalog 렌더링을 PASS했다. P0-4 릴리스 실행 `aed831b84fe140708b6346e244a2190c`는 두 prefix의 네 실제 HTTP 계정 경로에 실패를 정확히 4회 주입해 확정 상태·세션 철회·성공 응답 유지, `failure/wp_mail_failed` 4건, 전달 sink 0건, 자동 재시도 0건을 각각 PASS했고 성능 블록도 PASS했다. 0.7.4 회귀 실행 `5886351d4d39439993fae700b0cb610a`는 같은 계약과 `AUTH-PERF-003`을 다시 PASS했다. 모든 실행의 임시 DB/filesystem과 process가 정리됐고 reference에는 쓰지 않았다. 최신 로컬 증거는 `.harness/reports/latest.json`에 있다.
 
 가입 동시성은 단순 재클릭과 다르다. 동일 normalized email의 병렬 요청·다른 case·동일 idempotency key·서로 다른 key를 각각 검사한다. 사용자 생성 후 consent 저장 실패, mail 송신 실패, usermeta finalize 실패를 따로 주입한다. account pending 상태의 fail-closed를 검사하고 고아 계정 재사용·완료 절차를 검증한다.
 
@@ -169,7 +169,7 @@ WooCommerce 주문·결제 메일과 LMS 수강·진도·수료증 알림은 각
 
 일반 실행은 cache만 사용하는 offline 방식이며 dependency 준비만 공식 HTTPS 다운로드를 사용한다. 매 실행 fresh DB와 per-run synthetic secret을 만들며 기존 endpoint/datadir 입력 option은 없다. runner safety unit 검사는 별도로 실행한다. 실행 절차와 상세 guard는 `tests/harness/README.md`가 소유한다.
 
-D01은 선택 전화, 이메일 인증 없음, 자동 로그인 없음으로 확정했다. D02는 자동 삭제 없는 차단·수동 queue 계약으로 확정했다. D06의 정산/강의실 owner와 정적 신청 페이지의 사이트 운영 owner를 읽기 전용 감사로 분리했고 Members는 범용 제한 엔진을 소유하지 않는다. D07의 0.7.3 지원 판정은 실제 runtime을 실행한 single-site WordPress 7.1/PHP 8.3/Woo 11.1.0에 한정한다.
+D01은 선택 전화, 이메일 인증 없음, 자동 로그인 없음으로 확정했다. D02는 자동 삭제 없는 차단·수동 queue 계약으로 확정했다. D06의 정산/강의실 owner와 정적 신청 페이지의 사이트 운영 owner를 읽기 전용 감사로 분리했고 Members는 범용 제한 엔진을 소유하지 않는다. D07의 0.7.4 지원 판정은 실제 runtime을 실행한 single-site WordPress 7.1/PHP 8.3/Woo 11.1.0에 한정한다.
 
 2026-09-08 0.7.0 보강 실행: `mamp-https-703376f74438`은 MAMP Apache 뒤 임시 TLS proxy에서 TLS 1.3, HSTS, hostname 검증, `__Host-` Secure/HttpOnly/SameSite/host-only guest cookie, Core Secure/HttpOnly auth cookie, no-store와 PHPSESSID 부재를 통과하고 합성 user·plugin 목록·MU bootstrap·인증서 디렉터리를 복원했다. `mamp-race-a3364a28d0f1`은 가입/reset 경쟁, `mamp-woo-b4b7885b4d3a`는 checkout/cart/order/device-limit, `mamp-timing-f9ad12a0c504`는 동일 공개 문구와 median 비율 1.339를 통과했다. 공유 DB limiter는 독립 PHP process 8개·100회에서 10회만 허용하며 object-cache 호출 장애와 분리되고 DB storage 실패는 fail-closed한다. 로컬 CA/proxy는 실제 운영 인증서·CDN·다중 host를 증명하지 않으므로 운영 manifest와 trusted staging 재검증은 남는다.
 

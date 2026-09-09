@@ -3,6 +3,8 @@
   "version": 1,
   "status": "SPECIFIED",
   "implementation_contract": "AUTH-UI-002",
+  "strategy_contract": "AUTH-UX-003",
+  "strategy_manifest": "tests/harness/ux_strategy_contract.json",
   "screens": {
     "login": {
       "template": "templates/login.php",

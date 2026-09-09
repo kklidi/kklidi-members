@@ -42,3 +42,4 @@ WooCommerce 주문·결제·환불 메일은 WooCommerce가 소유한다. LMS �
 - **P0-2 — 완료:** 네 사건만 실제 성공 경로에서 발송한다. `wp_`와 임의 prefix의 합성 WordPress에서 잘못된 상태·실패·중복 요청에 추가 알림이 없고, 현재 Core 이메일·금지 정보·WordPress ID 보존·Members 비활성 fallback이 유지됨을 검증했다.
 - **P0-3 — 완료:** 12개 신규 메일 msgid를 영어 POT와 한국어 PO/MO로 제공하고, 합성 WordPress의 `ko_KR` 사이트 fallback 및 사용자 locale 전환에서 네 가지 알림 preset이 한국어로 렌더링됨을 `bacdd413b3444dd694baa26d725e7e9a` 실행으로 `wp_`/비기본 prefix 각각 검증했다.
 - **P0-4 — 완료:** 릴리스 실행 `aed831b84fe140708b6346e244a2190c`에서 `wp_`와 비기본 prefix 각각 네 실제 계정 경로에 `wp_mail()` 실패를 주입했다. 가입 활성 상태·필수 동의, 변경 비밀번호·전 세션 철회, 탈퇴 접수 상태·접근 차단, 최종 비활성 상태가 모두 유지됐고 작업 성공 응답도 유지됐다. 각 prefix에서 실패 주입은 정확히 4회였고 감사 결과는 정확히 4건의 `failure/wp_mail_failed`, 전달 sink 기록과 자동 재시도는 0건이었다. 재시도 queue 또는 운영 UI는 구현하지 않았다.
+- **0.7.4 회귀 — 완료:** 실행 `5886351d4d39439993fae700b0cb610a`에서 같은 두 prefix와 네 성공/실패 알림 경계를 다시 PASS했다. 0.7.4의 `AUTH-UX-003`은 알림 template 편집, SMTP, 재시도 queue 또는 관리자 수신 알림을 추가하지 않는다.

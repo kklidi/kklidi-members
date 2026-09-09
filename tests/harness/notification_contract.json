@@ -9,7 +9,7 @@
     "scope": "synthetic_wordpress",
     "prefixes": ["wp_", "non_default"],
     "mail_failure_injection": "PASS",
-    "evidence_id": "aed831b84fe140708b6346e244a2190c",
+    "evidence_id": "5886351d4d39439993fae700b0cb610a",
     "report": ".harness/reports/latest.json"
   },
   "transport": {

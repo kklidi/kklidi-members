@@ -46,6 +46,7 @@ The runner has no option for an existing site URL, existing DB endpoint, existin
 | `run.py` | Lifecycle, dependency verification, isolated HTTP client, login assertions, redacted reports |
 | `test_runner.py` | Destructive-operation boundaries, assertion falsification, and UI route-asset guards |
 | `ui_contract.json` | `AUTH-UI-001` screen/state/translation/accessibility/asset contract manifest |
+| `ux_strategy_contract.json` | `AUTH-UX-003` approved frontend/admin information architecture and implementation boundaries |
 | `mamp_woo_case.php` | CLI-only, fixed-sandbox Woo/WCI fixture with tagged user/product/orders, Members optional-dependency toggles, and exact cleanup |
 | `mamp_lms_case.php` | CLI-only, fixed-sandbox LMS fixture for identity/access/domain ownership, Members fallback, mail sink, and exact cleanup |
 | `mamp_lms_run.py` | Runs the actual fixed-sandbox LMS identity/access/on-off contract and writes a per-run JSON report |
@@ -59,7 +60,7 @@ The runner has no option for an existing site URL, existing DB endpoint, existin
 | `observer.php` | Test-only observation and outbound side-effect guards |
 | `router.php` | Loopback/Host restriction and bounded dev server routing |
 
-The `AUTH-UI-001` unit guard verifies that every current Members frontend route and the admin surface are represented in the UI contract. `AUTH-UI-002` additionally verifies the CSS files, responsive/focus rules, server-rendered page shell, route-only frontend asset hook, admin-only asset hook, and absence of Members JavaScript. Browser acceptance remains a separate MAMP check.
+The `AUTH-UI-001` unit guard verifies that every current Members frontend route and the admin surface are represented in the UI contract. `AUTH-UI-002` additionally verifies the CSS files, responsive/focus rules, server-rendered page shell, route-only frontend asset hook, admin-only asset hook, and absence of Members JavaScript. `AUTH-UX-003` fixes the approved 0.7.4 strategy without claiming that its 0.7.5–0.7.9 runtime stages already exist. Browser acceptance remains a separate MAMP check.
 
 The fixed MAMP LMS fixture exercises actual Woo order reconciliation into KKLIDI LMS enrollment, WordPress ID continuity across progress/certificate/private-question rows, learner/outsider access, route-scoped Members profile delegation, Members-off LMS/Core fallback, and exact cleanup. It creates only tagged synthetic data and sinks notification mail.
 

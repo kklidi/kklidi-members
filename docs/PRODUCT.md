@@ -120,7 +120,7 @@ KBoard는 12개 board 중 author/roles 제한을 갖는 board가 있고 412개 c
 | SocialProviderInterface 상세·Google 첫 구현 | FUTURE | 1.0은 문서상 경계만, 미사용 provider skeleton도 생성하지 않음 |
 | Kakao/Naver/Apple | FUTURE | 실제 수요와 검증 가능한 provider 계약 후 |
 | 자동 개인정보 익명화·완전삭제 | UNKNOWN | D02 보존·연동 정책 확정 필요 |
-| 마케팅 동의 UI·신규 display_name 유일성 | UNKNOWN | 수집 목적/고유 nickname 정책 D03/D04 |
+| 마케팅 동의 UI·신규 display_name 유일성 | DECIDED_FOR_0.7.4 | 마케팅은 목적 승인 전 기본 수집 안 함; display_name 중복 허용 |
 | 범용 유료회원/정기결제/쿠폰/쪽지/대량문자/자동등업/페이지 접근 엔진/본인인증 | REMOVE | 현재 회원 MVP에 불필요, 다른 domain과 중복 |
 
 기존 전화가 없는 계정을 일괄 차단하지 않는다. D01에서 전화는 신규 가입과 프로필 모두 선택 입력으로 확정했다. 저장된 값은 self-asserted 연락처이며 인증된 휴대폰 또는 본인인증 증거가 아니다.
@@ -153,11 +153,12 @@ KBoard는 12개 board 중 author/roles 제한을 갖는 board가 있고 412개 c
 | --- | --- | --- |
 | D01 | **DECIDED 2026-09-08** | 전화 선택, 이메일 가입 인증 미도입, 가입 후 자동 로그인 없음. 공개 가입은 Core `users_can_register`만 사용하며 필수 문서가 없으면 닫힘 |
 | D02 | **DECIDED FOR 1.0 2026-09-08** | 즉시 로그인 차단·세션 철회 후 수동 queue. self-service 복구·자동 익명화·`wp_delete_user` 없음. Core ID와 외부 도메인 참조를 보존하고 실제 삭제/보존 완료는 각 도메인 owner와 사이트 privacy 절차가 판정 |
-| D03 | 마케팅 수집 목적·문구·채널·철회 | 현행 명시적 증거 없으므로 기본 수집 안 함 |
-| D04 | display_name 중복 금지 지속 여부 | nickname은 identity 아님. 1.0 제안은 중복 허용, 기존 이름 변경 안 함; UI 확정 전 결정 |
-| D05 | 과거 계정의 email state와 재동의 조건 | legacy_unknown 유지, 전원 강제 차단/검증 완료 처리 금지 |
+| D03 | **DECIDED FOR 0.7.4 2026-09-09** | 승인된 수집 목적·문구·채널이 생기기 전에는 마케팅 문서를 게시하거나 동의를 수집하지 않음. 기존 optional 저장 기능을 자동 활성화하지 않음 |
+| D04 | **DECIDED FOR 0.7.4 2026-09-09** | display_name 중복 허용. nickname은 identity·login identifier·권한이 아니며 기존 이름을 변경하지 않음 |
+| D05 | **DECIDED FOR 0.7.4 2026-09-09** | 과거 계정은 `legacy_unknown` 유지. 검증 완료로 소급 표시하거나 로그인 차단하지 않음. 현재 문서 재동의 강제는 별도 계약 전까지 도입하지 않음 |
 | D06 | **DECIDED 2026-09-08** | 정산 2페이지/메뉴는 payout, 강의실 메뉴는 LMS/LearnDash, 정적 가입신청 2페이지는 사이트 콘텐츠 운영 owner. Members는 이 접근 엔진을 소유하지 않음 |
-| D07 | **DECIDED FOR 0.7.3 2026-09-09** | 지원 판정은 single-site WordPress 7.1/PHP 8.3/Woo 11.1.0 조합. PHP 7.4~8.3 syntax 통과는 runtime 지원 주장으로 확대하지 않음 |
+| D07 | **DECIDED FOR 0.7.4 2026-09-09** | 지원 판정은 single-site WordPress 7.1/PHP 8.3/Woo 11.1.0 조합. PHP 7.4~8.3 syntax 통과는 runtime 지원 주장으로 확대하지 않음 |
 | D08 | **DECIDED 2026-09-09** | 가입 완료·비밀번호 변경·탈퇴 접수·탈퇴 처리 완료의 사용자 안내 메일을 후속 MVP 확장으로 승인. WordPress `wp_mail()`과 고정 plain-text preset을 사용하며 관리자·마케팅·주문·LMS 메일, 이메일 인증, template UI는 포함하지 않음 |
+| D09 | **DECIDED FOR 0.7.4 2026-09-09** | `AUTH-UX-003`: 독립형 branded shell, 충돌 검사 후 `/members/` clean route와 query fallback, 현재 가입 필드 정책, display_name 중복 허용, no-JS 기본·route 전용 password visibility, Core reset wrapper, plugin-owned link slot, Users 하위 관리자 정보 구조와 탈퇴 pending 복구/확정·감사 조회 계약 |
 
-D03~D05는 해당 선택 기능이나 legacy 전환을 실제로 시작할 때까지 기존 보수적 기본값을 유지한다. FUTURE/OPTIONAL 기능은 별도 승인 없이 구현하지 않는다.
+D03~D05는 보수적 기본값으로 확정했다. 마케팅 수집이나 강제 재동의를 실제로 시작하려면 새로운 목적·보존·철회 behavior contract가 필요하다. FUTURE/OPTIONAL 기능은 별도 승인 없이 구현하지 않는다. D09의 상세 계약과 단계별 구현 상태는 `UI_UX.md`와 `tests/harness/ux_strategy_contract.json`이 소유한다.

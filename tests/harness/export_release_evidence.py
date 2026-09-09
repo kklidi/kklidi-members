@@ -17,6 +17,11 @@ def main():
     reports = ROOT / '.harness/reports'
     synthetic = json.loads((reports / 'latest.json').read_text(encoding='utf-8'))
     assert synthetic['status'] == 'PASS'
+    ux_strategy = json.loads(
+        (ROOT / 'tests/harness/ux_strategy_contract.json').read_text(encoding='utf-8')
+    )
+    assert ux_strategy['contract'] == 'AUTH-UX-003'
+    assert ux_strategy['status'] == 'SPECIFIED_FOR_0.7.4_NOT_IMPLEMENTED'
     contracts = {name: [{'status': row['status'], **{key: row[key] for key in
         ('parallel_processes', 'parallel_calls', 'parallel_allowed', 'shared_database_nodes',
          'object_cache_outage', 'storage_failure', 'bounded_rollback', 'rollback_deleted',
@@ -62,6 +67,7 @@ def main():
             'files': len(package_manifest['files']),
         },
         'contracts': contracts,
+        'strategy_contract': ux_strategy,
         'integration': integrations,
         'performance': synthetic['mvp_contracts'].get('AUTH-PERF-003', []),
         'deployment_preflight': preflight,

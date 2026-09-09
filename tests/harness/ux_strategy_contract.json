@@ -1,0 +1,111 @@
+{
+  "contract": "AUTH-UX-003",
+  "version": 1,
+  "status": "SPECIFIED_FOR_0.7.4_NOT_IMPLEMENTED",
+  "decision_date": "2026-09-09",
+  "frontend": {
+    "surface": "standalone_branded_members_shell",
+    "theme_markup_dependency": false,
+    "routes": {
+      "canonical_family": "/members/",
+      "activation_requires_collision_preflight": true,
+      "existing_query_routes_remain_fallback": true
+    },
+    "login_actions": ["password_reset", "register", "home"],
+    "registration": {
+      "identity_input": "email",
+      "wordpress_user_login": "opaque_private_candidate",
+      "supported_login_identifiers": ["email", "legacy_username"],
+      "required_fields": ["email", "password", "password_confirm", "first_name", "display_name", "consent_service", "consent_privacy"],
+      "optional_fields": ["last_name", "phone"],
+      "duplicate_display_name_allowed": true,
+      "automatic_login": false,
+      "email_verification": false
+    },
+    "validation_recovery": {
+      "same_request_safe_fields": ["email", "first_name", "last_name", "display_name", "phone"],
+      "always_cleared": ["password", "password_confirm", "nonce", "guest_token"],
+      "generic_identity_error": true,
+      "field_errors_linked_to_controls": true
+    },
+    "terms": {
+      "show_current_version": true,
+      "server_rendered_details": true,
+      "full_document_link": true
+    },
+    "password_visibility": {
+      "progressive_enhancement": true,
+      "route_scoped_script": true,
+      "no_javascript_required": true,
+      "custom_strength_auth_rule": false
+    },
+    "password_reset": {
+      "branded_wrapper_planned": true,
+      "wordpress_core_keys_and_apis_only": true,
+      "custom_token_or_auth_system": false
+    },
+    "account_navigation": {
+      "integration_mode": "plugin_registered_link_only_slots",
+      "members_queries_woocommerce_or_lms_domain_data": false,
+      "integrations_optional": true
+    }
+  },
+  "admin": {
+    "menu_parent": "users",
+    "sections": ["overview", "documents", "withdrawals", "audit"],
+    "overview_checks": ["core_public_registration", "required_documents", "route_collisions", "url_ownership", "owned_tables", "cleanup_schedule"],
+    "documents": {
+      "current_version_and_hash": true,
+      "preview_before_publish": true,
+      "version_history": true,
+      "published_snapshot_immutable": true
+    },
+    "withdrawals": {
+      "allowed_transitions": ["withdrawal_pending_to_disabled", "withdrawal_pending_to_active_with_reason"],
+      "capability_and_nonce_required": true,
+      "wordpress_user_id_preserved": true,
+      "external_domain_rows_preserved": true,
+      "restored_sessions": false
+    },
+    "audit": {
+      "localized_labels": true,
+      "filters": ["event", "result", "date", "user_id"],
+      "bounded_pagination": true,
+      "new_sensitive_payload": false
+    },
+    "notifications": {
+      "read_only_audit_results": true,
+      "editable_templates": false,
+      "smtp_settings": false,
+      "retry_queue": false,
+      "admin_recipient_notices": false
+    },
+    "core_users": {
+      "columns": ["account_state", "required_consent_status"],
+      "filters": ["account_state", "required_consent_status"],
+      "separate_user_registry": false
+    },
+    "retention": {
+      "display_defaults": {"success_days": 30, "security_days": 90},
+      "editable_before_legal_policy": false
+    },
+    "capability": "manage_kklidi_members",
+    "default_role": "administrator"
+  },
+  "boundaries": {
+    "wordpress_core_identity_and_auth": true,
+    "wordpress_user_ids_preserved": true,
+    "php_session_auth": false,
+    "global_frontend_assets": false,
+    "woocommerce_lms_domain_ownership_preserved": true,
+    "members_remains_optional_dependency": true,
+    "future_features_implemented": false
+  },
+  "implementation_order": {
+    "0.7.5": "login_register_ux",
+    "0.7.6": "account_reset_and_navigation_ux",
+    "0.7.7": "admin_information_architecture",
+    "0.7.8": "withdrawal_and_audit_operations",
+    "0.7.9": "browser_accessibility_and_release_gate"
+  }
+}

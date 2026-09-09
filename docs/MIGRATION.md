@@ -61,7 +61,7 @@ reference에는 Cosmosfarm/WP-Members의 설정·페이지·데이터가 남아 
 
 Rollback은 schema/route/settings별로 한다. 전환 후 새 주문·progress·새 회원이 생겼는데 전체 DB backup을 복원하면 정상 업무가 사라지므로 일반 rollback 방법으로 사용하지 않는다. 신규 필수 동의/보안 상태를 legacy에서 집행할 수 없다면 무조건 재활성화하지 않고 가입·민감 mutation을 일시 차단한 복구 화면으로 전환한다. 사이트 전체 유지보수 모드가 기본 해법은 아니다.
 
-0.7.3 합성 rehearsal은 dry-run→import→동일 batch 재실행→`legacy_wpmembers` import row만 제한적으로 제거→재실행 가능 상태를 검사한다. Core ID와 source meta는 전 과정에서 보존한다. 실제 전환은 [OPERATIONS](OPERATIONS.md)의 credential-free deployment manifest에 담당 역할, backup hash, 별도 restore 시험, route owner, rollback 방법과 최소 관찰 조건을 기록한 뒤 실행한다.
+0.7.4 합성 rehearsal은 dry-run→import→동일 batch 재실행→`legacy_wpmembers` import row만 제한적으로 제거→재실행 가능 상태를 검사한다. Core ID와 source meta는 전 과정에서 보존한다. 실제 전환은 [OPERATIONS](OPERATIONS.md)의 credential-free deployment manifest에 담당 역할, backup hash, 별도 restore 시험, route owner, rollback 방법과 최소 관찰 조건을 기록한 뒤 실행한다.
 
 탈퇴 차단 계정이나 미래 2FA가 생긴 후 Members 제거는 추가 gate가 필요하다. Core fallback만으로 그 정책이 유지되지 않으므로 동등 guard를 검증한 후 소유권을 넘긴다. 운영 장애 시의 관리자 복구는 테스트한 별도 절차를 갖추며 누구나 접근하는 bypass URL을 만들지 않는다.
 
