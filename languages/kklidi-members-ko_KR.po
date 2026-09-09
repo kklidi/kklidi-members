@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the KKLIDI Members plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: KKLIDI Members 0.7.12\n"
+"Project-Id-Version: KKLIDI Members 0.7.13\n"
 "Language: ko_KR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -792,3 +792,6 @@ msgstr "계정이 생성되었습니다. 이메일 또는 사용자명으로 로
 
 msgid "Create your account with WordPress Core authentication. After registration, sign in with your email or username; registration does not sign you in automatically."
 msgstr "WordPress Core 인증으로 계정을 만드세요. 가입 후 이메일 또는 사용자명으로 로그인해야 하며 가입 직후 자동 로그인은 수행되지 않습니다."
+
+msgid "Enter your username or email. If an account matches, WordPress will send a password reset link."
+msgstr "사용자명 또는 이메일을 입력하세요. 일치하는 계정이 있으면 WordPress가 비밀번호 재설정 링크를 보냅니다."

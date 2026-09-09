@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.7.13 — 2026-09-09
+
+- Clarified the password-reset request screen with the supported username/email input and WordPress Core generic-link response policy.
+- Kept reset-key issuance, validation, rate limits, no-store headers, and account enumeration protections unchanged.
+
 ## 0.7.12 — 2026-09-09
 
 - Clarified the approved registration policy: account creation does not issue an automatic login, and the user signs in with the email or username accepted by WordPress Core.
