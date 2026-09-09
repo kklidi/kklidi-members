@@ -90,6 +90,7 @@ Members 내부 Repository나 Service class를 다른 플러그인의 import 대�
 | Notifications | 계정·보안 안내 메일의 post-success 전달과 승인된 문구 설정 | 승인된 네 사건의 성공 경로에서만 `wp_mail()` 사용. 0.7.10은 Settings API와 non-autoload option으로 plain-text 제목·본문만 덮어쓰며 전역 sender filter/provider/queue 없음 |
 | Frontend | server-rendered form, 오류·접근성, assets | 등록된 account 화면/실제 component 렌더 시만 |
 | Admin | page/필드 설정, 읽기 전용 gettext message catalog, audit·탈퇴 queue 권한 UI | 관리자 화면에 한정; frontend 객체 초기화 금지 |
+| Admin registration notice | opt-in Settings API flag, Core `admin_email`, plain-text post-commit mail | 가입 성공 경로에서만. 승인·identity·sender·SMTP·Woo/LMS 데이터를 소유하지 않음 |
 | Integrations/WooCommerce | account link, 호환 phone adapter, lifecycle 협의 | Woo 존재 + 관련 route/event일 때 |
 | Integrations/KKLIDILMS | 공통 URL·변경 event의 선택적 이용 안내 | 큰 LMS 객체 생성 금지; LMS data/query 소유 안 함 |
 | Integrations/Community | Core identity·공통 UX 연결 경계 | FUTURE; KBoard 권한 엔진 복제 없음 |

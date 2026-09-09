@@ -50,6 +50,7 @@ The runner has no option for an existing site URL, existing DB endpoint, existin
 | `admin_ux_contract.json` | `AUTH-ADMIN-UX-001` bounded administrator diagnostics, route links, and quick actions |
 | `registration_fields_contract.json` | `AUTH-REGISTER-FIELDS-001` bounded built-in registration field states and security boundary |
 | `message_ux_contract.json` | `AUTH-MESSAGE-UX-001` read-only gettext catalog and visible notification-default boundary |
+| `admin_notification_contract.json` | `AUTH-ADMIN-NOTIFY-001` default-off administrator registration notice and Core mail boundary |
 | `ui_contract.json` | `AUTH-UI-001` screen/state/translation/accessibility/asset contract manifest |
 | `ux_strategy_contract.json` | `AUTH-UX-003` approved frontend/admin information architecture and implementation boundaries |
 | `mamp_woo_case.php` | CLI-only, fixed-sandbox Woo/WCI fixture with tagged user/product/orders, Members optional-dependency toggles, and exact cleanup |

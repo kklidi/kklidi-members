@@ -626,6 +626,48 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn("results['AUTH-MESSAGE-UX-001']", runtime_harness)
         self.assertIn("'extension_contracts_total': 4", runtime_harness)
 
+    def test_auth_admin_notify_001_design_is_default_off_and_core_owned(self):
+        repository = Path(__file__).resolve().parents[2]
+        contract = json.loads((
+            repository / 'tests/harness/admin_notification_contract.json'
+        ).read_text(encoding='utf-8'))
+        self.assertEqual(contract['contract'], 'AUTH-ADMIN-NOTIFY-001')
+        self.assertEqual(contract['version'], 1)
+        self.assertEqual(contract['status'], 'SPECIFIED_NOT_IMPLEMENTED')
+        self.assertEqual(contract['target_release'], '0.7.20')
+        setting = contract['setting']
+        self.assertFalse(setting['default_registration_enabled'])
+        self.assertFalse(setting['autoload'])
+        self.assertEqual(setting['fields'], ['registration_enabled'])
+        self.assertEqual(setting['capability'], 'manage_kklidi_members')
+        recipient = contract['recipient']
+        self.assertEqual(recipient['source'], 'wordpress_admin_email_option')
+        self.assertFalse(recipient['editable_in_members'])
+        self.assertFalse(recipient['request_value_allowed'])
+        event = contract['event']
+        self.assertEqual(event['transport'], 'wp_mail')
+        self.assertEqual(event['format'], 'text/plain')
+        self.assertEqual(event['locale'], 'wordpress_site_locale')
+        self.assertIn('member_email', event['required_content'])
+        self.assertIn('wordpress_user_id', event['forbidden_content'])
+        self.assertFalse(contract['failure']['mail_failure_rolls_back_registration'])
+        self.assertFalse(contract['failure']['mail_failure_changes_registration_response'])
+        for key in ('administrator_approval', 'pending_account_workflow', 'editable_recipient',
+                    'editable_template', 'html_email', 'sender_override', 'smtp_settings',
+                    'external_provider_sdk', 'global_frontend_hooks', 'global_frontend_assets'):
+            self.assertFalse(contract['boundaries'][key])
+        self.assertTrue(contract['boundaries']['wordpress_core_identity_and_auth_preserved'])
+        self.assertTrue(contract['boundaries']['members_optional_dependency'])
+        document = (repository / 'docs/ADMIN_NOTIFICATIONS.md').read_text(encoding='utf-8')
+        product = (repository / 'docs/PRODUCT.md').read_text(encoding='utf-8')
+        harness = (repository / 'docs/HARNESS_PLAN.md').read_text(encoding='utf-8')
+        self.assertIn('SPECIFIED_NOT_IMPLEMENTED', document)
+        self.assertIn('| D13 | **SPECIFIED FOR 0.7.20', product)
+        self.assertIn('AUTH-ADMIN-NOTIFY-001 / 0.7.20 extension (SPECIFIED)', harness)
+        self.assertIn("'docs/ADMIN_NOTIFICATIONS.md'", (
+            repository / 'tests/harness/build_release.py'
+        ).read_text(encoding='utf-8'))
+
     def test_auth_ux_003_078_withdrawal_and_audit_operations_are_bounded(self):
         repository = Path(__file__).resolve().parents[2]
         admin = (repository / 'includes/Admin/AdminController.php').read_text(encoding='utf-8')

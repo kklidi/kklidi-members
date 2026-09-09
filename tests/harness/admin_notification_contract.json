@@ -1,0 +1,57 @@
+{
+  "contract": "AUTH-ADMIN-NOTIFY-001",
+  "version": 1,
+  "status": "SPECIFIED_NOT_IMPLEMENTED",
+  "target_release": "0.7.20",
+  "depends_on": ["AUTH-REGISTER-001", "AUTH-NOTIFY-001", "AUTH-NOTIFY-002"],
+  "setting": {
+    "option": "kklidi_members_admin_notifications",
+    "schema_version": 1,
+    "default_registration_enabled": false,
+    "autoload": false,
+    "api": "wordpress_settings_api",
+    "capability": "manage_kklidi_members",
+    "section": "notifications",
+    "fields": ["registration_enabled"]
+  },
+  "recipient": {
+    "source": "wordpress_admin_email_option",
+    "editable_in_members": false,
+    "request_value_allowed": false,
+    "invalid_address": "skip_and_audit_failure"
+  },
+  "event": {
+    "name": "admin_registration",
+    "trigger": "registration_pending_to_active_committed",
+    "logical_idempotency": "event_name_plus_registration_request_id",
+    "exactly_once_delivery_claimed": false,
+    "format": "text/plain",
+    "transport": "wp_mail",
+    "locale": "wordpress_site_locale",
+    "required_content": ["site_name", "member_display_name", "member_email", "registration_time_utc"],
+    "forbidden_content": ["password", "reset_key", "auth_cookie", "nonce", "wordpress_user_id", "role", "consent_evidence", "phone", "order_data", "lms_data"]
+  },
+  "failure": {
+    "mail_failure_rolls_back_registration": false,
+    "mail_failure_changes_registration_response": false,
+    "automatic_retry": false,
+    "audit_event": "mail_admin_registration",
+    "audit_success": "success/wp_mail_accepted",
+    "audit_failure": "failure/wp_mail_failed"
+  },
+  "boundaries": {
+    "administrator_approval": false,
+    "pending_account_workflow": false,
+    "editable_recipient": false,
+    "editable_template": false,
+    "html_email": false,
+    "sender_override": false,
+    "smtp_settings": false,
+    "external_provider_sdk": false,
+    "global_frontend_hooks": false,
+    "global_frontend_assets": false,
+    "wordpress_core_identity_and_auth_preserved": true,
+    "members_optional_dependency": true
+  },
+  "out_of_scope": ["administrator_approval", "multiple_recipients", "custom_recipient", "editable_admin_template", "html_email", "test_send", "retry_queue", "delivery_log", "smtp_provider", "woocommerce_order_mail", "lms_learning_mail", "kboard_mail"]
+}
