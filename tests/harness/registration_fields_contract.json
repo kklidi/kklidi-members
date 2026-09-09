@@ -1,0 +1,165 @@
+{
+  "contract": "AUTH-REGISTER-FIELDS-001",
+  "version": 1,
+  "status": "SPECIFIED_NOT_IMPLEMENTED",
+  "target_release": "0.7.18",
+  "depends_on": [
+    "AUTH-REGISTER-001",
+    "AUTH-REGISTER-002",
+    "AUTH-CONSENT-001",
+    "AUTH-UX-003"
+  ],
+  "principle": "bounded_builtin_allowlist",
+  "scope": "registration_route_only",
+  "defaults_preserve_0_7_17_behavior": true,
+  "admin": {
+    "menu_parent": "users",
+    "section": "registration",
+    "api": "wordpress_settings_api",
+    "capability": "manage_kklidi_members",
+    "server_nonce_required": true,
+    "editable_property": "state",
+    "allowed_states": [
+      "required",
+      "optional",
+      "hidden"
+    ],
+    "fixed_order": true,
+    "editable_labels": false,
+    "custom_fields": false
+  },
+  "storage": {
+    "api": "wordpress_options",
+    "option_name": "kklidi_members_registration_fields",
+    "schema_version": 1,
+    "autoload": false,
+    "custom_table": false,
+    "missing_or_unreadable": "use_contract_defaults",
+    "invalid_update": "reject_and_retain_last_valid"
+  },
+  "locked_fields": {
+    "email": {
+      "state": "required",
+      "source": "wordpress_user_email"
+    },
+    "password": {
+      "state": "required",
+      "source": "wordpress_core_password_api"
+    },
+    "password_confirm": {
+      "state": "required",
+      "source": "request_only_never_persist"
+    },
+    "display_name": {
+      "state": "required",
+      "source": "wordpress_display_name",
+      "duplicates_allowed": true
+    },
+    "consent_service": {
+      "state": "required",
+      "source": "members_versioned_consent"
+    },
+    "consent_privacy": {
+      "state": "required",
+      "source": "members_versioned_consent"
+    }
+  },
+  "configurable_fields": {
+    "first_name": {
+      "default": "required",
+      "allowed_states": [
+        "required",
+        "optional",
+        "hidden"
+      ],
+      "source": "wordpress_first_name"
+    },
+    "last_name": {
+      "default": "optional",
+      "allowed_states": [
+        "required",
+        "optional",
+        "hidden"
+      ],
+      "source": "wordpress_last_name"
+    },
+    "phone": {
+      "default": "optional",
+      "allowed_states": [
+        "required",
+        "optional",
+        "hidden"
+      ],
+      "source": "billing_phone_compatibility_adapter",
+      "verified_claim": false
+    }
+  },
+  "document_fields": {
+    "marketing": {
+      "state": "optional_when_published",
+      "configurable_by_this_contract": false
+    }
+  },
+  "request_behavior": {
+    "unknown_post_fields": "ignore",
+    "hidden_field_post_values": "ignore",
+    "optional_omission": "store_empty_value_for_new_account",
+    "required_validation": "server_side",
+    "safe_recovery": "visible_text_fields_same_request_only",
+    "always_clear": [
+      "password",
+      "password_confirm",
+      "nonce",
+      "guest_token"
+    ],
+    "role": "subscriber",
+    "automatic_login": false,
+    "email_verification": false
+  },
+  "change_behavior": {
+    "effective_for": "subsequent_registration_requests",
+    "existing_users_rewritten": false,
+    "existing_profile_values_deleted": false,
+    "profile_screen_changed": false,
+    "woocommerce_orders_changed": false,
+    "lms_records_changed": false
+  },
+  "security": {
+    "server_allowlist_required": true,
+    "client_role_or_user_id_accepted": false,
+    "arbitrary_meta_key_accepted": false,
+    "password_or_nonce_stored_in_settings": false,
+    "settings_update_audit": "metadata_only_field_states",
+    "registration_open_gate": "wordpress_users_can_register_and_required_documents_ready"
+  },
+  "accessibility_localization": {
+    "labels": "english_gettext_with_wordpress_locale_catalog",
+    "required_state_exposed_to_browser": true,
+    "field_errors_linked_to_controls": true,
+    "javascript_required": false
+  },
+  "boundaries": {
+    "wordpress_core_identity_and_auth_preserved": true,
+    "wordpress_user_ids_preserved": true,
+    "php_session_auth": false,
+    "global_frontend_assets": false,
+    "members_optional_dependency": true
+  },
+  "out_of_scope": [
+    "arbitrary_custom_fields",
+    "custom_meta_keys",
+    "field_reordering",
+    "custom_labels_or_help_text",
+    "conditional_field_logic",
+    "role_specific_registration_forms",
+    "file_upload_fields",
+    "email_change",
+    "email_verification",
+    "sms_verification",
+    "social_login",
+    "administrator_approval",
+    "automatic_login",
+    "woocommerce_checkout_fields",
+    "lms_profile_fields"
+  ]
+}

@@ -48,6 +48,7 @@ The runner has no option for an existing site URL, existing DB endpoint, existin
 | `notification_contract.json` | `AUTH-NOTIFY-001` four-event runtime, delivery, localization, and failure contract |
 | `notification_settings_contract.json` | `AUTH-NOTIFY-002` Core-first admin wording design and implementation boundary |
 | `admin_ux_contract.json` | `AUTH-ADMIN-UX-001` bounded administrator diagnostics, route links, and quick actions |
+| `registration_fields_contract.json` | `AUTH-REGISTER-FIELDS-001` bounded built-in registration field states and security boundary |
 | `ui_contract.json` | `AUTH-UI-001` screen/state/translation/accessibility/asset contract manifest |
 | `ux_strategy_contract.json` | `AUTH-UX-003` approved frontend/admin information architecture and implementation boundaries |
 | `mamp_woo_case.php` | CLI-only, fixed-sandbox Woo/WCI fixture with tagged user/product/orders, Members optional-dependency toggles, and exact cleanup |
@@ -68,6 +69,8 @@ The `AUTH-UI-001` unit guard verifies that every current Members frontend route 
 `AUTH-NOTIFY-002` adds a second notification extension contract. The disposable runner submits the actual WordPress Settings API form as an administrator, rejects the same nonce for a subscriber, verifies non-autoload storage and metadata-only audit, checks event placeholder allowlists and gettext fallback, and then reruns the existing four-event mail and failure contracts under both database prefixes.
 
 `AUTH-ADMIN-UX-001` keeps the route controller canonical and makes administrator setup easier without creating pages or mutating site menus. The contract is guarded by the unit suite and the MAMP lifecycle runner; it does not claim external mailbox delivery.
+
+`AUTH-REGISTER-FIELDS-001` specifies the 0.7.18 registration-only field policy. Email, password, display name and required consent stay locked; only first name, last name and phone may be required, optional or hidden. The current runtime does not consume this setting yet, so its unit guard verifies the design and default-compatibility boundary without claiming implementation.
 
 The fixed MAMP LMS fixture exercises actual Woo order reconciliation into KKLIDI LMS enrollment, WordPress ID continuity across progress/certificate/private-question rows, learner/outsider access, route-scoped Members profile delegation, Members-off LMS/Core fallback, and exact cleanup. It creates only tagged synthetic data and sinks notification mail.
 

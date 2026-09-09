@@ -30,6 +30,7 @@ reference와 독립된 WP DB/filesystem에 synthetic 사용자 A/B, subscriber/a
 | AUTH-LOGOUT-001 / MVP | nonce 있는 logout 실행, 이전 cookie 재사용 | 로그아웃/세션 폐기 후 보호 자원 접근 불가; 외부 redirect 거부; 재실행 안전 |
 | AUTH-REGISTER-001 / MVP | Core `users_can_register=1` + 필수 문서 준비 + 필수 필드·동의 제출, 한국어 표시명·빈 전화 포함 | WP user 정확히 1개·서버 역할·필수 동의 영속화. 기존 Members 가입 option 값은 결과에 영향 없음; 전화 선택; 이메일 인증·자동 로그인 없음; 재전송 중복 없음; 저장 실패 시 pending·재시도로 완료 |
 | AUTH-REGISTER-002 / MVP | Core `users_can_register=0`, 필수 문서 미준비, duplicate email/동시 동일 email/필수 누락/동의 누락/role·ID 주입 | 가입 폼·처리 닫힘 또는 성공 계정 0개, 경합 중 1개만; role 상승 없음; 기존 email/login 불변; 안전한 오류 안내 |
+| AUTH-REGISTER-FIELDS-001 / 0.7.18 extension (SPECIFIED) | 기본 설정, 이름·성·전화의 필수/선택/숨김 조합, 비관리자 설정 시도, hidden field·role·ID·meta 주입, invalid schema/state | 0.7.17 기본 동작 보존; 내장 세 필드만 변경; 숨김 입력 무시; invalid update 전체 거부; Core ID/auth·동의·profile·Woo/LMS 데이터 불변 |
 | AUTH-RESET-001 / MVP | 분실→sink link→유효 key로 reset, 만료·재사용·다른 login·동시 소비 | 실제 Core password만 변경; 이전 key 재사용 거부; old session 무효 확인; 자동 로그인 없음; public 존재 여부 비노출 |
 | AUTH-REDIRECT-001 / MVP | LMS lesson·강의실 tab·checkout 목적지; 외부/동일 host 다른 port/CRLF/이중 인코딩/중첩 URL | 허용된 원래 목적지 유지, 위험 주소는 local fallback; 무한 루프 없음; 목적지 resource 권한 별도 검사 |
 | AUTH-PROFILE-001 / MVP | A가 이름·표시명·전화 수정; B user_id/role/state/meta/script 주입 | A allowlist만 변경, B/role/verified/과거 주문 불변; 한글 보존·출력 escape·invalid email/phone 거부; 1.0 email read-only |

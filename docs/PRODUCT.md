@@ -67,7 +67,7 @@ Reference root `R = C:/MAMP/htdocs/ns_0727`, 플러그인 root `P = R/wp-content
 | 기능 | 근거 | 분류 |
 | --- | --- | --- |
 | 로그인 | user class가 wp_signon 사용; Cosmosfarm이 label·form·redirect 필터 적용 | REQUIRED: Core 로그인 자체를 새 엔진으로 바꾸지 않음 |
-| 가입·필드 | E03/E04: 이메일, 비밀번호/확인, 표시명, first_name, billing_phone, 두 동의가 표시·필수 설정 | REQUIRED: 고정 필드만 지원, generic form builder 제거 |
+| 가입·필드 | E03/E04: 이메일, 비밀번호/확인, 표시명, first_name, billing_phone, 두 동의가 표시·필수 설정 | REQUIRED: 승인된 내장 allowlist만 지원하고 generic form builder는 제거. 0.7.18 설계는 이름·성·전화의 필수/선택/숨김만 허용 |
 | username/email | username 필드는 설정상 존재하나 Cosmosfarm이 숨기고 이메일 대입. 434명 중 397명 login=email | REQUIRED: 기존 37명 username login도 유지. 이메일 변경 시 user_login 불변 |
 | 분실/reset | pwd_link=1, Core key validation/reset 사용 | REPLACEABLE |
 | profile | /profile shortcode; 현재 LMS에 별도 profile/password 구현 | KEEP_TEMPORARILY: 같은 core 값의 여러 editor를 전환 순서로 정리 |
@@ -151,7 +151,7 @@ KBoard는 12개 board 중 author/roles 제한을 갖는 board가 있고 412개 c
 
 | ID | 결정 | 기본 설계 제안 / 결정이 필요한 시점 |
 | --- | --- | --- |
-| D01 | **DECIDED 2026-09-08** | 전화 선택, 이메일 가입 인증 미도입, 가입 후 자동 로그인 없음. 공개 가입은 Core `users_can_register`만 사용하며 필수 문서가 없으면 닫힘 |
+| D01 | **DECIDED 2026-09-08; DEFAULT PRESERVED FOR 0.7.18** | 전화 선택, 이메일 가입 인증 미도입, 가입 후 자동 로그인 없음. 공개 가입은 Core `users_can_register`만 사용하며 필수 문서가 없으면 닫힘. 전화 선택은 `AUTH-REGISTER-FIELDS-001`의 설치 기본값이며 관리자는 필수/숨김으로 바꿀 수 있음 |
 | D02 | **DECIDED FOR 1.0 2026-09-08** | 즉시 로그인 차단·세션 철회 후 수동 queue. self-service 복구·자동 익명화·`wp_delete_user` 없음. Core ID와 외부 도메인 참조를 보존하고 실제 삭제/보존 완료는 각 도메인 owner와 사이트 privacy 절차가 판정 |
 | D03 | **DECIDED FOR 0.7.4 2026-09-09** | 승인된 수집 목적·문구·채널이 생기기 전에는 마케팅 문서를 게시하거나 동의를 수집하지 않음. 기존 optional 저장 기능을 자동 활성화하지 않음 |
 | D04 | **DECIDED FOR 0.7.4 2026-09-09** | display_name 중복 허용. nickname은 identity·login identifier·권한이 아니며 기존 이름을 변경하지 않음 |
@@ -161,5 +161,6 @@ KBoard는 12개 board 중 author/roles 제한을 갖는 board가 있고 412개 c
 | D08 | **DECIDED 2026-09-09** | 가입 완료·비밀번호 변경·탈퇴 접수·탈퇴 처리 완료의 사용자 안내 메일을 후속 MVP 확장으로 승인. WordPress `wp_mail()`과 고정 plain-text preset을 사용하며 관리자·마케팅·주문·LMS 메일, 이메일 인증, template UI는 포함하지 않음 |
 | D09 | **DECIDED FOR 0.7.4 2026-09-09** | `AUTH-UX-003`: 독립형 branded shell, 충돌 검사 후 `/members/` clean route와 query fallback, 현재 가입 필드 정책, display_name 중복 허용, no-JS 기본·route 전용 password visibility, Core reset wrapper, plugin-owned link slot, Users 하위 관리자 정보 구조와 탈퇴 pending 복구/확정·감사 조회 계약 |
 | D10 | **DECIDED FOR 0.7.10 2026-09-09** | `AUTH-NOTIFY-002`: 기존 네 사용자 알림의 plain-text 제목·본문만 WordPress Settings API와 단일 non-autoload option으로 관리. `wp_mail()`·Core/site 발신 정책을 유지하고 전역 sender filter, SMTP/provider 설정, 시험 발송, HTML, queue 및 다른 domain 메일은 포함하지 않음 |
+| D11 | **SPECIFIED FOR 0.7.18 2026-09-10** | `AUTH-REGISTER-FIELDS-001`: 이메일·비밀번호·표시명·필수 동의는 잠그고 이름·성·전화만 필수/선택/숨김으로 설정. 현재 동작을 기본값으로 보존하며 임의 custom field·meta key·순서·label 편집과 profile/Woo/LMS 변경은 포함하지 않음 |
 
-D03~D05는 보수적 기본값으로 확정했다. 마케팅 수집이나 강제 재동의를 실제로 시작하려면 새로운 목적·보존·철회 behavior contract가 필요하다. FUTURE/OPTIONAL 기능은 별도 승인 없이 구현하지 않는다. D09의 상세 계약과 단계별 구현 상태는 `UI_UX.md`와 `tests/harness/ux_strategy_contract.json`이 소유한다. D10의 Core 우선 관리자 설정 경계는 `NOTIFICATIONS.md`와 `tests/harness/notification_settings_contract.json`이 소유한다.
+D03~D05는 보수적 기본값으로 확정했다. 마케팅 수집이나 강제 재동의를 실제로 시작하려면 새로운 목적·보존·철회 behavior contract가 필요하다. FUTURE/OPTIONAL 기능은 별도 승인 없이 구현하지 않는다. D09의 상세 계약과 단계별 구현 상태는 `UI_UX.md`와 `tests/harness/ux_strategy_contract.json`이 소유한다. D10의 Core 우선 관리자 설정 경계는 `NOTIFICATIONS.md`와 `tests/harness/notification_settings_contract.json`이 소유한다. D11의 제한된 가입 필드 설정은 `REGISTRATION_FIELDS.md`와 `tests/harness/registration_fields_contract.json`이 소유하며 현재 runtime에는 아직 구현되지 않았다.

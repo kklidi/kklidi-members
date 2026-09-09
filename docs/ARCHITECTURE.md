@@ -78,7 +78,7 @@ Members 내부 Repository나 Service class를 다른 플러그인의 import 대�
 | --- | --- | --- |
 | Core | version/config, lazy factory, URL facade, 필수 lifecycle guards | 필수, 최소 bootstrap |
 | Auth | Core signon/logout wrapper, 계정 상태 및 limiter policy | 인증 경로에서 service load; 필수 auth guard hook 등록은 전역 허용 |
-| Registration | fixed fields, server role, duplicate/consent validation | 가입 GET/POST만 |
+| Registration | bounded built-in field allowlist, server role, duplicate/consent validation | 가입 GET/POST만. 0.7.18 설계는 이름·성·전화 상태만 설정하며 임의 meta field를 만들지 않음 |
 | Password | Core lost/reset, 현재 비밀번호 확인 후 변경 | password route만 |
 | Profile | self profile field allowlist, phone validation | profile route만 |
 | Consent | 문서 version·hash·append-only 동의 사건 | 가입/동의 화면·변경 처리만 |

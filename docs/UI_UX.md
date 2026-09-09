@@ -82,7 +82,7 @@
 - Members는 theme markup에 종속되지 않는 독립형 branded shell을 유지한다. 사이트명·로고·홈 링크 같은 최소 brand context만 WordPress 데이터에서 가져오고 외부 font·CDN을 요구하지 않는다.
 - clean route의 기본 후보는 `/members/login/`, `/members/register/`, `/members/account/`와 account 하위 경로다. 기존 publish page·rewrite 충돌을 먼저 검사하고 관리자가 route map을 적용하기 전에는 활성화하지 않는다. 현재 query route는 항상 호환 fallback으로 유지한다.
 - 로그인 화면은 비밀번호 찾기, 가입, 홈으로 돌아가기 동선을 제공한다. credential 오류는 계속 일반화하고 email/username 존재 여부를 노출하지 않는다.
-- 가입 필수 입력은 email, password/confirmation, first name, display name, 서비스 약관과 개인정보 처리방침 동의다. last name과 phone은 선택이다. display name 중복은 허용하며 login identifier나 권한 판단에 사용하지 않는다.
+- 0.7.17 가입 기본값은 email, password/confirmation, first name, display name, 서비스 약관과 개인정보 처리방침 동의가 필수이고 last name과 phone은 선택이다. `AUTH-REGISTER-FIELDS-001`은 0.7.18에도 이 기본값을 유지하면서 이름·성·전화만 필수/선택/숨김으로 설정하도록 지정한다. email·password·display name·필수 동의는 잠금이며 임의 custom field는 만들지 않는다. display name 중복은 허용하며 login identifier나 권한 판단에 사용하지 않는다.
 - validation 실패 시 email·이름·표시명·전화 같은 안전한 같은-request 입력만 복원하고 password, nonce, guest token은 항상 비운다. 오류 요약과 field 연결 오류를 함께 제공한다.
 - 약관은 현재 version을 표시하고 서버 렌더링 `<details>`와 전문 링크로 읽을 수 있게 한다. 동의 checkbox는 전문을 열지 않아도 키보드로 접근 가능해야 한다.
 - password 표시/숨김은 route 전용의 작은 progressive-enhancement script만 허용한다. JavaScript가 없어도 제출·검증·복구가 모두 가능해야 하며 별도 password score를 인증 규칙으로 만들지 않는다.

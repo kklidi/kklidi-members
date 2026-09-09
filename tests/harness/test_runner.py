@@ -386,6 +386,111 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('Clear filters', admin_template)
         self.assertIn('Leave a field empty to restore its translated default.', admin_template)
 
+    def test_auth_register_fields_001_design_is_bounded_and_default_compatible(self):
+        repository = Path(__file__).resolve().parents[2]
+        contract = json.loads(
+            (repository / 'tests/harness/registration_fields_contract.json').read_text(
+                encoding='utf-8'
+            )
+        )
+
+        self.assertEqual(contract['contract'], 'AUTH-REGISTER-FIELDS-001')
+        self.assertEqual(contract['version'], 1)
+        self.assertEqual(contract['status'], 'SPECIFIED_NOT_IMPLEMENTED')
+        self.assertEqual(contract['target_release'], '0.7.18')
+        self.assertEqual(contract['principle'], 'bounded_builtin_allowlist')
+        self.assertEqual(contract['scope'], 'registration_route_only')
+        self.assertTrue(contract['defaults_preserve_0_7_17_behavior'])
+
+        admin = contract['admin']
+        self.assertEqual(admin['api'], 'wordpress_settings_api')
+        self.assertEqual(admin['capability'], 'manage_kklidi_members')
+        self.assertTrue(admin['server_nonce_required'])
+        self.assertEqual(admin['allowed_states'], ['required', 'optional', 'hidden'])
+        self.assertTrue(admin['fixed_order'])
+        self.assertFalse(admin['editable_labels'])
+        self.assertFalse(admin['custom_fields'])
+
+        storage = contract['storage']
+        self.assertEqual(storage['option_name'], 'kklidi_members_registration_fields')
+        self.assertEqual(storage['schema_version'], 1)
+        self.assertFalse(storage['autoload'])
+        self.assertFalse(storage['custom_table'])
+        self.assertEqual(storage['invalid_update'], 'reject_and_retain_last_valid')
+
+        locked = contract['locked_fields']
+        self.assertEqual(
+            set(locked),
+            {'email', 'password', 'password_confirm', 'display_name',
+             'consent_service', 'consent_privacy'},
+        )
+        self.assertTrue(all(field['state'] == 'required' for field in locked.values()))
+        self.assertTrue(locked['display_name']['duplicates_allowed'])
+
+        configurable = contract['configurable_fields']
+        self.assertEqual(set(configurable), {'first_name', 'last_name', 'phone'})
+        self.assertEqual(
+            {name: field['default'] for name, field in configurable.items()},
+            {'first_name': 'required', 'last_name': 'optional', 'phone': 'optional'},
+        )
+        for field in configurable.values():
+            self.assertEqual(field['allowed_states'], ['required', 'optional', 'hidden'])
+        self.assertFalse(configurable['phone']['verified_claim'])
+
+        request = contract['request_behavior']
+        self.assertEqual(request['hidden_field_post_values'], 'ignore')
+        self.assertEqual(request['required_validation'], 'server_side')
+        self.assertEqual(request['role'], 'subscriber')
+        self.assertFalse(request['automatic_login'])
+        self.assertFalse(request['email_verification'])
+        self.assertEqual(
+            set(request['always_clear']),
+            {'password', 'password_confirm', 'nonce', 'guest_token'},
+        )
+
+        changes = contract['change_behavior']
+        for invariant in ('existing_users_rewritten', 'existing_profile_values_deleted',
+                          'profile_screen_changed', 'woocommerce_orders_changed',
+                          'lms_records_changed'):
+            self.assertFalse(changes[invariant])
+
+        security = contract['security']
+        self.assertTrue(security['server_allowlist_required'])
+        self.assertFalse(security['client_role_or_user_id_accepted'])
+        self.assertFalse(security['arbitrary_meta_key_accepted'])
+        self.assertEqual(
+            security['registration_open_gate'],
+            'wordpress_users_can_register_and_required_documents_ready',
+        )
+
+        boundaries = contract['boundaries']
+        self.assertTrue(boundaries['wordpress_core_identity_and_auth_preserved'])
+        self.assertTrue(boundaries['wordpress_user_ids_preserved'])
+        self.assertFalse(boundaries['php_session_auth'])
+        self.assertFalse(boundaries['global_frontend_assets'])
+        self.assertTrue(boundaries['members_optional_dependency'])
+
+        required_exclusions = {
+            'arbitrary_custom_fields', 'custom_meta_keys', 'field_reordering',
+            'custom_labels_or_help_text', 'conditional_field_logic',
+            'role_specific_registration_forms', 'administrator_approval',
+            'email_verification', 'sms_verification', 'social_login',
+            'automatic_login', 'woocommerce_checkout_fields', 'lms_profile_fields',
+        }
+        self.assertTrue(required_exclusions.issubset(set(contract['out_of_scope'])))
+
+        design = (repository / 'docs/REGISTRATION_FIELDS.md').read_text(encoding='utf-8')
+        product = (repository / 'docs/PRODUCT.md').read_text(encoding='utf-8')
+        architecture = (repository / 'docs/ARCHITECTURE.md').read_text(encoding='utf-8')
+        harness = (repository / 'docs/HARNESS_PLAN.md').read_text(encoding='utf-8')
+        self.assertIn('SPECIFIED_NOT_IMPLEMENTED', design)
+        self.assertIn('| D11 | **SPECIFIED FOR 0.7.18', product)
+        self.assertIn('bounded built-in field allowlist', architecture)
+        self.assertIn('AUTH-REGISTER-FIELDS-001 / 0.7.18 extension (SPECIFIED)', harness)
+        self.assertIn("'docs/REGISTRATION_FIELDS.md'", (
+            repository / 'tests/harness/build_release.py'
+        ).read_text(encoding='utf-8'))
+
     def test_auth_ux_003_078_withdrawal_and_audit_operations_are_bounded(self):
         repository = Path(__file__).resolve().parents[2]
         admin = (repository / 'includes/Admin/AdminController.php').read_text(encoding='utf-8')
