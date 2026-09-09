@@ -11,6 +11,21 @@ require_once WP_PLUGIN_DIR . '/kklidi-members/includes/Consent/Documents.php';
 use KKLIDI\Members\Consent\Documents;
 
 $mode = isset($argv[1]) && is_string($argv[1]) ? $argv[1] : '';
+if ($mode === 'set-site-locale') {
+    $locale = isset($argv[2]) && is_string($argv[2]) ? sanitize_text_field($argv[2]) : '';
+    if (!in_array($locale, array('en_US', 'ko_KR'), true)) { exit('Invalid locale.'); }
+    // The pinned Core package has no Korean language pack, so Core's WPLANG
+    // sanitizer would discard ko_KR. Store the synthetic site locale directly
+    // in the owned test database; the plugin catalog is still loaded by Core.
+    global $wpdb;
+    $wpdb->replace($wpdb->options, array(
+        'option_name' => 'WPLANG', 'option_value' => $locale, 'autoload' => 'yes',
+    ), array('%s', '%s', '%s'));
+    wp_cache_delete('WPLANG', 'options');
+    wp_cache_delete('alloptions', 'options');
+    echo json_encode(array('locale' => get_locale(), 'option' => get_option('WPLANG')));
+    exit;
+}
 if ($mode === 'core-on-no-documents') {
     update_option('users_can_register', 1);
     update_option('kklidi_members_registration_enabled', '1', false);

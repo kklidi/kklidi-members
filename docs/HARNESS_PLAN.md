@@ -65,9 +65,9 @@ reference와 독립된 WP DB/filesystem에 synthetic 사용자 A/B, subscriber/a
 
 `AUTH-NOTIFY-001`은 [NOTIFICATIONS.md](NOTIFICATIONS.md)와 `tests/harness/notification_contract.json`에서 가입 완료·비밀번호 변경·탈퇴 접수·탈퇴 처리 완료의 사용자 알림을 고정한다. 기존 24개 MVP runtime 계약 집계에는 추가하지 않는다. 상태는 **SPECIFIED**, runtime은 **IMPLEMENTED_AND_SYNTHETIC_VERIFIED**다.
 
-WooCommerce 주문·결제 메일과 LMS 수강·진도·수료증 알림은 각 domain owner에 남는다. 이메일 가입 인증, 관리자 알림, 마케팅, 편집 가능한 template, SMTP/provider, 재시도 queue는 이 계약 범위가 아니다. P0-3은 gettext/한국어 catalog, P0-4는 메일 실패 주입과 보안 상태 보존을 별도 검증한다.
+WooCommerce 주문·결제 메일과 LMS 수강·진도·수료증 알림은 각 domain owner에 남는다. 이메일 가입 인증, 관리자 알림, 마케팅, 편집 가능한 template, SMTP/provider, 재시도 queue는 이 계약 범위가 아니다. P0-3은 gettext/한국어 catalog 검증을 완료했고, P0-4는 메일 실패 주입과 보안 상태 보존을 별도 검증한다.
 
-2026-09-09 P0-2 실행 `0d31685ae4584e49af3aa5f54c0896a0`는 WordPress 7.1/PHP 8.3의 새 임시 설치에서 `wp_`와 임의 prefix를 각각 검사했다. 각 variant에서 네 알림 preset, 현재 Core 수신자, 명시적 plain-text header, 성공 후 발송, `wp_mail` 수락 감사 결과, 거부·재실행 중복 0, credential/token·주문/LMS 상세 미포함, Members-off hard dependency 없음이 PASS였다. 가입 메일은 동일 이메일 처리 lock을 해제한 뒤 호출했다. 임시 DB/filesystem과 process가 모두 정리됐고 reference에는 쓰지 않았다. 로컬 증거는 `.harness/reports/latest.json`에 있다.
+2026-09-09 P0-2 실행 `0d31685ae4584e49af3aa5f54c0896a0`는 WordPress 7.1/PHP 8.3의 새 임시 설치에서 `wp_`와 임의 prefix를 각각 검사했다. P0-3 실행 `bacdd413b3444dd694baa26d725e7e9a`도 두 prefix에서 네 알림 preset, 현재 Core 수신자, 명시적 plain-text header, 성공 후 발송, `wp_mail` 수락 감사 결과, 거부·재실행 중복 0, credential/token·주문/LMS 상세 미포함, Members-off hard dependency 없음과 `ko_KR` 사이트 fallback/사용자 locale catalog 렌더링을 PASS했다. 가입 메일은 동일 이메일 처리 lock을 해제한 뒤 호출했다. 임시 DB/filesystem과 process가 모두 정리됐고 reference에는 쓰지 않았다. 로컬 증거는 `.harness/reports/latest.json`에 있다.
 
 가입 동시성은 단순 재클릭과 다르다. 동일 normalized email의 병렬 요청·다른 case·동일 idempotency key·서로 다른 key를 각각 검사한다. 사용자 생성 후 consent 저장 실패, mail 송신 실패, usermeta finalize 실패를 따로 주입한다. account pending 상태의 fail-closed를 검사하고 고아 계정 재사용·완료 절차를 검증한다.
 

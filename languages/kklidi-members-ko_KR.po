@@ -204,3 +204,39 @@ msgid "Result"
 msgstr "결과"
 msgid "Reason"
 msgstr "사유"
+
+msgid "[%s] Registration complete"
+msgstr "[%s] 회원가입이 완료되었습니다"
+
+msgid "Your account registration is complete."
+msgstr "회원가입이 완료되었습니다."
+
+msgid "Sign in: %s"
+msgstr "로그인: %s"
+
+msgid "[%s] Password changed"
+msgstr "[%s] 비밀번호가 변경되었습니다"
+
+msgid "The password for your account was changed."
+msgstr "회원 계정의 비밀번호가 변경되었습니다."
+
+msgid "If you did not make this change, reset your password immediately: %s"
+msgstr "본인이 변경하지 않았다면 즉시 비밀번호를 재설정하세요: %s"
+
+msgid "[%s] Withdrawal request received"
+msgstr "[%s] 탈퇴 요청이 접수되었습니다"
+
+msgid "We received your account withdrawal request."
+msgstr "탈퇴 요청을 접수했습니다."
+
+msgid "Sign-in access has been blocked while the site administrator and service owners complete their review."
+msgstr "사이트 관리자와 각 서비스 소유자가 검토를 마칠 때까지 로그인이 차단됩니다."
+
+msgid "[%s] Withdrawal processing complete"
+msgstr "[%s] 탈퇴 처리가 완료되었습니다"
+
+msgid "Your withdrawal request has been processed and sign-in access remains blocked."
+msgstr "탈퇴 요청 처리가 완료되었으며 로그인 차단 상태가 유지됩니다."
+
+msgid "Your WordPress account ID and related order or learning records may be retained according to the applicable retention policies."
+msgstr "해당 보존 정책에 따라 WordPress 계정 ID와 관련 주문 또는 학습 기록이 보존될 수 있습니다."

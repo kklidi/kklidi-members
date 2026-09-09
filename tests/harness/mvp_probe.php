@@ -26,6 +26,24 @@ if ($action === 'set-fixture-state') {
     echo json_encode(array('user_id' => (int) $target->ID, 'state' => $state));
     exit;
 }
+if ($action === 'set-user-locale') {
+    if (!$user || !isset($argv[2]) || !in_array($argv[2], array('en_US', 'ko_KR'), true)) {
+        exit('Invalid synthetic user locale.');
+    }
+    update_user_meta($user->ID, 'locale', sanitize_text_field($argv[2]));
+    echo wp_json_encode(array('user_id' => (int) $user->ID, 'locale' => get_user_locale($user)));
+    exit;
+}
+if ($action === 'translation-check') {
+    $catalog = WP_PLUGIN_DIR . '/kklidi-members/languages/kklidi-members-ko_KR.mo';
+    echo wp_json_encode(array(
+        'locale' => get_locale(),
+        'determined_locale' => determine_locale(),
+        'catalog_exists' => file_exists($catalog),
+        'registration_subject' => sprintf(__('[%s] Registration complete', 'kklidi-members'), get_bloginfo('name')),
+    ));
+    exit;
+}
 if ($action === 'expire-audit') {
     $table = $wpdb->prefix . 'kklidi_mem_login_audit';
     $wpdb->query("UPDATE {$table} SET occurred_at_utc = '2000-01-01 00:00:00'");

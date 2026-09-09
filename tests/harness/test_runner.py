@@ -1,5 +1,7 @@
 """Small safety tests for a harness that provisions and destroys temporary data."""
 import json
+import gettext
+import re
 import unittest
 from pathlib import Path
 import os
@@ -9,6 +11,7 @@ from unittest.mock import patch
 
 from run import (Browser, HarnessError, LOCK, PACKAGE_FILES, archive_name, assert_identity,
                  assert_production_shape, hidden_input, owned_cleanup, verified_archive)
+from compile_catalog import read_po
 from validate_deployment_manifest import inspect as inspect_deployment_manifest
 
 
@@ -198,7 +201,7 @@ class HarnessGuards(unittest.TestCase):
         self.assertEqual(contract['version'], 1)
         self.assertEqual(contract['status'], 'SPECIFIED')
         self.assertEqual(contract['implementation_status'], 'IMPLEMENTED_AND_SYNTHETIC_VERIFIED')
-        self.assertEqual(contract['implementation_phase'], 'P0-2')
+        self.assertEqual(contract['implementation_phase'], 'P0-3')
         self.assertEqual(contract['verification'], {
             'status': 'PASS',
             'scope': 'synthetic_wordpress',
@@ -210,6 +213,10 @@ class HarnessGuards(unittest.TestCase):
             'format': 'text/plain',
             'sender': 'wordpress_default',
             'smtp_owned_by_members': False,
+        })
+        self.assertEqual(contract['localization']['verification'], {
+            'status': 'PASS', 'site_fallback': 'ko_KR', 'user_locale': 'ko_KR',
+            'catalog_msgids': 12, 'report': '.harness/reports/latest.json',
         })
 
         events = contract['events']
@@ -297,6 +304,30 @@ class HarnessGuards(unittest.TestCase):
         harness = (repository / 'tests/harness/run.py').read_text(encoding='utf-8')
         self.assertIn("'includes/Notifications/AccountMailer.php'", harness)
         self.assertIn("results['AUTH-NOTIFY-001']", harness)
+
+    def test_auth_notify_001_catalog_covers_mail_presets(self):
+        repository = Path(__file__).resolve().parents[2]
+        mailer = (repository / 'includes/Notifications/AccountMailer.php').read_text(encoding='utf-8')
+        msgids = re.findall(r"__\(\s*'([^']*)'\s*,\s*'kklidi-members'\s*\)", mailer)
+        self.assertEqual(len(msgids), 12)
+        self.assertEqual(len(set(msgids)), len(msgids))
+
+        pot = read_po(repository / 'languages/kklidi-members.pot')
+        catalog = read_po(repository / 'languages/kklidi-members-ko_KR.po')
+        with (repository / 'languages/kklidi-members-ko_KR.mo').open('rb') as stream:
+            translations = gettext.GNUTranslations(stream)
+        for msgid in msgids:
+            with self.subTest(msgid=msgid):
+                self.assertIn(msgid, pot)
+                self.assertIn(msgid, catalog)
+                self.assertTrue(catalog[msgid])
+                self.assertNotEqual(catalog[msgid], msgid)
+                self.assertNotEqual(translations.gettext(msgid), msgid)
+
+        harness = (repository / 'tests/harness/run.py').read_text(encoding='utf-8')
+        self.assertIn("'set-site-locale', 'ko_KR'", harness)
+        self.assertIn("'set-user-locale', 'ko_KR'", harness)
+        self.assertIn("languages/kklidi-members-ko_KR.mo", harness)
 
     def test_tls_runner_confines_openssl_random_state_to_run_directory(self):
         repository = Path(__file__).resolve().parents[2]

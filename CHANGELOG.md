@@ -8,8 +8,7 @@
   the existing audit unique key for one logical dispatch claim per event.
 - Verified the four presets, rejected/replayed requests, data minimization, arbitrary
   database prefixes, and Members-off behavior in disposable WordPress installations.
-- Korean message catalogs and injected mail-failure behavior remain the P0-3 and P0-4
-  gates before the 0.7.3 package is built.
+- Injected mail-failure behavior remains the P0-4 gate before the 0.7.3 package is built.
 
 ## 0.7.2 — 2026-09-09
 

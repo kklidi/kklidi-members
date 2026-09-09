@@ -1,4 +1,11 @@
 <?php
+// The pinned Core archive ships only en_US. Advertise the bundled plugin
+// locale to the synthetic locale switcher so user-locale behavior can be
+// exercised without installing a global Core language pack.
+add_filter('get_available_languages', static function ($languages) {
+    $languages[] = 'ko_KR';
+    return array_values(array_unique($languages));
+});
 // Test-only MU observer. Does not authenticate users, set cookies, or replace login.
 if (!defined('ABSPATH') || realpath(ABSPATH) !== realpath(getenv('KKH_ROOT') ?: '')
     || @file_get_contents(dirname(ABSPATH) . '/owner') !== getenv('KKH_RUN')
@@ -85,6 +92,8 @@ add_action('init', function () {
         'plugins' => get_option('active_plugins'), 'members_files' => $members_files,
         'kklidi_cookies' => $kklidi_cookies,
         'php_session_active' => session_status() === PHP_SESSION_ACTIVE,
+        'locale' => get_locale(), 'determined_locale' => determine_locale(),
+        'wplang_option' => get_option('WPLANG'),
         'query_count' => get_num_queries(), 'memory_peak_bytes' => memory_get_peak_usage(true),
         'run_id' => getenv('KKH_RUN')]);
 }, PHP_INT_MAX);

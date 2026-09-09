@@ -300,3 +300,39 @@ msgstr ""
 
 msgid "Reason"
 msgstr ""
+
+msgid "[%s] Registration complete"
+msgstr ""
+
+msgid "Your account registration is complete."
+msgstr ""
+
+msgid "Sign in: %s"
+msgstr ""
+
+msgid "[%s] Password changed"
+msgstr ""
+
+msgid "The password for your account was changed."
+msgstr ""
+
+msgid "If you did not make this change, reset your password immediately: %s"
+msgstr ""
+
+msgid "[%s] Withdrawal request received"
+msgstr ""
+
+msgid "We received your account withdrawal request."
+msgstr ""
+
+msgid "Sign-in access has been blocked while the site administrator and service owners complete their review."
+msgstr ""
+
+msgid "[%s] Withdrawal processing complete"
+msgstr ""
+
+msgid "Your withdrawal request has been processed and sign-in access remains blocked."
+msgstr ""
+
+msgid "Your WordPress account ID and related order or learning records may be retained according to the applicable retention policies."
+msgstr ""

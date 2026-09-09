@@ -176,6 +176,13 @@ def copy_production_plugin(target):
         destination = target / Path(name)
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(REPO / name, destination)
+    # Translation catalogs are package assets rather than PHP runtime files,
+    # but the synthetic site must carry them to exercise WordPress locale lookup.
+    for name in ('languages/kklidi-members.pot', 'languages/kklidi-members-ko_KR.po',
+                 'languages/kklidi-members-ko_KR.mo'):
+        destination = target / Path(name)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(REPO / name, destination)
 
 
 def copy_device_reference(target):
@@ -293,7 +300,7 @@ def assert_account_notice(row, recipient, subject_fragment, required_fragments, 
     require(any(header.lower().startswith('content-type: text/plain;') for header in headers),
             'Account notice did not declare its plain-text format')
     require(subject_fragment in str(row.get('subject', '')),
-            'Account notice used the wrong preset subject')
+            'Account notice used the wrong preset subject: ' + str(row.get('subject', '')))
     require(all(fragment in content for fragment in required_fragments),
             'Account notice omitted required preset content')
     require(not any(fragment and fragment in content for fragment in forbidden_fragments),
@@ -525,7 +532,7 @@ def local_response_path(base, location):
     return urllib.parse.urlunsplit(('', '', parsed.path or '/', parsed.query, parsed.fragment))
 
 
-def run_mvp_cases(base, env, fixture, command, php_cli):
+def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
     """Exercise the bounded 1.0 account workflows through real HTTP requests."""
     results = {}
     key = env['KKH_PROBE_KEY']
@@ -626,6 +633,22 @@ def run_mvp_cases(base, env, fixture, command, php_cli):
     results['AUTH-LOGIN-002']['blocked_states'] = 'PASS'
 
     # Registration creates one Core subscriber with a private login and current consent evidence.
+    korean_site = command(php_cli + [HERE / 'mvp_setup.php', 'set-site-locale', 'ko_KR'],
+                          json_result=True)
+    require(korean_site.get('locale') == 'ko_KR' and korean_site.get('option') == 'ko_KR',
+            'Korean site-locale setup failed: ' + repr(korean_site))
+    if restart_server:
+        restart_server()
+    locale_probe = Browser(base).observe(key)
+    require(locale_probe.get('locale') == 'ko_KR',
+            'HTTP site locale did not refresh: ' + repr({k: locale_probe.get(k)
+                                                         for k in ('locale', 'determined_locale', 'wplang_option')}))
+    translation_check = command(php_cli + [HERE / 'mvp_probe.php', 'translation-check'],
+                                json_result=True)
+    require(translation_check == {
+        'locale': 'ko_KR', 'determined_locale': 'ko_KR', 'catalog_exists': True,
+        'registration_subject': '[Synthetic Members Harness] 회원가입이 완료되었습니다',
+    }, 'Korean catalog was not loaded by WordPress: ' + repr(translation_check))
     registration = Browser(base)
     status, headers, form = registration.request('/?kklidi_members_register=1')
     require(status == 200 and 'name="email"' in form and 'no-store' in headers.get('Cache-Control', '').lower(),
@@ -654,12 +677,18 @@ def run_mvp_cases(base, env, fixture, command, php_cli):
     require(status == 302 and 'registered=1' in headers.get('Location', '')
             and registration.observe(key)['logged_in'] is False,
             'Registration did not complete without auto-login')
+    english_site = command(php_cli + [HERE / 'mvp_setup.php', 'set-site-locale', 'en_US'],
+                           json_result=True)
+    require(english_site.get('locale') == 'en_US' and english_site.get('option') in ('', 'en_US'),
+            'Site-locale restore failed: ' + repr(english_site))
+    if restart_server:
+        restart_server()
     registration_mail = read_mailbox(mailbox_path)
     require(len(registration_mail) == initial_mail_count + 1,
             'Registration success did not create exactly one account notice')
     assert_account_notice(
-        registration_mail[-1], env['KKH_MVP_EMAIL'], 'Registration complete',
-        ['Your account registration is complete.', 'Sign in:', base],
+        registration_mail[-1], env['KKH_MVP_EMAIL'], '회원가입이 완료되었습니다',
+        ['회원가입이 완료되었습니다.', '로그인:', base],
         [env['KKH_USER_PASSWORD'], request_id, env['KKH_MVP_EMAIL'], 'user_id', 'role=']
     )
     probe = command(php_cli + [HERE / 'mvp_probe.php'], json_result=True)
@@ -687,6 +716,9 @@ def run_mvp_cases(base, env, fixture, command, php_cli):
                      json_result=True)
     require(replay == {'sent': False} and len(read_mailbox(mailbox_path)) == len(registration_mail),
             'Logical notification replay was not idempotent')
+    user_locale = command(php_cli + [HERE / 'mvp_probe.php', 'set-user-locale', 'ko_KR'],
+                          json_result=True)
+    require(user_locale.get('locale') == 'ko_KR', 'Korean user-locale setup failed')
     results['AUTH-REGISTER-001'] = {'status': 'PASS', 'users_created': 1,
                                     'required_consents': 2, 'auto_login': False,
                                     'core_registration_authority': True,
@@ -887,8 +919,8 @@ def run_mvp_cases(base, env, fixture, command, php_cli):
     require(len(password_mail) == password_mail_count + 1,
             'Password change did not create exactly one account notice')
     assert_account_notice(
-        password_mail[-1], env['KKH_MVP_EMAIL'], 'Password changed',
-        ['The password for your account was changed.', 'reset your password immediately:',
+        password_mail[-1], env['KKH_MVP_EMAIL'], '비밀번호가 변경되었습니다',
+        ['회원 계정의 비밀번호가 변경되었습니다.', '비밀번호를 재설정하세요:',
          '/wp-login.php?action=lostpassword'],
         [env['KKH_USER_PASSWORD'], env['KKH_NEW_PASSWORD'], env['KKH_RESET_PASSWORD'],
          env['KKH_MVP_EMAIL'], 'key=', 'user_id', 'auth_cookie']
@@ -920,9 +952,9 @@ def run_mvp_cases(base, env, fixture, command, php_cli):
     require(len(withdrawal_mail) == withdrawal_mail_count + 1,
             'Withdrawal request did not create exactly one account notice')
     assert_account_notice(
-        withdrawal_mail[-1], env['KKH_MVP_EMAIL'], 'Withdrawal request received',
-        ['We received your account withdrawal request.', 'Sign-in access has been blocked',
-         'site administrator and service owners'],
+        withdrawal_mail[-1], env['KKH_MVP_EMAIL'], '탈퇴 요청이 접수되었습니다',
+        ['탈퇴 요청을 접수했습니다.', '로그인이 차단됩니다',
+         '사이트 관리자와 각 서비스 소유자'],
         [env['KKH_NEW_PASSWORD'], withdrawal_fields['request_id'], env['KKH_MVP_EMAIL'],
          'all personal data has been deleted', 'orders were deleted', 'learning records were deleted']
     )
@@ -959,9 +991,9 @@ def run_mvp_cases(base, env, fixture, command, php_cli):
     require(len(finalized_mail) == len(withdrawal_mail) + 1,
             'Withdrawal finalization did not create exactly one account notice')
     assert_account_notice(
-        finalized_mail[-1], env['KKH_MVP_EMAIL'], 'Withdrawal processing complete',
-        ['has been processed', 'sign-in access remains blocked',
-         'account ID and related order or learning records may be retained'],
+        finalized_mail[-1], env['KKH_MVP_EMAIL'], '탈퇴 처리가 완료되었습니다',
+        ['탈퇴 요청 처리가 완료되었으며 로그인 차단 상태가 유지됩니다.',
+         'WordPress 계정 ID와 관련 주문 또는 학습 기록이 보존될 수 있습니다'],
         [env['KKH_NEW_PASSWORD'], env['KKH_MVP_EMAIL'], 'all personal data has been deleted',
          'orders were deleted', 'learning records were deleted']
     )
@@ -990,6 +1022,8 @@ def run_mvp_cases(base, env, fixture, command, php_cli):
         'credentials_and_tokens_absent': True, 'order_lms_details_absent': True,
         'minimal_audit_results': 'wp_mail_accepted',
         'members_off_no_hard_dependency': 'checked_after_account_cases',
+        'korean_site_fallback': True, 'korean_user_locale': True,
+        'catalog_rendered': True, 'catalog_msgids': 12,
     }
 
     # Repeated failures eventually return a standards-visible throttle response.
@@ -1370,7 +1404,14 @@ def execute(php, mysqld, one_prefix=False, skip_perf=False):
             server = start(php_cli + ['-S', '127.0.0.1:' + env['KKH_HTTP_PORT'], '-t', webroot,
                                       HERE / 'router.php'], 'php-mvp-' + str(index))
             wait_port(server, int(env['KKH_HTTP_PORT']))
-            mvp_results = run_mvp_cases(base, env, fixture, command, php_cli)
+            def restart_mvp_server():
+                nonlocal server
+                stop(server)
+                server = start(php_cli + ['-S', '127.0.0.1:' + env['KKH_HTTP_PORT'], '-t', webroot,
+                                          HERE / 'router.php'], 'php-mvp-restart-' + str(index))
+                wait_port(server, int(env['KKH_HTTP_PORT']))
+            mvp_results = run_mvp_cases(base, env, fixture, command, php_cli,
+                                        restart_server=restart_mvp_server)
             stop(server)
             print('Checking limiter with 100 calls across 8 independent PHP workers...', flush=True)
             with ThreadPoolExecutor(max_workers=8) as pool:

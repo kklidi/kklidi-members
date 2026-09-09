@@ -3,7 +3,7 @@
   "version": 1,
   "status": "SPECIFIED",
   "implementation_status": "IMPLEMENTED_AND_SYNTHETIC_VERIFIED",
-  "implementation_phase": "P0-2",
+  "implementation_phase": "P0-3",
   "verification": {
     "status": "PASS",
     "scope": "synthetic_wordpress",
@@ -59,7 +59,15 @@
   "localization": {
     "source_strings": "english_gettext",
     "korean_catalog": "languages/kklidi-members-ko_KR.po",
-    "recipient_locale": "wordpress_user_locale_with_site_fallback"
+    "compiled_catalog": "languages/kklidi-members-ko_KR.mo",
+    "recipient_locale": "wordpress_user_locale_with_site_fallback",
+    "verification": {
+      "status": "PASS",
+      "site_fallback": "ko_KR",
+      "user_locale": "ko_KR",
+      "catalog_msgids": 12,
+      "report": ".harness/reports/latest.json"
+    }
   },
   "boundaries": {
     "wordpress_core_auth_preserved": true,
