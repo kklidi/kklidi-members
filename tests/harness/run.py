@@ -847,6 +847,13 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
             'Members administrator page/capability unavailable: '
             + repr({'status': admin_status, 'has_action': 'name="kklidi_members_admin_action"' in admin_page,
                     'has_title': 'KKLIDI Members' in admin_page}))
+    overview_status, _, overview_page = admin.request('/wp-admin/users.php?page=kklidi-members&section=overview')
+    require(overview_status == 200
+            and 'Quick actions' in overview_page
+            and 'Member route links' in overview_page
+            and 'kklidi_members_login=1' in overview_page
+            and 'WordPress registration settings' in overview_page,
+            'Administrator overview quick actions or canonical route links missing')
     admin_nonce = hidden_input(admin_page, '_kklidi_members_admin_nonce')
     denied_get_status, _, denied_get_page = profile_browser.request(
         '/wp-admin/users.php?page=kklidi-members')
@@ -866,6 +873,7 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
     require(notification_status == 200
             and 'kklidi_members_notification_templates[events][registration_completed][subject]'
             in notification_page
+            and 'Leave a field empty to restore its translated default.' in notification_page
             and hidden_input(notification_page, 'option_page') == 'kklidi_members_notifications',
             'Notification Settings API screen is unavailable')
     settings_nonce = hidden_input(notification_page, '_wpnonce')
@@ -1144,6 +1152,8 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
             and 'value="restore_withdrawal"' in queue_page
             and 'value="finalize_withdrawal"' in queue_page,
             'Pending withdrawal was not visible in the administrator queue')
+    require('pending request' in queue_page.lower(),
+            'Pending withdrawal count was not visible in the administrator queue')
     restore_fields = {
         'kklidi_members_admin_action': 'restore_withdrawal',
         '_kklidi_members_admin_nonce': hidden_input(queue_page, '_kklidi_members_admin_nonce'),
@@ -1217,6 +1227,7 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
         + f'&audit_user_id={restore_user_id}&audit_date={audit_date}')
     require(audit_status == 200 and 'Withdrawal restored' in audit_page
             and 'Administrator restored access with a reason' in audit_page
+            and 'Clear filters' in audit_page
             and 'name="audit_event"' in audit_page and 'name="audit_result"' in audit_page
             and 'name="audit_date"' in audit_page and 'name="audit_user_id"' in audit_page,
             'Bounded administrator audit filters did not render the restored event')
