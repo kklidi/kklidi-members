@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.7.12 — 2026-09-09
+
+- Clarified the approved registration policy: account creation does not issue an automatic login, and the user signs in with the email or username accepted by WordPress Core.
+- Kept the Core login, account state, user-ID, consent, and notification behavior unchanged.
+
 ## 0.7.11 — 2026-09-09
 
 - Clarified that withdrawal blocks sign-in immediately and proceeds through administrator review before finalization; no WordPress user or service record is deleted.
