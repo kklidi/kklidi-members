@@ -886,10 +886,10 @@ msgstr ""
 msgid "Leave empty to use the translated default message for the recipient locale."
 msgstr ""
 
-msgid "Your account was created. Please sign in with your email or username to continue."
+msgid "Your account was created. Please sign in with the email address you registered."
 msgstr ""
 
-msgid "Create your account with WordPress Core authentication. After registration, sign in with your email or username; registration does not sign you in automatically."
+msgid "Create your account with WordPress Core authentication. After registration, sign in with the email address you registered; registration does not sign you in automatically."
 msgstr ""
 
 msgid "Enter your username or email. If an account matches, WordPress will send a password reset link."

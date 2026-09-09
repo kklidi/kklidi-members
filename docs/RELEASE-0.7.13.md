@@ -15,6 +15,6 @@ tokens remain outside this release.
 - Python contract guards: 30 passed.
 - PHP 8.3 syntax: 32 production PHP files passed.
 - Release package: built successfully with the Korean catalog check.
-- Fixed MAMP lifecycle `mamp-lifecycle-9cf51f53abcf` passed install,
-  `0.7.12→0.7.13` update, reinstall, deactivate/reactivate, protected user-ID
-  and domain fingerprints, and exact source restoration.
+- Fixed MAMP lifecycle evidence for the `0.7.12→0.7.13` update path is exported
+  in the credential-free sidecar `docs/evidence/0.7.13.json` after the final ZIP
+  is frozen.

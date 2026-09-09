@@ -787,11 +787,11 @@ msgstr "비워 두면 수신자 언어에 맞는 기본 번역 제목을 사용�
 msgid "Leave empty to use the translated default message for the recipient locale."
 msgstr "비워 두면 수신자 언어에 맞는 기본 번역 본문을 사용합니다."
 
-msgid "Your account was created. Please sign in with your email or username to continue."
-msgstr "계정이 생성되었습니다. 이메일 또는 사용자명으로 로그인해 계속하세요."
+msgid "Your account was created. Please sign in with the email address you registered."
+msgstr "계정이 생성되었습니다. 가입할 때 사용한 이메일 주소로 로그인하세요."
 
-msgid "Create your account with WordPress Core authentication. After registration, sign in with your email or username; registration does not sign you in automatically."
-msgstr "WordPress Core 인증으로 계정을 만드세요. 가입 후 이메일 또는 사용자명으로 로그인해야 하며 가입 직후 자동 로그인은 수행되지 않습니다."
+msgid "Create your account with WordPress Core authentication. After registration, sign in with the email address you registered; registration does not sign you in automatically."
+msgstr "WordPress Core 인증으로 계정을 만드세요. 가입 후 가입할 때 사용한 이메일 주소로 로그인해야 하며 가입 직후 자동 로그인은 수행되지 않습니다."
 
 msgid "Enter your username or email. If an account matches, WordPress will send a password reset link."
 msgstr "사용자명 또는 이메일을 입력하세요. 일치하는 계정이 있으면 WordPress가 비밀번호 재설정 링크를 보냅니다."
