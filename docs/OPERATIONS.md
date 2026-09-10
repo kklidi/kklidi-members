@@ -22,6 +22,8 @@ Action Scheduler와 익명 Woo session처럼 일반 HTTP 요청으로 변하는 
 
 로컬 CA는 운영 신뢰 증거가 아니다. 실제 인증서, CDN 또는 load balancer, 브라우저 신뢰 저장소는 실제 staging URL에서 `deployment_preflight.py`로 다시 확인한다. preflight는 기본 신뢰 저장소와 hostname 검증을 사용하는 별도 TLS handshake에서 TLS 1.2 이상과 인증서 유효기간도 기록한다.
 
+Members 인증 라우트의 캐시 경계는 특정 호스팅 사업자에 종속되지 않는다. 플러그인은 해당 라우트에서 WordPress `DONOTCACHE*` 상수와 표준 `Cache-Control`을 설정하고, LiteSpeed·reverse proxy·CDN이 이해할 수 있는 보조 비캐시 헤더를 함께 보낸다. LiteSpeed에서는 공식 `litespeed_control_set_nocache` action도 호출한다. Cloudways의 Apache/Nginx·Varnish·Breeze·Cloudflare 조합에서는 알 수 없는 헤더가 무시되고 표준 헤더와 호스트 캐시 예외 설정이 적용된다. 이미 저장된 공개 캐시 객체는 플러그인 코드가 삭제할 수 없으므로 각 환경에서 Members 경로와 `kklidi_members_*` query 변형을 캐시 제외 목록에 넣고 퍼지한 뒤 재검증한다.
+
 ## 2. 제한 저장소와 다중 노드
 
 로그인·가입·복구 제한 카운터는 WordPress object-cache adapter를 통하지 않고 공유 MySQL options table과 `GET_LOCK`을 사용한다. object cache 호출이 실패해도 카운터는 공유 DB에서 동작하고, DB 또는 advisory lock을 사용할 수 없으면 인증 mutation을 일시 거부한다. 일반 읽기 화면은 이 실패 정책의 대상이 아니다.

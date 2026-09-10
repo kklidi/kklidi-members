@@ -3,7 +3,7 @@ Contributors: kklidi
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.7.30
+Stable tag: 0.7.31
 
 Core-based member accounts with scoped UI, consent records and safe withdrawal handling.
 
@@ -28,6 +28,7 @@ See docs/RELEASE-0.7.25.md.
 See docs/RELEASE-0.7.26.md.
 See docs/RELEASE-0.7.29.md.
 See docs/RELEASE-0.7.30.md.
+See docs/RELEASE-0.7.31.md.
 
 0.7.17 adds administrator diagnostics, quick actions, route links, and clearer
 notification, withdrawal, and audit management while preserving the approved
@@ -45,6 +46,11 @@ docs/RELEASE-0.7.16.md.
 3. Review registration and consent policy before changing the closed defaults.
 
 == Changelog ==
+
+= 0.7.31 =
+
+* Add a platform-neutral non-cache boundary for Members-owned authentication routes.
+* Cover LiteSpeed, reverse proxy, CDN, Cloudflare, and Cloudways-style stacks without global cache hooks.
 
 = 0.7.30 =
 

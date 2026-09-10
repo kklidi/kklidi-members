@@ -535,7 +535,7 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('| D14 | **IMPLEMENTED FOR 0.7.21', product)
         self.assertIn('AUTH-ROUTE-MAP-001 / 0.7.21 extension (IMPLEMENTED)', harness)
         self.assertIn("'docs/ROUTE_MANAGEMENT.md'", builder)
-        self.assertIn("Version: 0.7.30", plugin)
+        self.assertIn("Version: 0.7.31", plugin)
         self.assertIn('RouteMap::install()', installer)
         self.assertIn('RouteMap::deactivate()', plugin)
         self.assertIn("public const OPTION_NAME = 'kklidi_members_route_map';", route_map)
@@ -1534,6 +1534,20 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn("Strict-Transport-Security", tls_proxy)
         self.assertIn("context.minimum_version = ssl.TLSVersion.TLSv1_2", tls_proxy)
 
+    def test_members_route_cache_boundary_is_platform_neutral_and_scoped(self):
+        repository = Path(__file__).resolve().parents[2]
+        cache_headers = (repository / 'includes/Core/CacheHeaders.php').read_text(encoding='utf-8')
+        plugin = (repository / 'includes/Core/Plugin.php').read_text(encoding='utf-8')
+        for marker in ('DONOTCACHEPAGE', 'DONOTCACHEOBJECT', 'DONOTMINIFY', 'DONOTCDN',
+                       'Surrogate-Control: no-store', 'CDN-Cache-Control: no-store',
+                       'Cloudflare-CDN-Cache-Control: no-store',
+                       'X-LiteSpeed-Cache-Control: no-cache',
+                       "litespeed_control_set_nocache"):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, cache_headers)
+        self.assertIn("CacheHeaders::mark_route();", plugin)
+        self.assertIn("add_action('litespeed_control_finalize'", cache_headers)
+
     def test_limiter_storage_bypasses_object_cache_and_fails_closed(self):
         repository = Path(__file__).resolve().parents[2]
         limiter = (repository / 'includes/Security/RateLimiter.php').read_text(encoding='utf-8')
@@ -1712,7 +1726,7 @@ class HarnessGuards(unittest.TestCase):
         ready = json.loads(json.dumps(example))
         ready['environment']['base_url'] = 'https://staging.kklidi.com'
         ready['versions'].update(
-            wordpress='7.1', php='8.3', members='0.7.30', woocommerce='11.1.0')
+            wordpress='7.1', php='8.3', members='0.7.31', woocommerce='11.1.0')
         ready['owners'] = {key: 'approved-' + key for key in ready['owners']}
         ready['backup'].update(
             artifact_sha256='a' * 64,

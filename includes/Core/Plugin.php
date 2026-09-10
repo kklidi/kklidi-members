@@ -68,6 +68,9 @@ final class Plugin {
 				continue;
 			}
 
+			require_once KKLIDI_MEMBERS_DIR . 'includes/Core/CacheHeaders.php';
+			CacheHeaders::mark_route();
+
 			require_once KKLIDI_MEMBERS_DIR . $handler[0];
 			call_user_func(array($handler[1], 'handle'));
 			return;

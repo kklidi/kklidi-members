@@ -42,8 +42,9 @@ PRODUCTION_FILES = [
     'includes/Consent/ConsentController.php',
     'includes/Consent/Documents.php',
     'includes/Consent/Repository.php',
-    'includes/Core/Installer.php',
-    'includes/Core/Plugin.php',
+	'includes/Core/Installer.php',
+	'includes/Core/Plugin.php',
+	'includes/Core/CacheHeaders.php',
 	'includes/Core/RouteMap.php',
     'includes/Core/Url.php',
     'includes/Frontend/AccountController.php',
@@ -277,7 +278,7 @@ def assert_identity(observed, expected, prefix, run_id, expected_plugins=None,
     expected_plugins = [] if expected_plugins is None else expected_plugins
     expected_kklidi_cookies = [] if expected_kklidi_cookies is None else expected_kklidi_cookies
     expected_files = ([] if not expected_plugins else [
-        'includes/Audit/Recorder.php', 'includes/Core/Plugin.php',
+		'includes/Audit/Recorder.php', 'includes/Core/Plugin.php',
 		'includes/Core/RouteMap.php',
         'includes/Security/AccountState.php', 'includes/Security/RateLimiter.php',
         'kklidi-members.php'])

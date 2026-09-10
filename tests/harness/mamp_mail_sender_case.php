@@ -33,7 +33,7 @@ require_once ABSPATH . 'wp-admin/includes/user.php';
 if (untrailingslashit(home_url('/')) !== 'http://localhost:8888/kklidi-members-mamp-sandbox') {
 	exit('Refusing a non-sandbox WordPress site.');
 }
-if (!defined('KKLIDI_MEMBERS_VERSION') || KKLIDI_MEMBERS_VERSION !== '0.7.30'
+if (!defined('KKLIDI_MEMBERS_VERSION') || KKLIDI_MEMBERS_VERSION !== '0.7.31'
 	|| !is_plugin_active('kklidi-members/kklidi-members.php')) {
 	exit('The expected Members candidate is not active.');
 }

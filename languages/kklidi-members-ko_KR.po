@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the KKLIDI Members plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: KKLIDI Members 0.7.30\n"
+"Project-Id-Version: KKLIDI Members 0.7.31\n"
 "Language: ko_KR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
