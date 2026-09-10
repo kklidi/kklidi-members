@@ -23,6 +23,13 @@
 - WordPress 생성 로그인·회원가입 링크 소유권은 Core fallback으로 유지된다. `wp-login.php` 직접 접근을 강제로 리디렉션하지 않는다.
 - LiteSpeed의 Members path/query/cookie 제외 설정과 0.7.31 route-scoped 비캐시 헤더가 함께 적용된 상태다.
 
+## P0-1 ~ P0-4 진행 결과
+
+- P0-1: HSTS는 아직 서버에 적용되지 않았다. 적용 가이드와 양수 `max-age` preflight는 준비됐다.
+- P0-2: manifest 검증은 `owners_assigned`, `backup_hash`, `backup_time`, `restore_tested`가 없어 `BLOCKED`다. 값을 추측해 채우지 않았다.
+- P0-3: 익명 라우트 9개 상태·폼·캐시 경계를 읽기 전용으로 확인했다. 로그인·가입·비밀번호 재설정·계정은 200, 보호된 프로필·비밀번호·동의·탈퇴·로그아웃은 302이며 모두 예상과 일치했다. 로그인된 관리자 화면에서도 계정·프로필·비밀번호·동의·탈퇴 화면이 정상 렌더링됐다.
+- P0-4: 관리자 가입 알림은 활성화되어 있고, 네 계정 알림 preset은 번역된 기본 문구를 사용하도록 비어 있다. 사용자 지정 발신자와 footer는 비활성화되어 있으며 전송 경계는 `wp_mail()` plain text다. 실제 mailbox 수신은 테스트 수신 주소와 실제 발송 확인이 필요해 아직 미완료다.
+
 ## 닫히지 않은 게이트
 
 - HTTPS 응답에 `Strict-Transport-Security`가 없다. HSTS는 plugin header가 아니라 서버 또는 CDN에서 전체 host와 subdomain 정책을 확인한 뒤 적용해야 한다.
