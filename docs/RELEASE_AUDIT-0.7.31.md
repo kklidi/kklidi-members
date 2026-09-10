@@ -29,6 +29,7 @@
 - P0-2: manifest 검증은 `owners_assigned`, `backup_hash`, `backup_time`, `restore_tested`가 없어 `BLOCKED`다. 값을 추측해 채우지 않았다.
 - P0-3: 익명 라우트 9개 상태·폼·캐시 경계를 읽기 전용으로 확인했다. 로그인·가입·비밀번호 재설정·계정은 200, 보호된 프로필·비밀번호·동의·탈퇴·로그아웃은 302이며 모두 예상과 일치했다. 로그인된 관리자 화면에서도 계정·프로필·비밀번호·동의·탈퇴 화면이 정상 렌더링됐다.
 - P0-4: 관리자 가입 알림은 활성화되어 있고, 네 계정 알림 preset은 번역된 기본 문구를 사용하도록 비어 있다. 사용자 지정 발신자와 footer는 비활성화되어 있으며 전송 경계는 `wp_mail()` plain text다. 실제 mailbox 수신은 테스트 수신 주소와 실제 발송 확인이 필요해 아직 미완료다.
+- P0-5: `kklidi.com`과 `studio01.kklidi.com`에는 현재 서버 IP와 MailChannels를 포함한 단일 SPF 레코드가 있고, 두 도메인의 `default` DKIM 공개키는 RSA 2048비트로 유효하다. 상위 DMARC는 `p=none`이라 하위 도메인에도 모니터링만 적용된다. 실제 발송의 DKIM 서명·SPF/DKIM alignment·DMARC pass는 수신 메일 원문 확인 전까지 미완료다.
 
 ## 닫히지 않은 게이트
 
