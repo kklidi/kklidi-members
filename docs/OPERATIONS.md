@@ -24,6 +24,8 @@ Action Scheduler와 익명 Woo session처럼 일반 HTTP 요청으로 변하는 
 
 HSTS는 응답 헤더가 존재하는 것만으로 통과시키지 않고 양수 `max-age`를 요구한다. Studio01 LiteSpeed의 최초 적용안은 `docs/deployment/studio01-hsts.htaccess`에 있으며 5분 정책부터 시작해 검증·관찰 뒤 7일, 1년으로 올린다. 모든 하위 도메인이 HTTPS-only임을 확인하기 전에는 `includeSubDomains`를 추가하지 않고, preload는 별도 영향 검토 없이 사용하지 않는다.
 
+운영자가 실제 설정을 적용할 때는 `docs/deployment/HSTS_CHECKLIST.md`를 따른다. Members는 `.htaccess`나 CDN 설정을 자동 편집하지 않으며, preflight 결과로 적용 여부만 확인한다.
+
 Members 인증 라우트의 캐시 경계는 특정 호스팅 사업자에 종속되지 않는다. 플러그인은 해당 라우트에서 WordPress `DONOTCACHE*` 상수와 표준 `Cache-Control`을 설정하고, LiteSpeed·reverse proxy·CDN이 이해할 수 있는 보조 비캐시 헤더를 함께 보낸다. LiteSpeed에서는 공식 `litespeed_control_set_nocache` action도 호출한다. Cloudways의 Apache/Nginx·Varnish·Breeze·Cloudflare 조합에서는 알 수 없는 헤더가 무시되고 표준 헤더와 호스트 캐시 예외 설정이 적용된다. 이미 저장된 공개 캐시 객체는 플러그인 코드가 삭제할 수 없으므로 각 환경에서 Members 경로와 `kklidi_members_*` query 변형을 캐시 제외 목록에 넣고 퍼지한 뒤 재검증한다.
 
 ## 2. 제한 저장소와 다중 노드
