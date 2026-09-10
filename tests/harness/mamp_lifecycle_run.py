@@ -16,7 +16,7 @@ ROOT = HERE.parents[1]
 SANDBOX = Path('C:/MAMP/htdocs/kklidi-members-mamp-sandbox')
 PLUGIN = SANDBOX / 'wp-content/plugins/kklidi-members'
 PHP = 'C:/MAMP/bin/php/php8.3.1/php.exe'
-PREVIOUS_VERSION = '0.7.22'
+PREVIOUS_VERSION = '0.7.23'
 CURRENT_VERSION = re.search(
     r'\* Version: (\d+\.\d+\.\d+)',
     (ROOT / 'kklidi-members.php').read_text(encoding='utf-8'),

@@ -143,6 +143,11 @@
 			<h2><?php esc_html_e('Registration fields', 'kklidi-members'); ?></h2>
 			<p><?php esc_html_e('Configure only the approved built-in profile fields shown during registration. Existing users and profile values are not changed.', 'kklidi-members'); ?></p>
 			<p class="description"><?php esc_html_e('Email, password, display name, and required consent stay required. Hidden fields are ignored even if they are added to a request manually.', 'kklidi-members'); ?></p>
+			<h3><?php esc_html_e('Always-required fields', 'kklidi-members'); ?></h3>
+			<p class="description"><?php esc_html_e('These account and consent fields are required for every registration and cannot be hidden.', 'kklidi-members'); ?></p>
+			<table class="widefat striped kklidi-members-admin-table"><thead><tr><th scope="col"><?php esc_html_e('Field', 'kklidi-members'); ?></th><th scope="col"><?php esc_html_e('Status', 'kklidi-members'); ?></th></tr></thead><tbody>
+			<?php foreach (\KKLIDI\Members\Registration\RegistrationFields::fixed_required_fields() as $field_label) : ?><tr><td data-label="<?php esc_attr_e('Field', 'kklidi-members'); ?>"><?php echo esc_html($field_label); ?></td><td data-label="<?php esc_attr_e('Status', 'kklidi-members'); ?>"><strong><?php esc_html_e('Required · fixed', 'kklidi-members'); ?></strong></td></tr><?php endforeach; ?>
+			</tbody></table>
 			<?php settings_errors(\KKLIDI\Members\Registration\RegistrationFields::OPTION_NAME); ?>
 			<form action="<?php echo esc_url(admin_url('options.php')); ?>" method="post">
 				<?php settings_fields(\KKLIDI\Members\Registration\RegistrationFields::OPTION_GROUP); ?>

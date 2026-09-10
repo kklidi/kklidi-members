@@ -12,6 +12,7 @@ final class RegistrationFields {
 	public const SETTINGS_PAGE = 'kklidi_members_registration_fields';
 	private const VERSION = 1;
 	private const FIELD_KEYS = array('first_name', 'last_name', 'phone');
+	private const FIXED_REQUIRED_FIELDS = array('email', 'password', 'password_confirm', 'display_name', 'consent_service', 'consent_privacy');
 	private const STATES = array('required', 'optional', 'hidden');
 
 	public static function defaults(): array {
@@ -33,6 +34,30 @@ final class RegistrationFields {
 	public static function state(string $field): string {
 		$settings = self::settings();
 		return isset($settings['fields'][$field]) ? $settings['fields'][$field] : 'hidden';
+	}
+
+	public static function fixed_required_fields(): array {
+		return array(
+			'email' => __('Email', 'kklidi-members'),
+			'password' => __('Password', 'kklidi-members'),
+			'password_confirm' => __('Confirm password', 'kklidi-members'),
+			'display_name' => __('Display name', 'kklidi-members'),
+			'consent_service' => __('Service terms consent', 'kklidi-members'),
+			'consent_privacy' => __('Privacy policy consent', 'kklidi-members'),
+		);
+	}
+
+	public static function is_required(string $field, array $states = array()): bool {
+		if (in_array($field, self::FIXED_REQUIRED_FIELDS, true)) {
+			return true;
+		}
+		return isset($states[$field]) && $states[$field] === 'required';
+	}
+
+	public static function render_required_marker(bool $required): void {
+		if ($required) {
+			echo '<span class="kklidi-members-required" aria-hidden="true">*</span>';
+		}
 	}
 
 	public static function register_settings(): void {

@@ -54,6 +54,7 @@ The runner has no option for an existing site URL, existing DB endpoint, existin
 | `route_management_contract.json` | `AUTH-ROUTE-MAP-001` page-free clean route activation, collision, and query-fallback boundary |
 | `ui_input_contract.json` | `AUTH-UX-005` inline password visibility, required markers, and concise frontend copy boundary |
 | `auth_layout_contract.json` | `AUTH-UX-006` centered short auth routes, hidden site brand eyebrow, and one-line login links |
+| `registration_ux_contract.json` | `AUTH-REGISTER-UX-007` unified required-field metadata, explicit markers, and locked admin policy display |
 | `ui_contract.json` | `AUTH-UI-001` screen/state/translation/accessibility/asset contract manifest |
 | `ux_strategy_contract.json` | `AUTH-UX-003` approved frontend/admin information architecture and implementation boundaries |
 | `mamp_woo_case.php` | CLI-only, fixed-sandbox Woo/WCI fixture with tagged user/product/orders, Members optional-dependency toggles, and exact cleanup |

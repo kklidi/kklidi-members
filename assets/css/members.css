@@ -107,10 +107,16 @@
 }
 
 .kklidi-members-field {
-	display: grid;
-	gap: 7px;
+	display: block;
 	font-size: var(--kklidi-members-font-control);
 	font-weight: 650;
+}
+
+.kklidi-members-field > input:not([type="checkbox"]),
+.kklidi-members-field > textarea,
+.kklidi-members-field > .kklidi-members-password-control {
+	display: block;
+	margin-top: 7px;
 }
 
 .kklidi-members-field input:not([type="checkbox"]),
@@ -186,6 +192,7 @@
 .kklidi-members-field-help,
 .kklidi-members-field-error {
 	display: block;
+	margin-top: 7px;
 	font-size: var(--kklidi-members-font-meta);
 }
 
@@ -195,14 +202,10 @@
 	margin-left: 3px;
 }
 
-/* Keep required status visible even when a template uses a wrapped label. */
-.kklidi-members-field > label:has(input[required])::after,
-.kklidi-members-field:has(> .kklidi-members-password-control input[required]) > label::after,
-.kklidi-members-check:has(input[required])::after {
-	color: var(--kklidi-members-danger);
-	content: ' *';
-	font-weight: 700;
-	margin-left: 3px;
+.kklidi-members-required-legend {
+	margin: 0;
+	color: var(--kklidi-members-muted);
+	font-size: var(--kklidi-members-font-meta);
 }
 
 .kklidi-members-field-help {

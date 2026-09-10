@@ -1,0 +1,28 @@
+{
+  "contract": "AUTH-REGISTER-UX-007",
+  "version": 1,
+  "status": "IMPLEMENTED_AND_UNIT_VERIFIED",
+  "target_release": "0.7.24",
+  "required_policy": {
+    "fixed": ["email", "password", "password_confirm", "display_name", "consent_service", "consent_privacy"],
+    "configurable": ["first_name", "last_name", "phone"],
+    "configurable_states": ["required", "optional", "hidden"]
+  },
+  "visual_indicator": {
+    "required_marker": "explicit_server_rendered_asterisk",
+    "aria_hidden": true,
+    "legend": true,
+    "optional_hint_preserved": true,
+    "css_structure_inference": false
+  },
+  "admin_settings": {
+    "fixed_fields_visible": true,
+    "fixed_fields_labeled": "Required · fixed",
+    "fixed_fields_editable": false
+  },
+  "verification": {
+    "status": "PASS",
+    "scope": "unit_and_static_ui_guards",
+    "test_runner": "tests/harness/test_runner.py"
+  }
+}

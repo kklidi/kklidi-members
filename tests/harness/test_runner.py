@@ -267,7 +267,7 @@ class HarnessGuards(unittest.TestCase):
                       frontend_css)
         self.assertIn('position: absolute;', frontend_css)
         self.assertIn('padding-right: 54px !important;', frontend_css)
-        self.assertIn(':has(input[required])', frontend_css)
+        self.assertIn('kklidi-members-required', frontend_css)
         self.assertIn('.kklidi-members-has-js .kklidi-members-password-toggle {',
                       frontend_css)
         self.assertIn('display: inline-flex;', frontend_css)
@@ -507,7 +507,7 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('| D14 | **IMPLEMENTED FOR 0.7.21', product)
         self.assertIn('AUTH-ROUTE-MAP-001 / 0.7.21 extension (IMPLEMENTED)', harness)
         self.assertIn("'docs/ROUTE_MANAGEMENT.md'", builder)
-        self.assertIn("Version: 0.7.23", plugin)
+        self.assertIn("Version: 0.7.24", plugin)
         self.assertIn('RouteMap::install()', installer)
         self.assertIn('RouteMap::deactivate()', plugin)
         self.assertIn("public const OPTION_NAME = 'kklidi_members_route_map';", route_map)
@@ -1220,7 +1220,7 @@ class HarnessGuards(unittest.TestCase):
         register = (repository / 'templates/register.php').read_text(encoding='utf-8')
         withdrawal = (repository / 'templates/withdrawal.php').read_text(encoding='utf-8')
         self.assertIn('position: absolute;', css)
-        self.assertIn(':has(input[required])', css)
+        self.assertIn('kklidi-members-required', css)
         self.assertIn('Enter your account details to continue.', login)
         self.assertIn('Create an account, then sign in with your email address.', register)
         self.assertIn('data-kklidi-members-password-toggle', withdrawal)
@@ -1253,6 +1253,39 @@ class HarnessGuards(unittest.TestCase):
         self.assertNotIn('kklidi-members-brand', login)
         self.assertNotIn('kklidi-members-brand', reset)
         self.assertNotIn('kklidi-members-page--login', register)
+
+    def test_auth_register_ux_007_required_policy_and_markers_share_one_source(self):
+        repository = Path(__file__).resolve().parents[2]
+        contract = json.loads(
+            (repository / 'tests/harness/registration_ux_contract.json').read_text(encoding='utf-8')
+        )
+        self.assertEqual(contract['contract'], 'AUTH-REGISTER-UX-007')
+        self.assertEqual(contract['target_release'], '0.7.24')
+        self.assertEqual(contract['status'], 'IMPLEMENTED_AND_UNIT_VERIFIED')
+        self.assertEqual(contract['required_policy']['fixed'], [
+            'email', 'password', 'password_confirm', 'display_name',
+            'consent_service', 'consent_privacy',
+        ])
+        self.assertEqual(contract['required_policy']['configurable'], ['first_name', 'last_name', 'phone'])
+        self.assertEqual(contract['visual_indicator']['required_marker'], 'explicit_server_rendered_asterisk')
+        self.assertFalse(contract['visual_indicator']['css_structure_inference'])
+        self.assertTrue(contract['admin_settings']['fixed_fields_visible'])
+        self.assertFalse(contract['admin_settings']['fixed_fields_editable'])
+        fields = (repository / 'includes/Registration/RegistrationFields.php').read_text(encoding='utf-8')
+        register = (repository / 'templates/register.php').read_text(encoding='utf-8')
+        admin = (repository / 'templates/admin.php').read_text(encoding='utf-8')
+        css = (repository / 'assets/css/members.css').read_text(encoding='utf-8')
+        self.assertIn('FIXED_REQUIRED_FIELDS', fields)
+        self.assertIn('public static function is_required', fields)
+        self.assertIn('public static function render_required_marker', fields)
+        self.assertIn('render_required_marker(true)', register)
+        self.assertIn("is_required('first_name', $field_states)", register)
+        self.assertIn("is_required('last_name', $field_states)", register)
+        self.assertIn("is_required('phone', $field_states)", register)
+        self.assertIn('Required field', register)
+        self.assertIn('fixed_required_fields()', admin)
+        self.assertIn('Required · fixed', admin)
+        self.assertNotIn(':has(input[required])', css)
 
     def test_auth_notify_001_catalog_covers_mail_presets(self):
         repository = Path(__file__).resolve().parents[2]
@@ -1355,7 +1388,7 @@ class HarnessGuards(unittest.TestCase):
 
         lifecycle = (repository / 'tests/harness/mamp_lifecycle_run.py').read_text(encoding='utf-8')
         self.assertIn("SANDBOX = Path('C:/MAMP/htdocs/kklidi-members-mamp-sandbox')", lifecycle)
-        self.assertIn("PREVIOUS_VERSION = '0.7.22'", lifecycle)
+        self.assertIn("PREVIOUS_VERSION = '0.7.23'", lifecycle)
         self.assertIn("ALLOWED_INITIAL_VERSIONS = ('0.7.0', PREVIOUS_VERSION, CURRENT_VERSION)", lifecycle)
         self.assertIn("CURRENT_VERSION = re.search(", lifecycle)
         self.assertIn("OLD_ARCHIVE = ROOT / ('dist/kklidi-members-' + PREVIOUS_VERSION + '.zip')", lifecycle)
@@ -1460,7 +1493,7 @@ class HarnessGuards(unittest.TestCase):
         ready = json.loads(json.dumps(example))
         ready['environment']['base_url'] = 'https://staging.kklidi.com'
         ready['versions'].update(
-            wordpress='7.1', php='8.3', members='0.7.23', woocommerce='11.1.0')
+            wordpress='7.1', php='8.3', members='0.7.24', woocommerce='11.1.0')
         ready['owners'] = {key: 'approved-' + key for key in ready['owners']}
         ready['backup'].update(
             artifact_sha256='a' * 64,

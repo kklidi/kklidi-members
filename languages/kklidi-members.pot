@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the KKLIDI Members plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: KKLIDI Members 0.7.23\n"
+"Project-Id-Version: KKLIDI Members 0.7.24\n"
 "Report-Msgid-Bugs-To: https://kklidi.com/\n"
 "POT-Creation-Date: 2026-09-07 00:00+0000\n"
 "MIME-Version: 1.0\n"
@@ -1205,4 +1205,25 @@ msgid "Find password"
 msgstr ""
 
 msgid "Home"
+msgstr ""
+
+msgid "Required field"
+msgstr ""
+
+msgid "Always-required fields"
+msgstr ""
+
+msgid "These account and consent fields are required for every registration and cannot be hidden."
+msgstr ""
+
+msgid "Field"
+msgstr ""
+
+msgid "Required · fixed"
+msgstr ""
+
+msgid "Service terms consent"
+msgstr ""
+
+msgid "Privacy policy consent"
 msgstr ""

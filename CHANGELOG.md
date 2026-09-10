@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.24 — 2026-09-10
+
+- Unify required-field metadata and visible asterisks across registration.
+- Show fixed required account and consent fields in administrator settings.
+- Keep first name, last name, and phone as the only configurable fields.
+
 ## 0.7.23 — 2026-09-10
 
 - Center the short login and password-reset routes in a compact card.
