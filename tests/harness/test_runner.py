@@ -254,12 +254,20 @@ class HarnessGuards(unittest.TestCase):
         self.assertNotIn('wp_enqueue_script(', admin_source)
         self.assertIn('data-kklidi-members-password-toggle',
                       (repository / 'templates/login.php').read_text(encoding='utf-8'))
+        self.assertIn('Enter your account details to continue.',
+                      (repository / 'templates/login.php').read_text(encoding='utf-8'))
         register_template = (repository / 'templates/register.php').read_text(encoding='utf-8')
         self.assertIn('<details', register_template)
         self.assertIn('data-kklidi-members-password-toggle', register_template)
+        self.assertNotIn('WordPress Core authentication', register_template)
         self.assertIn('aria-describedby', register_template)
+        self.assertIn('data-kklidi-members-password-toggle',
+                      (repository / 'templates/withdrawal.php').read_text(encoding='utf-8'))
         self.assertIn('.kklidi-members-password-toggle {\n\talign-items: center;\n\tdisplay: none;',
                       frontend_css)
+        self.assertIn('position: absolute;', frontend_css)
+        self.assertIn('padding-right: 54px !important;', frontend_css)
+        self.assertIn(':has(input[required])', frontend_css)
         self.assertIn('.kklidi-members-has-js .kklidi-members-password-toggle {',
                       frontend_css)
         self.assertIn('display: inline-flex;', frontend_css)
@@ -499,7 +507,7 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('| D14 | **IMPLEMENTED FOR 0.7.21', product)
         self.assertIn('AUTH-ROUTE-MAP-001 / 0.7.21 extension (IMPLEMENTED)', harness)
         self.assertIn("'docs/ROUTE_MANAGEMENT.md'", builder)
-        self.assertIn("Version: 0.7.21", plugin)
+        self.assertIn("Version: 0.7.22", plugin)
         self.assertIn('RouteMap::install()', installer)
         self.assertIn('RouteMap::deactivate()', plugin)
         self.assertIn("public const OPTION_NAME = 'kklidi_members_route_map';", route_map)
@@ -1185,13 +1193,37 @@ class HarnessGuards(unittest.TestCase):
         login_controller = (repository / 'includes/Auth/LoginController.php').read_text(encoding='utf-8')
         register_template = (repository / 'templates/register.php').read_text(encoding='utf-8')
         self.assertIn('Please sign in with the email address you registered.', login_controller)
-        self.assertIn('sign in with the email address you registered;', register_template)
-        self.assertIn('registration does not sign you in automatically.', register_template)
+        self.assertIn('Create an account, then sign in with your email address.', register_template)
         reset_template = (repository / 'templates/password-reset.php').read_text(encoding='utf-8')
-        self.assertIn('If an account matches, WordPress will send a password reset link.', reset_template)
+        self.assertIn('Enter your username or email to receive a reset link.', reset_template)
         self.assertIn("'includes/Notifications/NotificationTemplates.php'", package)
         self.assertIn("results['AUTH-NOTIFY-002']", package)
         self.assertIn("'extension_contracts_total': 6", package)
+
+    def test_auth_ux_005_input_controls_are_inline_required_and_concise(self):
+        repository = Path(__file__).resolve().parents[2]
+        contract = json.loads(
+            (repository / 'tests/harness/ui_input_contract.json').read_text(encoding='utf-8')
+        )
+        self.assertEqual(contract['contract'], 'AUTH-UX-005')
+        self.assertEqual(contract['target_release'], '0.7.22')
+        self.assertEqual(contract['status'], 'IMPLEMENTED_AND_UNIT_VERIFIED')
+        self.assertEqual(contract['password_visibility']['placement'], 'inside_input_end')
+        self.assertTrue(contract['password_visibility']['no_javascript_submission'])
+        self.assertFalse(contract['password_visibility']['auth_semantics_changed'])
+        self.assertEqual(contract['required_indicators']['visual_marker'], 'asterisk')
+        self.assertTrue(contract['required_indicators']['optional_hint_preserved'])
+        self.assertFalse(contract['copy']['internal_auth_implementation_explanations'])
+        self.assertTrue(contract['copy']['translated'])
+        css = (repository / 'assets/css/members.css').read_text(encoding='utf-8')
+        login = (repository / 'templates/login.php').read_text(encoding='utf-8')
+        register = (repository / 'templates/register.php').read_text(encoding='utf-8')
+        withdrawal = (repository / 'templates/withdrawal.php').read_text(encoding='utf-8')
+        self.assertIn('position: absolute;', css)
+        self.assertIn(':has(input[required])', css)
+        self.assertIn('Enter your account details to continue.', login)
+        self.assertIn('Create an account, then sign in with your email address.', register)
+        self.assertIn('data-kklidi-members-password-toggle', withdrawal)
 
     def test_auth_notify_001_catalog_covers_mail_presets(self):
         repository = Path(__file__).resolve().parents[2]
@@ -1294,7 +1326,7 @@ class HarnessGuards(unittest.TestCase):
 
         lifecycle = (repository / 'tests/harness/mamp_lifecycle_run.py').read_text(encoding='utf-8')
         self.assertIn("SANDBOX = Path('C:/MAMP/htdocs/kklidi-members-mamp-sandbox')", lifecycle)
-        self.assertIn("PREVIOUS_VERSION = '0.7.20'", lifecycle)
+        self.assertIn("PREVIOUS_VERSION = '0.7.21'", lifecycle)
         self.assertIn("ALLOWED_INITIAL_VERSIONS = ('0.7.0', PREVIOUS_VERSION, CURRENT_VERSION)", lifecycle)
         self.assertIn("CURRENT_VERSION = re.search(", lifecycle)
         self.assertIn("OLD_ARCHIVE = ROOT / ('dist/kklidi-members-' + PREVIOUS_VERSION + '.zip')", lifecycle)
@@ -1399,7 +1431,7 @@ class HarnessGuards(unittest.TestCase):
         ready = json.loads(json.dumps(example))
         ready['environment']['base_url'] = 'https://staging.kklidi.com'
         ready['versions'].update(
-            wordpress='7.1', php='8.3', members='0.7.21', woocommerce='11.1.0')
+            wordpress='7.1', php='8.3', members='0.7.22', woocommerce='11.1.0')
         ready['owners'] = {key: 'approved-' + key for key in ready['owners']}
         ready['backup'].update(
             artifact_sha256='a' * 64,

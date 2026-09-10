@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the KKLIDI Members plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: KKLIDI Members 0.7.21\n"
+"Project-Id-Version: KKLIDI Members 0.7.22\n"
 "Report-Msgid-Bugs-To: https://kklidi.com/\n"
 "POT-Creation-Date: 2026-09-07 00:00+0000\n"
 "MIME-Version: 1.0\n"
@@ -1184,4 +1184,13 @@ msgid "WordPress could not persist the member route rules."
 msgstr ""
 
 msgid "You do not have permission to manage member routes."
+msgstr ""
+
+msgid "Enter your account details to continue."
+msgstr ""
+
+msgid "Create an account, then sign in with your email address."
+msgstr ""
+
+msgid "Enter your username or email to receive a reset link."
 msgstr ""

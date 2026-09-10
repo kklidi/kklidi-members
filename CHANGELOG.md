@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.22 — 2026-09-10
+
+- Put password visibility icons inside password fields across account screens.
+- Add consistent required-field indicators while preserving server-side `required` validation.
+- Simplify frontend wording and remove internal authentication implementation language.
+
 ## 0.7.21 — 2026-09-10
 
 - Implemented `AUTH-ROUTE-MAP-001` with nine fixed, opt-in `/members/` clean routes that reuse the existing controllers and templates.

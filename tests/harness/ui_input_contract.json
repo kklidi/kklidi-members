@@ -1,0 +1,30 @@
+{
+  "contract": "AUTH-UX-005",
+  "version": 1,
+  "status": "IMPLEMENTED_AND_UNIT_VERIFIED",
+  "target_release": "0.7.22",
+  "scope": "existing_members_input_controls",
+  "password_visibility": {
+    "placement": "inside_input_end",
+    "routes": ["login", "register", "password", "password_reset", "withdrawal"],
+    "progressive_enhancement": true,
+    "no_javascript_submission": true,
+    "auth_semantics_changed": false
+  },
+  "required_indicators": {
+    "server_attribute": "required",
+    "visual_marker": "asterisk",
+    "configured_registration_fields": ["first_name", "last_name", "phone"],
+    "optional_hint_preserved": true
+  },
+  "copy": {
+    "user_action_first": true,
+    "internal_auth_implementation_explanations": false,
+    "translated": true
+  },
+  "verification": {
+    "status": "PASS",
+    "scope": "unit_and_static_ui_guards",
+    "test_runner": "tests/harness/test_runner.py"
+  }
+}

@@ -85,7 +85,7 @@
 - 0.7.17 가입 기본값은 email, password/confirmation, first name, display name, 서비스 약관과 개인정보 처리방침 동의가 필수이고 last name과 phone은 선택이다. `AUTH-REGISTER-FIELDS-001`은 0.7.18에도 이 기본값을 유지하면서 이름·성·전화만 필수/선택/숨김으로 설정하도록 지정한다. email·password·display name·필수 동의는 잠금이며 임의 custom field는 만들지 않는다. display name 중복은 허용하며 login identifier나 권한 판단에 사용하지 않는다.
 - validation 실패 시 email·이름·표시명·전화 같은 안전한 같은-request 입력만 복원하고 password, nonce, guest token은 항상 비운다. 오류 요약과 field 연결 오류를 함께 제공한다.
 - 약관은 현재 version을 표시하고 서버 렌더링 `<details>`와 전문 링크로 읽을 수 있게 한다. 동의 checkbox는 전문을 열지 않아도 키보드로 접근 가능해야 한다.
-- password 표시/숨김은 route 전용의 작은 progressive-enhancement script만 허용한다. JavaScript가 없어도 제출·검증·복구가 모두 가능해야 하며 별도 password score를 인증 규칙으로 만들지 않는다.
+- password 표시/숨김은 route 전용의 작은 progressive-enhancement script와 입력 필드 안쪽의 눈 아이콘으로 제공한다. JavaScript가 없어도 제출·검증·복구가 모두 가능해야 하며 별도 password score를 인증 규칙으로 만들지 않는다.
 - 가입 후 자동 로그인은 계속 하지 않는다. 로그인 화면의 완료 상태에서 다음 행동을 명확히 안내하고 password나 email을 URL에 넣지 않는다.
 - 비밀번호 분실·reset의 branded 화면은 WordPress Core key 발급·검증·변경 API만 감싼다. 자체 token, password store, auth cookie를 만들지 않는다.
 - WooCommerce와 LMS는 자신의 plugin이 등록하는 link-only navigation slot으로만 계정 홈에 진입점을 제공한다. Members가 주문·수강 데이터를 조회하거나 두 plugin의 존재를 필수로 만들지 않는다.
@@ -178,3 +178,7 @@ Members frontend의 본문은 16px, H1은 28~32px, H2는 20~22px, 도움말·오
 로그인·회원가입·계정 화면은 WordPress 페이지나 shortcode를 자동 생성하지 않고 Members route controller가 직접 렌더링한다. 관리자가 충돌 검사를 통과한 뒤에만 고정 `/members/` clean route를 켤 수 있으며 기존 query route는 항상 호환 fallback으로 남는다. URL helper와 화면 template은 두 형식에서 동일하다.
 
 메뉴는 관리자 화면에 표시된 대표 URL을 WordPress custom link로 수동 추가한다. Members는 기존 페이지·메뉴를 삭제하거나 고치지 않는다. clean route 기본값, 충돌 거부, Core login/register URL 소유권과 rollback의 상세 계약은 `ROUTE_MANAGEMENT.md`와 `tests/harness/route_management_contract.json`이 소유한다.
+
+## 16. AUTH-UX-005 · 0.7.22 입력 컨트롤 계약
+
+비밀번호 표시/숨김은 각 비밀번호 입력 필드의 오른쪽 안쪽에 눈 아이콘으로 제공한다. 아이콘은 route 전용 progressive enhancement이며 JavaScript가 꺼져도 입력·제출·서버 검증은 그대로 동작한다. `required`가 있는 입력은 라벨에 일관된 별표를 표시하고, 선택 입력은 기존 `Optional` 안내를 유지한다. 사용자 화면의 설명은 내부 인증 구현이나 저장 주체를 설명하지 않고 현재 행동과 다음 단계를 짧게 안내한다.
