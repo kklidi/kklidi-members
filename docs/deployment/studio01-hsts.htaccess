@@ -1,0 +1,13 @@
+# Studio01 HSTS rollout for LiteSpeed/Apache-compatible virtual hosts.
+# Add one stage at a time to the existing document-root .htaccess file.
+# Do not replace the existing WordPress or LiteSpeed blocks.
+
+# Stage 1: initial five-minute policy. Keep for at least one verification cycle.
+<IfModule mod_headers.c>
+Header always set Strict-Transport-Security "max-age=300"
+</IfModule>
+
+# Stage 2 after Stage 1 succeeds: replace 300 with 604800 and observe for 7 days.
+# Stage 3 after Stage 2 succeeds: replace 604800 with 31536000.
+# Do not add includeSubDomains until every subdomain is HTTPS-only.
+# Do not add preload without a separate irreversible-impact review.

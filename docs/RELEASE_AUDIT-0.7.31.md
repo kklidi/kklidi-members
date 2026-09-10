@@ -30,10 +30,11 @@
 - 서버는 `X-Powered-By: PHP/8.3.33`을 노출한다. Members 계약 위반은 아니지만 서버 hardening 항목으로 제거 여부를 결정할 수 있다.
 - 배포 manifest는 담당 역할, 백업 artifact SHA-256·생성 시각, 별도 restore 시험 증거가 없어 `BLOCKED`다. HSTS가 적용되기 전 deployment preflight도 `PARTIAL`이다.
 
+검사 뒤 `deployment_preflight.py`가 단순 헤더 존재 대신 양수 `max-age`를 요구하도록 보강했다. LiteSpeed/Apache 호환 단계적 적용안은 `docs/deployment/studio01-hsts.htaccess`에 기록했다. 실제 document-root 설정 반영은 호스팅 파일 또는 LiteSpeed WebAdmin 접근이 필요하다.
+
 ## 실행 증거
 
 - `.harness/reports/studio01-sol-security-0.7.31-run1.json`
 - `.harness/reports/studio01-sol-security-0.7.31-run2.json`
 - `.harness/reports/studio01-deployment-manifest.validation-0.7.31.json`
 - `python -m unittest test_runner.HarnessGuards.test_members_route_cache_boundary_is_platform_neutral_and_scoped`: PASS
-

@@ -13,9 +13,23 @@ from run import (Browser, HarnessError, LOCK, PACKAGE_FILES, archive_name, asser
                  assert_production_shape, hidden_input, owned_cleanup, verified_archive)
 from compile_catalog import read_po
 from validate_deployment_manifest import inspect as inspect_deployment_manifest
+from deployment_preflight import inspect_hsts
 
 
 class HarnessGuards(unittest.TestCase):
+    def test_deployment_preflight_requires_positive_hsts_max_age(self):
+        disabled = inspect_hsts('max-age=0; includeSubDomains')
+        malformed = inspect_hsts('includeSubDomains; max-age=invalid')
+        enabled = inspect_hsts('max-age=300')
+
+        self.assertFalse(disabled['enabled'])
+        self.assertTrue(disabled['include_subdomains'])
+        self.assertFalse(malformed['enabled'])
+        self.assertTrue(enabled['enabled'])
+        self.assertEqual(300, enabled['max_age'])
+        self.assertFalse(enabled['include_subdomains'])
+        self.assertFalse(enabled['preload'])
+
     def test_dependency_tampering_fails_before_execution(self):
         with tempfile.TemporaryDirectory(prefix='kkh-cache-test-') as directory:
             cache = Path(directory)

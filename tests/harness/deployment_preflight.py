@@ -12,6 +12,27 @@ import urllib.request
 ROOT = Path(__file__).resolve().parents[2]
 
 
+def inspect_hsts(value):
+    directives = {}
+    for part in value.split(';') if isinstance(value, str) else ():
+        name, separator, raw_value = part.strip().partition('=')
+        if not name:
+            continue
+        directives[name.lower()] = raw_value.strip() if separator else True
+    max_age_value = directives.get('max-age', '')
+    try:
+        max_age = int(max_age_value)
+    except (TypeError, ValueError):
+        max_age = 0
+    return {
+        'header': value if isinstance(value, str) else '',
+        'max_age': max_age,
+        'enabled': max_age > 0,
+        'include_subdomains': 'includesubdomains' in directives,
+        'preload': 'preload' in directives,
+    }
+
+
 def inspect_tls(hostname, port, context):
     with socket.create_connection((hostname, port), timeout=30) as connection:
         with context.wrap_socket(connection, server_hostname=hostname) as secured:
@@ -46,6 +67,7 @@ def inspect(url, ca_file=None):
         relevant = [cookie for cookie in jar
                     if cookie.name in ('kklidi_members_guest', '__Host-kklidi_members_guest')]
         guest = relevant[0] if len(relevant) == 1 else None
+        hsts = inspect_hsts(headers.get('Strict-Transport-Security', ''))
         checks = {
             'https_final_url': urllib.parse.urlsplit(response.url).scheme == 'https',
             'tls_1_2_or_newer': tls['version'] in ('TLSv1.2', 'TLSv1.3'),
@@ -54,7 +76,7 @@ def inspect(url, ca_file=None):
             'login_form': 'name="kklidi_members_identifier"' in body,
             'no_store': 'no-store' in headers.get('Cache-Control', '').lower(),
             'private_cache': 'private' in headers.get('Cache-Control', '').lower(),
-            'hsts': bool(headers.get('Strict-Transport-Security')),
+            'hsts': hsts['enabled'],
             'guest_cookie_present': guest is not None,
             'guest_cookie_host_prefix': guest is not None
                 and guest.name == '__Host-kklidi_members_guest',
@@ -67,7 +89,8 @@ def inspect(url, ca_file=None):
             'php_session_absent': not any(cookie.name == 'PHPSESSID' for cookie in jar),
         }
         return {'status': 'PASS' if all(checks.values()) else 'PARTIAL', 'checks': checks,
-                'tls': tls, 'network_request_sent': True, 'host': parsed.hostname}
+                'tls': tls, 'hsts_policy': hsts,
+                'network_request_sent': True, 'host': parsed.hostname}
 
 def main():
     parser = argparse.ArgumentParser()
