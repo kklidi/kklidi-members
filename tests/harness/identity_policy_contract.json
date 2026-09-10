@@ -1,0 +1,97 @@
+{
+  "contract": "AUTH-IDENTITY-002",
+  "version": 1,
+  "status": "IMPLEMENTED_AND_SYNTHETIC_VERIFIED",
+  "target_release": "0.7.28",
+  "depends_on": [
+    "AUTH-LOGIN-001",
+    "AUTH-REGISTER-001",
+    "AUTH-REGISTER-002",
+    "AUTH-RESET-001",
+    "AUTH-REGISTER-FIELDS-001"
+  ],
+  "verification": {
+    "status": "PASS",
+    "scope": "synthetic_wordpress",
+    "prefixes": [
+      "wp_",
+      "non_default"
+    ],
+    "evidence_id": "c32099f406cb48b2ae6074bc38a0d997",
+    "report": ".harness/reports/latest.json"
+  },
+  "principle": "email_first_new_accounts_legacy_username_compatible",
+  "registration": {
+    "primary_identifier_input": "email",
+    "username_field": false,
+    "wordpress_user_login": "opaque_private_generated_candidate",
+    "wordpress_user_login_user_visible": false,
+    "wordpress_user_login_mutable": false,
+    "wordpress_user_nicename": "independent_unique_public_slug",
+    "user_nicename_equals_user_login": false,
+    "display_name": "public_non_unique_nickname",
+    "display_name_login_identifier": false,
+    "automatic_login": false
+  },
+  "login": {
+    "primary_ui_label": "email",
+    "legacy_helper_required": true,
+    "accepted_identifiers": [
+      "email",
+      "legacy_username"
+    ],
+    "core_api": "wp_signon",
+    "generic_public_error": true,
+    "rate_limit_preserved": true,
+    "authenticate_hooks_preserved": true
+  },
+  "password_reset": {
+    "primary_ui_label": "email",
+    "legacy_helper_required": true,
+    "accepted_identifiers": [
+      "email",
+      "legacy_username"
+    ],
+    "core_api": "retrieve_password_and_core_reset_key",
+    "generic_public_response": true
+  },
+  "migration": {
+    "existing_wordpress_user_ids_changed": false,
+    "existing_user_login_changed": false,
+    "existing_accounts_merged": false,
+    "replacement_accounts_created": false,
+    "email_change_syncs_user_login": false
+  },
+  "security": {
+    "custom_password_store": false,
+    "custom_auth_cookie": false,
+    "php_session_auth": false,
+    "client_user_login_accepted_on_registration": false,
+    "client_role_or_user_id_accepted": false,
+    "identifier_plaintext_audit": false,
+    "identity_enumeration_response": "generic"
+  },
+  "current_runtime_gap": [],
+  "implementation_acceptance": [
+    "new_account_email_login",
+    "legacy_username_login",
+    "legacy_email_login",
+    "new_registration_has_no_username_field",
+    "new_user_nicename_does_not_expose_user_login",
+    "display_name_never_authenticates",
+    "user_id_and_user_login_unchanged",
+    "generic_failure_and_rate_limit_regression",
+    "members_deactivation_core_login_no_fatal"
+  ],
+  "out_of_scope": [
+    "new_username_choice",
+    "username_change",
+    "email_change",
+    "email_verification",
+    "automatic_login",
+    "two_factor_authentication",
+    "social_login",
+    "account_merge",
+    "user_login_migration"
+  ]
+}

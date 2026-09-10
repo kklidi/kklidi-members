@@ -34,6 +34,13 @@ final class Installer {
 			'',
 			false
 		);
+		require_once KKLIDI_MEMBERS_DIR . 'includes/Notifications/MailSenderSettings.php';
+		add_option(
+			\KKLIDI\Members\Notifications\MailSenderSettings::OPTION_NAME,
+			\KKLIDI\Members\Notifications\MailSenderSettings::defaults(),
+			'',
+			false
+		);
 		require_once KKLIDI_MEMBERS_DIR . 'includes/Registration/RegistrationFields.php';
 		add_option(
 			\KKLIDI\Members\Registration\RegistrationFields::OPTION_NAME,

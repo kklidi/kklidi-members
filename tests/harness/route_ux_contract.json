@@ -1,0 +1,15 @@
+{
+  "contract": "AUTH-UX-009",
+  "version": 1,
+  "status": "IMPLEMENTED_AND_UNIT_VERIFIED",
+  "target_release": "0.7.27",
+  "route_templates": ["login", "register", "account", "profile", "password", "password-reset", "consent", "withdrawal", "logout"],
+  "site_brand_eyebrow": false,
+  "shared_account_link_row": true,
+  "display_name": {
+    "label": "Display name (nickname)",
+    "login_identifier": false,
+    "public_name": true
+  },
+  "vertical_alignment": "center_when_content_fits_top_safe_margin_when_overflowing"
+}

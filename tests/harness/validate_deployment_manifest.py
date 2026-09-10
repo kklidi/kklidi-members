@@ -80,8 +80,13 @@ def inspect(manifest):
             and rollback.get('members_enabled') in ('restore_previous_release', 'keep_current_release')
             and rollback.get('registration_mutations_blocked_if_policy_guard_absent') is True,
         'observation_window': int(observation.get('minimum_days', 0) or 0) >= 14
-            and observation.get('actual_order_required') is True
-            and observation.get('actual_recovery_required') is True,
+            and observation.get('actual_recovery_required') is True
+            and (
+                (versions.get('woocommerce') == '11.1.0'
+                 and observation.get('actual_order_required') is True)
+                or (versions.get('woocommerce') == 'disabled'
+                    and observation.get('actual_order_required') is False)
+            ),
         'conservative_policies': decisions == {
             'marketing_collection': 'disabled_until_purpose_and_withdrawal_are_approved',
             'display_name_uniqueness': 'duplicates_allowed',

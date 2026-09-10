@@ -20,7 +20,7 @@ lifecycle domain 지문은 WordPress posts/comments와 Woo/LMS/KBoard 소유 테
 Action Scheduler와 익명 Woo session처럼 일반 HTTP 요청으로 변하는 기반 테이블은 Members
 소유권 판정에서 제외하며, 선택된 보호 테이블의 비식별 CHECKSUM만 비교한다.
 
-로컬 CA는 운영 신뢰 증거가 아니다. 실제 인증서, CDN 또는 load balancer, 브라우저 신뢰 저장소는 실제 staging URL에서 `deployment_preflight.py`로 다시 확인한다.
+로컬 CA는 운영 신뢰 증거가 아니다. 실제 인증서, CDN 또는 load balancer, 브라우저 신뢰 저장소는 실제 staging URL에서 `deployment_preflight.py`로 다시 확인한다. preflight는 기본 신뢰 저장소와 hostname 검증을 사용하는 별도 TLS handshake에서 TLS 1.2 이상과 인증서 유효기간도 기록한다.
 
 ## 2. 제한 저장소와 다중 노드
 
@@ -39,7 +39,7 @@ Action Scheduler와 익명 Woo session처럼 일반 HTTP 요청으로 변하는 
 - 백업 artifact SHA-256, 생성 시각, 별도 restore 시험 증거
 - D06 route owner 매핑
 - 이전 플러그인 버전 복구 방법과 가입·민감 mutation 차단 방법
-- 최소 14일 관찰 및 실제 주문·계정 복구 각 1회 확인 조건
+- 최소 14일 관찰 및 계정 복구 1회 확인 조건. WooCommerce 11.1.0이 활성인 환경은 실제 주문 1회도 확인하며, `disabled` 환경은 주문 관찰을 요구하지 않는다.
 
 ```powershell
 python tests/harness/validate_deployment_manifest.py --manifest path/to/deployment-manifest.json
@@ -47,7 +47,7 @@ python tests/harness/validate_deployment_manifest.py --manifest path/to/deployme
 
 검사 결과가 `READY`이고 실제 HTTPS preflight가 PASS일 때만 production acceptance를 완료한다.
 manifest validator는 현재 Members 버전과 D07의 WordPress 7.1/PHP 8.3 조합을 요구하며,
-WooCommerce는 검증한 11.1.0 또는 명시적 `disabled`만 허용한다.
+WooCommerce는 검증한 11.1.0 또는 명시적 `disabled`만 허용한다. 주문 관찰 조건은 이 버전 상태와 일치해야 한다.
 
 릴리스 evidence JSON과 ZIP manifest는 설치 ZIP 밖의 sidecar로 보관한다. lifecycle
 보고서가 최종 ZIP의 SHA-256을 기록하므로 evidence를 ZIP 안에 넣어 다시 빌드하는

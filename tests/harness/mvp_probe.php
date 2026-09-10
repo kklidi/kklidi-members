@@ -209,6 +209,31 @@ if ($action === 'notification-settings-summary') {
     ));
 	exit;
 }
+if ($action === 'mail-sender-summary') {
+	require_once KKLIDI_MEMBERS_DIR . 'includes/Notifications/MailSenderSettings.php';
+	$option_name = \KKLIDI\Members\Notifications\MailSenderSettings::OPTION_NAME;
+	$stored = get_option($option_name, array());
+	$autoload = $wpdb->get_var($wpdb->prepare(
+		"SELECT autoload FROM {$wpdb->options} WHERE option_name = %s",
+		$option_name
+	));
+	$audit_table = $wpdb->prefix . 'kklidi_mem_login_audit';
+	echo wp_json_encode(array(
+		'autoload' => $autoload,
+		'stored' => $stored,
+		'effective' => \KKLIDI\Members\Notifications\MailSenderSettings::settings(),
+		'settings_audit_count' => (int) $wpdb->get_var($wpdb->prepare(
+			"SELECT COUNT(*) FROM {$audit_table} WHERE event_type = %s",
+			'mail_sender_settings_update'
+		)),
+		'test_audit' => $wpdb->get_results($wpdb->prepare(
+			"SELECT result, reason_code FROM {$audit_table}
+			 WHERE event_type = %s ORDER BY id",
+			'mail_sender_test'
+		), ARRAY_A),
+	));
+	exit;
+}
 if ($action === 'registration-fields-summary') {
 	require_once KKLIDI_MEMBERS_DIR . 'includes/Registration/RegistrationFields.php';
 	$option_name = \KKLIDI\Members\Registration\RegistrationFields::OPTION_NAME;
@@ -424,7 +449,10 @@ $summary = array(
     'audit_rows' => count($audit_rows),
     'audit_events' => array_values(array_map(static fn($row) => $row['event_type'], $audit_rows)),
     'mail_audit' => array_values(array_filter($audit_rows, static function ($row) {
-        return str_starts_with($row['event_type'], 'mail_');
+        return in_array($row['event_type'], array(
+            'mail_registration_completed', 'mail_password_changed',
+            'mail_withdrawal_requested', 'mail_withdrawal_finalized',
+        ), true);
     })),
     'audit_contains_raw_email' => $email !== '' && stripos($serialized_audit, $email) !== false,
     'audit_contains_raw_ip' => stripos($serialized_audit, '127.0.0.1') !== false,
@@ -434,6 +462,8 @@ if ($user) {
     $summary['user'] = array(
         'id' => (int) $user->ID,
         'login_is_private' => str_starts_with($user->user_login, 'member_'),
+        'nicename_is_separate' => (string) $user->user_nicename !== (string) $user->user_login,
+        'nicename_is_public_slug' => str_starts_with($user->user_nicename, 'member-profile-'),
         'email_matches' => strtolower($user->user_email) === strtolower($email),
         'roles' => array_values($user->roles),
         'state' => (string) get_user_meta($user->ID, '_kklidi_members_account_state', true),

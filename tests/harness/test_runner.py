@@ -240,6 +240,10 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('is_password_enhancement_route', plugin_source)
         self.assertIn('members-auth.js', plugin_source)
         self.assertIn("if (self::is_password_enhancement_route())", plugin_source)
+        self.assertRegex(
+            plugin_source,
+            r"(?s)is_password_enhancement_route\(\).*?kklidi_members_withdrawal",
+        )
         self.assertIn('cleanRoutePreflight',
                       (repository / 'includes/Core/Url.php').read_text(encoding='utf-8'))
 
@@ -301,6 +305,28 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('line-height: 1.7', css)
         self.assertNotIn('font-size: clamp(1.75rem, 5vw, 2.35rem)', css)
         self.assertNotIn('url(http', css.lower())
+
+    def test_auth_ux_009_route_shell_links_and_display_name_are_consistent(self):
+        repository = Path(__file__).resolve().parents[2]
+        contract = json.loads((repository / 'tests/harness/route_ux_contract.json').read_text(encoding='utf-8'))
+        self.assertEqual(contract['contract'], 'AUTH-UX-009')
+        self.assertEqual(contract['target_release'], '0.7.27')
+        self.assertFalse(contract['site_brand_eyebrow'])
+        self.assertTrue(contract['shared_account_link_row'])
+        self.assertFalse(contract['display_name']['login_identifier'])
+        self.assertTrue(contract['display_name']['public_name'])
+        self.assertIn('min-height: 100vh;', (repository / 'assets/css/members.css').read_text(encoding='utf-8'))
+        self.assertIn('margin: auto;', (repository / 'assets/css/members.css').read_text(encoding='utf-8'))
+        partial = (repository / 'templates/partials/route-links.php').read_text(encoding='utf-8')
+        self.assertIn('kklidi-members-form-links--inline', partial)
+        for name in contract['route_templates']:
+            source = (repository / 'templates' / f'{name}.php').read_text(encoding='utf-8')
+            self.assertNotIn('kklidi-members-eyebrow', source)
+            self.assertIn('templates/partials/route-links.php', source)
+        for name in ('register', 'profile'):
+            source = (repository / 'templates' / f'{name}.php').read_text(encoding='utf-8')
+            self.assertIn('Display name (nickname)', source)
+            self.assertIn('not used as a login ID', source)
 
     def test_auth_ux_003_076_core_reset_and_link_slots_are_bounded(self):
         repository = Path(__file__).resolve().parents[2]
@@ -384,8 +410,10 @@ class HarnessGuards(unittest.TestCase):
         admin_source = (repository / 'includes/Admin/AdminController.php').read_text(encoding='utf-8')
         admin_template = (repository / 'templates/admin.php').read_text(encoding='utf-8')
         admin_css = (repository / 'assets/css/admin.css').read_text(encoding='utf-8')
-        for marker in ('$quick_links', '$route_urls', 'WordPress registration settings', 'Member route links'):
+        for marker in ('$quick_links', '$route_urls', '$wordpress_urls', 'WordPress registration settings', 'Members manual menu links', 'Current generated link', 'Core fallback'):
             self.assertIn(marker, admin_source + admin_template)
+        self.assertIn('wp_login_url()', admin_source)
+        self.assertIn('wp_registration_url()', admin_source)
         for marker in ('kklidi-members-quick-links', 'kklidi-members-quick-link', 'kklidi-members-queue-count'):
             self.assertIn(marker, admin_css + admin_template)
         self.assertIn('get_edit_user_link(', admin_template)
@@ -507,7 +535,7 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('| D14 | **IMPLEMENTED FOR 0.7.21', product)
         self.assertIn('AUTH-ROUTE-MAP-001 / 0.7.21 extension (IMPLEMENTED)', harness)
         self.assertIn("'docs/ROUTE_MANAGEMENT.md'", builder)
-        self.assertIn("Version: 0.7.25", plugin)
+        self.assertIn("Version: 0.7.30", plugin)
         self.assertIn('RouteMap::install()', installer)
         self.assertIn('RouteMap::deactivate()', plugin)
         self.assertIn("public const OPTION_NAME = 'kklidi_members_route_map';", route_map)
@@ -767,7 +795,7 @@ class HarnessGuards(unittest.TestCase):
         for secret in ('password', 'key', 'user_id', 'email'):
             self.assertNotIn("add_query_arg('" + secret + "'", password)
         self.assertIn("results['AUTH-MESSAGE-UX-001']", runtime_harness)
-        self.assertIn("'extension_contracts_total': 6", runtime_harness)
+        self.assertIn("'extension_contracts_total': 8", runtime_harness)
 
     def test_auth_admin_notify_001_design_is_default_off_and_core_owned(self):
         repository = Path(__file__).resolve().parents[2]
@@ -842,7 +870,7 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('AdminNotificationSettings::OPTION_GROUP', template)
         self.assertIn("AdminNotificationSettings::defaults()", installer)
         self.assertIn("results['AUTH-ADMIN-NOTIFY-001']", runtime_harness)
-        self.assertIn("'extension_contracts_total': 6", runtime_harness)
+        self.assertIn("'extension_contracts_total': 8", runtime_harness)
 
     def test_auth_ux_003_078_withdrawal_and_audit_operations_are_bounded(self):
         repository = Path(__file__).resolve().parents[2]
@@ -1195,10 +1223,10 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('Please sign in with the email address you registered.', login_controller)
         self.assertIn('Create an account, then sign in with your email address.', register_template)
         reset_template = (repository / 'templates/password-reset.php').read_text(encoding='utf-8')
-        self.assertIn('Enter your username or email to receive a reset link.', reset_template)
+        self.assertIn('Enter your email to receive a reset link.', reset_template)
         self.assertIn("'includes/Notifications/NotificationTemplates.php'", package)
         self.assertIn("results['AUTH-NOTIFY-002']", package)
-        self.assertIn("'extension_contracts_total': 6", package)
+        self.assertIn("'extension_contracts_total': 8", package)
 
     def test_auth_ux_005_input_controls_are_inline_required_and_concise(self):
         repository = Path(__file__).resolve().parents[2]
@@ -1243,13 +1271,15 @@ class HarnessGuards(unittest.TestCase):
         login = (repository / 'templates/login.php').read_text(encoding='utf-8')
         reset = (repository / 'templates/password-reset.php').read_text(encoding='utf-8')
         register = (repository / 'templates/register.php').read_text(encoding='utf-8')
-        self.assertIn('.kklidi-members-page--login .kklidi-members-main', css)
+        self.assertIn('.kklidi-members-main', css)
         self.assertIn('min-height: 100vh;', css)
         self.assertIn('max-width: 480px;', css)
-        self.assertIn('kklidi-members-form-links--inline', login)
-        self.assertIn("esc_html_e('Sign up', 'kklidi-members')", login)
-        self.assertIn("esc_html_e('Find password', 'kklidi-members')", login)
-        self.assertIn("esc_html_e('Home', 'kklidi-members')", login)
+        links_partial = (repository / 'templates/partials/route-links.php').read_text(encoding='utf-8')
+        self.assertIn("templates/partials/route-links.php", login)
+        self.assertIn("__('Sign up', 'kklidi-members')", login)
+        self.assertIn("__('Find password', 'kklidi-members')", login)
+        self.assertIn("__('Home', 'kklidi-members')", login)
+        self.assertIn('kklidi-members-form-links--inline', links_partial)
         self.assertNotIn('kklidi-members-brand', login)
         self.assertNotIn('kklidi-members-brand', reset)
         self.assertNotIn('kklidi-members-page--login', register)
@@ -1294,7 +1324,7 @@ class HarnessGuards(unittest.TestCase):
         )
         self.assertEqual(contract['contract'], 'AUTH-WITHDRAW-UX-008')
         self.assertEqual(contract['target_release'], '0.7.25')
-        self.assertEqual(contract['status'], 'IMPLEMENTED_AND_UNIT_VERIFIED')
+        self.assertEqual(contract['status'], 'IMPLEMENTED_AND_BROWSER_VERIFIED')
         self.assertEqual(contract['password_reauthentication']['server_check'], 'wp_check_password')
         self.assertTrue(contract['password_reauthentication']['field_error'])
         self.assertTrue(contract['password_reauthentication']['field_aria_invalid'])
@@ -1310,6 +1340,8 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('wp_check_password($password, $user->user_pass, $user->ID)', controller)
         self.assertIn("field_errors['current_password']", controller)
         self.assertIn('data-kklidi-members-password-toggle', template)
+        self.assertIn('kklidi_members_withdrawal',
+                      (repository / 'includes/Core/Plugin.php').read_text(encoding='utf-8'))
         self.assertIn('aria-invalid="true" aria-describedby="kklidi-members-withdrawal-password-error"', template)
         self.assertIn('Deletion-eligible data is processed according to the applicable retention period', template)
         self.assertIn('deletion-eligible data is handled according to the applicable retention period', login)
@@ -1457,7 +1489,7 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn("delete_option('kklidi_members_registration_enabled');", admin)
         self.assertIn("delete_option('kklidi_members_registration_enabled');", installer)
         self.assertNotIn('name="registration_enabled"', template)
-        self.assertIn('Public registration remains controlled by the WordPress General Settings screen.', template)
+        self.assertIn('Public registration remains controlled by WordPress General Settings.', template)
         self.assertIn("$mode === 'core-on-no-documents'", setup)
         self.assertIn("$mode === 'documents-ready-core-off'", setup)
         self.assertIn("$mode === 'core-on'", setup)
@@ -1485,6 +1517,9 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn("'network_request_sent': False", preflight)
         self.assertIn("'__Host-kklidi_members_guest'", preflight)
         self.assertIn("'guest_cookie_host_only'", preflight)
+        self.assertIn("'tls_1_2_or_newer'", preflight)
+        self.assertIn("'certificate_trusted_hostname'", preflight)
+        self.assertIn("'certificate_not_expired'", preflight)
         self.assertNotIn('password', preflight.split('def inspect', 1)[0])
 
         https_runner = (repository / 'tests/harness/mamp_https_run.py').read_text(encoding='utf-8')
@@ -1512,6 +1547,162 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn("'storage_failure_denied'", fixture)
         self.assertIn("'cache_adapter_unavailable_allowed'", fixture)
 
+    def test_auth_identity_002_contract_preserves_core_and_legacy_identity(self):
+        repository = Path(__file__).resolve().parents[2]
+        contract = json.loads(
+            (repository / 'tests/harness/identity_policy_contract.json').read_text(
+                encoding='utf-8'
+            )
+        )
+        self.assertEqual(contract['contract'], 'AUTH-IDENTITY-002')
+        self.assertEqual(contract['version'], 1)
+        self.assertEqual(contract['status'], 'IMPLEMENTED_AND_SYNTHETIC_VERIFIED')
+        self.assertEqual(contract['target_release'], '0.7.28')
+        self.assertEqual(contract['principle'],
+                         'email_first_new_accounts_legacy_username_compatible')
+        self.assertEqual(contract['verification']['status'], 'PASS')
+        self.assertEqual(contract['verification']['scope'], 'synthetic_wordpress')
+        self.assertEqual(contract['verification']['prefixes'], ['wp_', 'non_default'])
+        self.assertEqual(contract['verification']['evidence_id'],
+                         'c32099f406cb48b2ae6074bc38a0d997')
+
+        registration = contract['registration']
+        self.assertEqual(registration['primary_identifier_input'], 'email')
+        self.assertFalse(registration['username_field'])
+        self.assertFalse(registration['wordpress_user_login_user_visible'])
+        self.assertFalse(registration['wordpress_user_login_mutable'])
+        self.assertEqual(registration['wordpress_user_nicename'],
+                         'independent_unique_public_slug')
+        self.assertFalse(registration['user_nicename_equals_user_login'])
+        self.assertFalse(registration['display_name_login_identifier'])
+        self.assertFalse(registration['automatic_login'])
+
+        for flow in ('login', 'password_reset'):
+            self.assertEqual(contract[flow]['primary_ui_label'], 'email')
+            self.assertTrue(contract[flow]['legacy_helper_required'])
+            self.assertEqual(contract[flow]['accepted_identifiers'],
+                             ['email', 'legacy_username'])
+
+        migration = contract['migration']
+        for key in ('existing_wordpress_user_ids_changed', 'existing_user_login_changed',
+                    'existing_accounts_merged', 'replacement_accounts_created',
+                    'email_change_syncs_user_login'):
+            self.assertFalse(migration[key])
+
+        security = contract['security']
+        self.assertFalse(security['custom_password_store'])
+        self.assertFalse(security['custom_auth_cookie'])
+        self.assertFalse(security['php_session_auth'])
+        self.assertFalse(security['client_user_login_accepted_on_registration'])
+
+        register_template = (repository / 'templates/register.php').read_text(encoding='utf-8')
+        registration_controller = (
+            repository / 'includes/Registration/RegistrationController.php'
+        ).read_text(encoding='utf-8')
+        login_template = (repository / 'templates/login.php').read_text(encoding='utf-8')
+        reset_template = (repository / 'templates/password-reset.php').read_text(encoding='utf-8')
+        login_controller = (repository / 'includes/Auth/LoginController.php').read_text(
+            encoding='utf-8'
+        )
+
+        self.assertNotIn('name="username"', register_template)
+        self.assertNotIn('name="user_login"', register_template)
+        self.assertIn("$candidate = 'member_' . bin2hex(random_bytes(8));",
+                      registration_controller)
+        self.assertIn("'user_login' => $login", registration_controller)
+        self.assertIn("'user_nicename' => self::unique_nicename()",
+                      registration_controller)
+        self.assertIn('wp_signon(', login_controller)
+        self.assertIn("esc_html_e('Email', 'kklidi-members')", login_template)
+        self.assertIn('Existing members may also use their existing username.', login_template)
+        self.assertIn("esc_html_e('Email', 'kklidi-members')", reset_template)
+        self.assertIn('Existing members may also use their existing username.', reset_template)
+        self.assertNotIn('Username or email', login_template)
+        self.assertNotIn('Username or email', reset_template)
+        self.assertEqual(contract['current_runtime_gap'], [])
+
+        identity_doc = (repository / 'docs/IDENTITY_POLICY.md').read_text(encoding='utf-8')
+        product_doc = (repository / 'docs/PRODUCT.md').read_text(encoding='utf-8')
+        self.assertIn('IMPLEMENTED_AND_SYNTHETIC_VERIFIED', identity_doc)
+        self.assertIn('| D15 | **IMPLEMENTED FOR 0.7.28', product_doc)
+        review_doc = (
+            repository / 'docs/CONTRACT_SECURITY_REVIEW-0.7.28-0.7.29.md'
+        ).read_text(encoding='utf-8')
+        self.assertIn('AUTH-IDENTITY-002 구현·합성 검증 완료', review_doc)
+        self.assertIn('user_nicename', review_doc)
+
+    def test_auth_mail_sender_001_contract_is_scoped_and_implemented(self):
+        repository = Path(__file__).resolve().parents[2]
+        contract = json.loads(
+            (repository / 'tests/harness/mail_sender_contract.json').read_text(
+                encoding='utf-8'
+            )
+        )
+        self.assertEqual(contract['contract'], 'AUTH-MAIL-SENDER-001')
+        self.assertEqual(contract['version'], 1)
+        self.assertEqual(contract['status'], 'IMPLEMENTED_AND_SYNTHETIC_VERIFIED')
+        self.assertEqual(contract['target_release'], '0.7.29')
+        self.assertEqual(contract['admin']['api'], 'wordpress_settings_api')
+        self.assertEqual(contract['admin']['capability'], 'manage_kklidi_members')
+        self.assertTrue(contract['admin']['server_nonce_required'])
+        self.assertFalse(contract['admin']['show_in_rest'])
+        self.assertEqual(contract['storage']['option_name'], 'kklidi_members_mail_sender')
+        self.assertFalse(contract['storage']['autoload'])
+
+        transport = contract['transport']
+        self.assertEqual(transport['api'], 'wp_mail')
+        self.assertEqual(transport['format'], 'text/plain')
+        self.assertEqual(transport['application'], 'per_members_message_from_header')
+        self.assertFalse(transport['members_registers_global_sender_filters'])
+        self.assertFalse(transport['smtp_owned_by_members'])
+        self.assertFalse(transport['provider_credentials_stored'])
+        self.assertFalse(transport['reply_to_editable'])
+
+        scope = contract['scope']
+        self.assertEqual(len(scope['members_user_events']), 4)
+        self.assertEqual(scope['members_admin_events'], ['admin_registration'])
+        for excluded in ('wordpress_core_password_reset_mail', 'woocommerce_order_mail',
+                         'lms_learning_mail', 'kboard_mail'):
+            self.assertFalse(scope[excluded])
+
+        self.assertFalse(contract['defaults']['sender_enabled'])
+        self.assertFalse(contract['defaults']['footer_enabled'])
+        self.assertFalse(contract['test_send']['arbitrary_recipient_input'])
+        self.assertTrue(contract['test_send']['capability_and_nonce_required'])
+        self.assertFalse(contract['failure_and_audit']['mail_failure_rolls_back_account_action'])
+        self.assertFalse(contract['failure_and_audit']['automatic_retry'])
+        self.assertTrue(contract['security']['header_injection_rejected'])
+        self.assertFalse(contract['security']['credentials_stored'])
+        self.assertFalse(contract['security']['global_mail_behavior_changed'])
+
+        settings_source = (repository / 'includes/Notifications/MailSenderSettings.php').read_text(
+            encoding='utf-8')
+        admin_source = (repository / 'includes/Admin/AdminController.php').read_text(encoding='utf-8')
+        account_mailer = (repository / 'includes/Notifications/AccountMailer.php').read_text(
+            encoding='utf-8')
+        admin_mailer = (repository / 'includes/Notifications/AdminRegistrationMailer.php').read_text(
+            encoding='utf-8')
+        installer = (repository / 'includes/Core/Installer.php').read_text(encoding='utf-8')
+        harness = (repository / 'tests/harness/run.py').read_text(encoding='utf-8')
+        self.assertIn("public const OPTION_NAME = 'kklidi_members_mail_sender'", settings_source)
+        self.assertIn("register_setting(self::OPTION_GROUP", settings_source)
+        self.assertIn("'show_in_rest' => false", settings_source)
+        self.assertIn("return 'manage_kklidi_members';", settings_source)
+        self.assertIn("wp_mail($admin->user_email", settings_source)
+        self.assertIn("RateLimiter::consume", settings_source)
+        self.assertIn("MailSenderSettings::prepare", account_mailer + admin_mailer)
+        self.assertIn("MailSenderSettings::OPTION_NAME", installer)
+        self.assertIn("results['AUTH-MAIL-SENDER-001']", harness)
+        self.assertNotIn("add_filter('wp_mail_from", settings_source + admin_source)
+
+        sender_doc = (repository / 'docs/MAIL_SENDER_POLICY.md').read_text(encoding='utf-8')
+        notification_doc = (repository / 'docs/NOTIFICATIONS.md').read_text(encoding='utf-8')
+        product_doc = (repository / 'docs/PRODUCT.md').read_text(encoding='utf-8')
+        self.assertIn('IMPLEMENTED_AND_SYNTHETIC_VERIFIED', sender_doc)
+        self.assertIn('전역 `wp_mail_from`', sender_doc)
+        self.assertIn('AUTH-MAIL-SENDER-001', notification_doc)
+        self.assertIn('| D16 | **IMPLEMENTED FOR 0.7.29', product_doc)
+
     def test_deployment_manifest_requires_real_owners_backup_and_bounded_rollback(self):
         repository = Path(__file__).resolve().parents[2]
         example = json.loads((repository / 'tests/harness/deployment_manifest.example.json')
@@ -1521,7 +1712,7 @@ class HarnessGuards(unittest.TestCase):
         ready = json.loads(json.dumps(example))
         ready['environment']['base_url'] = 'https://staging.kklidi.com'
         ready['versions'].update(
-            wordpress='7.1', php='8.3', members='0.7.25', woocommerce='11.1.0')
+            wordpress='7.1', php='8.3', members='0.7.30', woocommerce='11.1.0')
         ready['owners'] = {key: 'approved-' + key for key in ready['owners']}
         ready['backup'].update(
             artifact_sha256='a' * 64,
@@ -1532,6 +1723,16 @@ class HarnessGuards(unittest.TestCase):
         report = inspect_deployment_manifest(ready)
         self.assertEqual(report['status'], 'READY')
         self.assertEqual(report['failed'], [])
+
+        disabled_woocommerce = json.loads(json.dumps(ready))
+        disabled_woocommerce['versions']['woocommerce'] = 'disabled'
+        disabled_woocommerce['observation']['actual_order_required'] = False
+        self.assertEqual(inspect_deployment_manifest(disabled_woocommerce)['status'], 'READY')
+
+        impossible_order_gate = json.loads(json.dumps(disabled_woocommerce))
+        impossible_order_gate['observation']['actual_order_required'] = True
+        self.assertIn('observation_window',
+                      inspect_deployment_manifest(impossible_order_gate)['failed'])
 
         wrong_release = json.loads(json.dumps(ready))
         wrong_release['versions']['members'] = '0.7.4'

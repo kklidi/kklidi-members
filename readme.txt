@@ -3,7 +3,7 @@ Contributors: kklidi
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.7.25
+Stable tag: 0.7.30
 
 Core-based member accounts with scoped UI, consent records and safe withdrawal handling.
 
@@ -25,6 +25,9 @@ frontend wording. 0.7.21 adds optional fixed /members/ clean routes without crea
 pages or shortcodes. Activation requires pretty permalinks and a conflict-free
 preflight; query routes and Core force-reauth remain available as fallbacks.
 See docs/RELEASE-0.7.25.md.
+See docs/RELEASE-0.7.26.md.
+See docs/RELEASE-0.7.29.md.
+See docs/RELEASE-0.7.30.md.
 
 0.7.17 adds administrator diagnostics, quick actions, route links, and clearer
 notification, withdrawal, and audit management while preserving the approved
@@ -43,11 +46,38 @@ docs/RELEASE-0.7.16.md.
 
 == Changelog ==
 
+= 0.7.30 =
+
+* Load the scoped password visibility script on the withdrawal route.
+* Verify the withdrawal eye control and responsive account screens in a real Chrome engine.
+
 = 0.7.25 =
 
 * Show a field-level error when withdrawal password reauthentication fails.
 * Add the inline password visibility control to withdrawal requests.
 * Explain immediate sign-in blocking and retention-qualified processing without promising universal deletion.
+
+= 0.7.26 =
+
+* Separate Members manual menu links from WordPress-generated login and registration links in administrator settings.
+* Show the current generated URL beside the Core fallback and clarify that direct wp-login.php access is not redirected.
+
+= 0.7.27 =
+
+* Remove the site-name brand line from all Members route screens.
+* Center short screens while allowing long forms to start with a safe top margin.
+* Use one shared account-link row and clarify that display name is a public nickname, not a login ID.
+
+= 0.7.28 =
+
+* Keep new registration email-first without collecting a separate username.
+* Separate the new account's public user_nicename from its private Core user_login.
+* Present email as the primary login and password-reset identifier while retaining legacy username compatibility.
+
+= 0.7.29 =
+
+* Add Members-scoped sender name, sender email, plain-text footer, and administrator-only bounded test mail settings.
+* Keep Core reset, WooCommerce, LMS, KBoard, SMTP credentials, and global WordPress mail filters outside the feature.
 
 = 0.7.24 =
 

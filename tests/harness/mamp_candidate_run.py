@@ -20,7 +20,7 @@ VERSION = re.search(r'\* Version: (\d+\.\d+\.\d+)',
 ARCHIVE = ROOT / ('dist/kklidi-members-' + VERSION + '.zip')
 RUNNERS = ('mamp_route_run.py', 'mamp_https_run.py', 'mamp_lms_run.py',
            'mamp_woo_run.py', 'mamp_kboard_run.py', 'mamp_race_run.py',
-           'mamp_timing_run.py')
+           'mamp_timing_run.py', 'mamp_mail_sender_run.py')
 STATUS = r'''require "C:/MAMP/htdocs/kklidi-members-mamp-sandbox/wp-load.php";
 require_once ABSPATH."wp-admin/includes/plugin.php";
 echo wp_json_encode(array("active"=>is_plugin_active("kklidi-members/kklidi-members.php"),

@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.7.30 — 2026-09-10
+
+- Load the route-scoped password visibility script on the withdrawal screen.
+- Add a regression guard and record real Chrome desktop/mobile acceptance evidence.
+
+## 0.7.29 — 2026-09-10
+
+- Add optional Members-only sender name, sender email, and plain-text footer settings.
+- Add an administrator-only, rate-limited test mail sent to the current Core account email.
+
+## 0.7.28 — 2026-09-10
+
+- Keep new registration email-first while separating the public `user_nicename` from the internal login value.
+- Preserve legacy username and email login compatibility without changing existing user IDs or logins.
+
+## 0.7.27 — 2026-09-10
+
+- Remove the site-name brand line from every Members route.
+- Unify account links in one row and clarify that display name is a public nickname.
+
+## 0.7.26 — 2026-09-10
+
+- Separate manual Members menu links from WordPress-generated login and registration URLs.
+- Clarify Core URL ownership without redirecting direct `wp-login.php` access.
+
 ## 0.7.25 — 2026-09-10
 
 - Show a field-level error when withdrawal password reauthentication fails.

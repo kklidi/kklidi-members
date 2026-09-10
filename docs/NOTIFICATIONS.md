@@ -23,7 +23,7 @@
 
 ## 2. 전달·보안 규칙
 
-1. P0-2의 전송 경계는 WordPress `wp_mail()`이다. 본문은 고정된 `text/plain` preset으로 시작하고 발신자와 reply-to는 WordPress 기본 메일 설정을 따른다. Members가 SMTP 또는 외부 provider 설정을 소유하지 않는다.
+1. 전송 경계는 WordPress `wp_mail()`이다. 본문은 `text/plain` preset이며 0.7.29의 선택적 Members 발신자·footer 설정은 Members가 소유한 호출에만 적용한다. Members가 SMTP 또는 외부 provider 설정을 소유하지 않는다.
 2. 수신 주소는 사건 처리 후 WordPress Core의 현재 사용자 레코드에서 다시 읽는다. 요청 body의 이메일이나 외부 도메인의 이메일을 신뢰하지 않는다.
 3. 비밀번호, reset key, 인증 cookie, nonce, 사용자 ID, role, 원문 동의 증거를 제목·본문·header에 넣지 않는다. 주문·결제와 LMS 수강·진도·수료증 데이터도 넣지 않는다.
 4. 사용자에게 보이는 source string은 영어 gettext와 `kklidi-members` text domain을 사용한다. 사용자 locale을 우선하고 사이트 locale을 fallback으로 하는 한국어 PO/MO catalog를 사용한다.
@@ -76,9 +76,15 @@ WooCommerce 주문·결제·환불 메일은 WooCommerce가 소유한다. LMS �
 
 ### 5.3 WordPress Core와 전달 계층 경계
 
-1. 전송 API와 형식은 계속 `wp_mail()`과 `text/plain`이다. 발신 이름·주소는 WordPress 또는 사이트의 메일 전송 계층이 정하며 Members 화면에는 현재 정책을 읽기 전용으로만 설명한다.
+1. 전송 API와 형식은 계속 `wp_mail()`과 `text/plain`이다. Members 발신자 설정이 켜진 경우에도 승인된 Members 호출의 `From` header에만 적용하며 Core와 다른 plugin의 메일은 기존 정책을 따른다.
 2. Members는 전역 `wp_mail_from`/`wp_mail_from_name` filter, SMTP 설정, provider credential, 외부 이메일 API, queue, 재시도, webhook 또는 전달 이력을 소유하지 않는다. 사이트가 SMTP plugin, Elastic Email 같은 provider 또는 managed transport를 도입해도 이 계약의 작성·치환 계층은 바뀌지 않는다.
 3. WordPress Core 비밀번호 재설정 메일은 Core 소유로 유지한다. Members의 `password_changed` 안내만 이 설정 범위에 포함하며 Core reset 메일의 제목·본문을 가로채지 않는다.
 4. 저장된 문구는 사이트별 plain text override다. override가 없을 때 영어 gettext 원문과 사용자 locale 우선·사이트 locale fallback의 번역 catalog를 그대로 사용한다.
 
 실행 가능한 설계 manifest는 `tests/harness/notification_settings_contract.json`이다. 합성 실행 `d28853b554c5497eb50df18d7f24dffe`는 `wp_`와 임의 prefix에서 Settings API nonce·capability, non-autoload 저장, 허용 placeholder 치환, 미허용 placeholder 원자적 거부, 빈 값 gettext fallback, 문구 원문을 남기지 않는 감사와 기존 네 메일·실패 경계를 PASS했다. 실제 mailbox 전달 판정과 운영 메일 provider 설정은 배포 환경의 별도 책임이다.
+
+## 6. AUTH-MAIL-SENDER-001 — 후속 발신자 확장 계약
+
+`AUTH-NOTIFY-002`의 현재 runtime은 계속 사이트 기본 발신자를 사용한다. 사용자가 승인한 후속 `AUTH-MAIL-SENDER-001`은 기본 꺼짐의 발신 이름·주소와 plain-text footer를 Members 소유 메일에만 추가한다. 전역 sender filter, SMTP/provider credential, HTML, Core reset과 Woo/LMS/KBoard 메일은 범위 밖이다.
+
+상세 정책과 보안·시험 발송 합격 기준은 `MAIL_SENDER_POLICY.md`, 실행 가능한 manifest는 `tests/harness/mail_sender_contract.json`이 소유한다. 0.7.29에서 Settings API 저장·권한·header injection·Members 메일 범위·시험 발송 실패/limit 합성 검증까지 완료했으며, 실제 mailbox 도착과 SPF/DKIM/DMARC 정렬은 운영 배포 gate다.

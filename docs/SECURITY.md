@@ -15,6 +15,7 @@
 ## 2. 로그인·가입·프로필·비밀번호
 
 - 로그인은 기존 username 또는 email을 받는다. credential 실패는 계정 존재·disabled 여부를 공개하지 않는 공통 메시지를 사용한다. 존재하지 않는 계정도 비교 가능한 password 검증 비용을 가져 timing 차이를 줄인다. 자격증명·비밀번호를 trim/sanitize_text_field로 바꾸지 않는다.
+- `AUTH-IDENTITY-002`는 0.7.28에서 신규 가입에 username 필드를 추가하지 않고 이메일을 주 UI 식별자로 명시한다. 기존 username 수락은 migration 호환 경계로 남기며 `wp_signon()`·rate limit·다른 `authenticate` hook을 그대로 통과한다. 새 계정의 내부 `user_login`은 비공개 생성 값으로 유지하고 공개 `user_nicename`은 독립 slug로 만든다. 로그인·reset 화면은 이메일을 먼저 안내하되 기존 아이디도 호환한다.
 - 가입 입력은 이메일, 비밀번호/확인, 이름, 표시명, 선택 전화, 승인된 필수 동의에 한정한다. role/capability/user_id/account_state/email_verified arbitrary meta는 거부한다. 신규 역할은 검토된 low-privilege subscriber, 요청 parameter로 변경 불가다.
 - 비밀번호는 긴 passphrase·password manager·붙여넣기를 허용한다. 제안 기본은 신규/변경 12자 이상, 합리적인 입력 상한(예: UTF-8 1,024 bytes); 길이 제한은 UI와 서버가 같은 규칙으로 검사한다. 기존 짧은 비밀번호의 로그인 자체를 migration 중 막지 않는다. 해시 방식·salt는 Core에 맡긴다.
 - 가입 동시성/부분 실패는 ARCHITECTURE의 lock·pending·idempotency로 관리한다. 동의 영속화 없이 가입 성공/자동 로그인이라고 응답하지 않는다. 공개 가입의 단일 운영 스위치는 Core `users_can_register`이며 0이면 가입 폼과 처리를 닫는다. 값이 1이어도 서비스 약관·개인정보 처리방침의 현재 문서가 모두 준비되지 않으면 fail-closed한다. Members 전용 가입 활성화 옵션은 두지 않는다.
@@ -23,6 +24,8 @@
 - 1.0 이메일은 표시 전용이다. 미래 변경은 새 주소 소유 증명 전 user_email을 교체하지 않고, 기존 주소로 변경 안내한다. old user_login은 보존한다.
 - reset은 Core 발급·만료·검증·변경 API를 사용한다. 기존 요청 링크와 새 요청 링크의 경합, 사용 후 재사용 거부, 잘못된 key, expiry를 검사한다. 성공 후 기본은 로그인 화면으로 이동하고 재로그인하며 자동 로그인하지 않는다. [check_password_reset_key](https://developer.wordpress.org/reference/functions/check_password_reset_key/), [reset_password](https://developer.wordpress.org/reference/functions/reset_password/).
 - 분실 요청에 이메일 존재 여부를 노출하지 않는다. 유효/무효 이메일 모두 같은 공개 응답을 사용하고, 등록 화면에서도 직접 “이 주소의 계정이 존재” API를 제공하지 않는다. 로그인/복구 안내로 연결한다. WP 기본 REST user/author 공개 등 사이트 전체 enumeration은 별도 노출이므로 Members만으로 완전히 제거했다고 주장하지 않는다.
+
+메일 발신자 확장은 `AUTH-MAIL-SENDER-001`에 한정한다. 전역 `wp_mail_from`/`wp_mail_from_name` filter를 등록하지 않고 Members 소유 `wp_mail()` 호출의 `From` header에만 적용한다. CR/LF header injection을 거부하며 SMTP/provider credential은 저장하지 않는다. Core reset·WooCommerce·LMS·KBoard 메일은 변경하지 않는다.
 
 ## 3. CSRF·Cookie·Redirect
 

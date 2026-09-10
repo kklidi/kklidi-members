@@ -2,7 +2,7 @@
 
 WordPress Core Auth 위에서 KKLIDI 서비스가 공유하는 회원·계정·인증 UX 계층.
 
-**현재 개발 후보: 0.7.25.** 0.7.25는 탈퇴 요청의 비밀번호 재인증 오류를 입력 필드에 연결하고 눈 아이콘을 제공하며, 즉시 로그인 차단과 보존 기간 기준의 처리 안내를 명확히 표시한다. 0.7.24의 회원가입 필수 정책·별표 표시, 0.7.23의 로그인·비밀번호 찾기 중앙 카드와 링크 위계, 0.7.21의 고정 `/members/` route와 WordPress Core 인증·사용자 ID·가입 공개 정책·동의·메일 소유권 경계는 그대로 유지한다. 실제 운영 인증서·다중 서버·운영 migration 승인은 [운영 계약](docs/OPERATIONS.md)의 환경 gate를 따른다.
+**현재 개발 후보: 0.7.30.** 0.7.30은 탈퇴 화면에서도 route 전용 비밀번호 JavaScript를 로드해 인라인 눈 아이콘이 실제 브라우저에서 동작하도록 수정한다. 0.7.29의 Members 전용 선택적 발신자·plain-text footer와 0.7.28의 이메일 중심 신규 계정, 독립 공개 `user_nicename`, 기존 아이디 호환 및 Core 인증 경계는 그대로 유지한다. 실제 운영 인증서·다중 서버·운영 migration·SPF/DKIM/DMARC 승인은 [운영 계약](docs/OPERATIONS.md)의 환경 gate를 따른다.
 
 이전 검증 기록: **첫 MVP runtime 0.2.0 구현 및 24개 MVP 계약의 합성 WordPress 실행 완료**. 최신 합성 실행은 24개 MVP 계약이 모두 PASS다. 실제 device-limit 1.1.3의 Members/Core 허용·차단·제거 경로, WooCommerce 11.1.0/WCI 1.0.3의 checkout·cart·주문 귀속, KKLIDI LMS의 주문→수강·진도·수료증·비공개 질문과 Members-off 폴백, KBoard 제거 전 호환성, TLS/browser gate를 통과했다. KBoard 권한 엔진 이전·복제와 content migration은 범위 밖이다. 제품 방향 판정은 **GREENFIELD_RECOMMENDED**다.
 

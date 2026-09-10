@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the KKLIDI Members plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: KKLIDI Members 0.7.25\n"
+"Project-Id-Version: KKLIDI Members 0.7.30\n"
 "Report-Msgid-Bugs-To: https://kklidi.com/\n"
 "POT-Creation-Date: 2026-09-07 00:00+0000\n"
 "MIME-Version: 1.0\n"
@@ -1232,4 +1232,151 @@ msgid "Service terms consent"
 msgstr ""
 
 msgid "Privacy policy consent"
+msgstr ""
+
+msgid "Members manual menu links"
+msgstr ""
+
+msgid "These are Members-owned screen links for manual menus. They are independent of the WordPress-generated link settings below."
+msgstr ""
+
+msgid "Use readable /members/ URLs for Members screens"
+msgstr ""
+
+msgid "WordPress-generated links"
+msgstr ""
+
+msgid "Public registration remains controlled by WordPress General Settings. These options only choose whether WordPress-generated login and registration links use Members."
+msgstr ""
+
+msgid "Direct wp-login.php access remains available and is not redirected."
+msgstr ""
+
+msgid "Current generated link"
+msgstr ""
+
+msgid "Core fallback"
+msgstr ""
+
+msgid "WordPress-generated login links use Members"
+msgstr ""
+
+msgid "WordPress-generated registration links use Members"
+msgstr ""
+
+msgid "Save generated-link settings"
+msgstr ""
+
+msgid "Login links: %1$s / Registration links: %2$s"
+msgstr ""
+
+msgid "Members"
+msgstr ""
+
+msgid "Members destination"
+msgstr ""
+
+msgid "Manage generated-link settings"
+msgstr ""
+
+msgid "Display name (nickname)"
+msgstr ""
+
+msgid "This name is visible to other users. It is not used as a login ID."
+msgstr ""
+
+msgid "Existing members may also use their existing username."
+msgstr ""
+
+msgid "Enter your email."
+msgstr ""
+
+msgid "Enter your email to receive a reset link."
+msgstr ""
+
+msgid "Members sender and footer"
+msgstr ""
+
+msgid "Sender and footer settings"
+msgstr ""
+
+msgid "Sender settings were not saved because the submitted data was invalid."
+msgstr ""
+
+msgid "The sender email must be a valid email address without line breaks."
+msgstr ""
+
+msgid "This is a no-reply email. Please use the website support channel if you need help."
+msgstr ""
+
+msgid "The current administrator email is not valid."
+msgstr ""
+
+msgid "[%s] Members sender test"
+msgstr ""
+
+msgid "This is a test email for the Members-owned account notification sender."
+msgstr ""
+
+msgid "WordPress could not accept the test email."
+msgstr ""
+
+msgid "These settings apply only to Members-owned account notices and administrator registration notices. WordPress Core, WooCommerce, LMS, and other plugin mail keep their existing sender."
+msgstr ""
+
+msgid "Members uses WordPress wp_mail() and plain text. It does not store SMTP credentials or register global sender filters. Confirm SPF, DKIM, and DMARC with your mail provider before using a custom address."
+msgstr ""
+
+msgid "Use a custom sender for Members emails"
+msgstr ""
+
+msgid "Sender name"
+msgstr ""
+
+msgid "Plain text only, up to 100 characters. Leave empty to use the mail transport default name."
+msgstr ""
+
+msgid "Sender email"
+msgstr ""
+
+msgid "Use an address owned and authorized by the site mail provider."
+msgstr ""
+
+msgid "Append a sender-only footer to Members emails"
+msgstr ""
+
+msgid "Footer text"
+msgstr ""
+
+msgid "Plain text only, up to 500 characters. Leave empty to use the translated no-reply default."
+msgstr ""
+
+msgid "The footer must be plain text without HTML, shortcodes, PHP, or line breaks and stay within 500 characters."
+msgstr ""
+
+msgid "The sender name must be plain text without HTML, PHP, or line breaks and stay within 100 characters."
+msgstr ""
+
+msgid "Optional Members sender and footer settings are shown below. Other WordPress and plugin mail keeps its existing sender."
+msgstr ""
+
+msgid "Save sender and footer settings"
+msgstr ""
+
+msgid "Members sender settings"
+msgstr ""
+
+msgid "Test delivery"
+msgstr ""
+
+msgid "Send a plain-text test to the current WordPress administrator email. The recipient cannot be changed here, and the result only confirms that wp_mail() accepted the request."
+msgstr ""
+
+msgid "Send test email"
+msgstr ""
+
+msgid "Members mail sender settings updated"
+msgstr ""
+
+msgid "Members mail sender test"
 msgstr ""

@@ -43,9 +43,11 @@ final class AccountMailer {
 		$sent = false;
 		try {
 			require_once KKLIDI_MEMBERS_DIR . 'includes/Notifications/NotificationTemplates.php';
+			require_once KKLIDI_MEMBERS_DIR . 'includes/Notifications/MailSenderSettings.php';
 			list($subject, $message) = NotificationTemplates::content($event);
 			$headers = array('Content-Type: text/plain; charset=' . get_bloginfo('charset'));
-			$sent = wp_mail($user->user_email, $subject, $message, $headers) === true;
+			$prepared = MailSenderSettings::prepare($message, $headers);
+			$sent = wp_mail($user->user_email, $subject, $prepared['message'], $prepared['headers']) === true;
 		} catch (\Throwable $error) {
 			$sent = false;
 		} finally {

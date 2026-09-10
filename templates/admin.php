@@ -44,8 +44,8 @@
 			</div>
 		</section>
 		<section class="kklidi-members-admin-card">
-			<h2><?php esc_html_e('Member route links', 'kklidi-members'); ?></h2>
-			<p><?php esc_html_e('Add the links you need to a site menu manually. Members does not create or replace WordPress pages automatically.', 'kklidi-members'); ?></p>
+			<h2><?php esc_html_e('Members manual menu links', 'kklidi-members'); ?></h2>
+			<p><?php esc_html_e('These are Members-owned screen links for manual menus. They are independent of the WordPress-generated link settings below.', 'kklidi-members'); ?></p>
 			<table class="widefat striped kklidi-members-admin-table"><thead><tr><th scope="col"><?php esc_html_e('Screen', 'kklidi-members'); ?></th><th scope="col"><?php esc_html_e('URL', 'kklidi-members'); ?></th></tr></thead><tbody>
 			<?php foreach ($route_urls as $route) : ?><tr><td data-label="<?php esc_attr_e('Screen', 'kklidi-members'); ?>"><?php echo esc_html($route[0]); ?></td><td data-label="<?php esc_attr_e('URL', 'kklidi-members'); ?>"><a href="<?php echo esc_url($route[1]); ?>"><?php echo esc_html($route[1]); ?></a></td></tr><?php endforeach; ?>
 			</tbody></table>
@@ -60,7 +60,7 @@
 				<?php wp_nonce_field('kklidi_members_admin', '_kklidi_members_admin_nonce'); ?>
 				<input type="hidden" name="section" value="routes">
 				<input type="hidden" name="kklidi_members_admin_action" value="set_clean_routes">
-				<p><label><input type="checkbox" name="clean_routes_enabled" value="1" <?php checked(!empty($route_settings['clean_routes_enabled'])); ?>> <?php esc_html_e('Enable the fixed /members/ clean routes', 'kklidi-members'); ?></label></p>
+				<p><label><input type="checkbox" name="clean_routes_enabled" value="1" <?php checked(!empty($route_settings['clean_routes_enabled'])); ?>> <?php esc_html_e('Use readable /members/ URLs for Members screens', 'kklidi-members'); ?></label></p>
 				<p><button class="button button-primary" type="submit"><?php esc_html_e('Apply clean route setting', 'kklidi-members'); ?></button></p>
 			</form>
 			<?php if (!empty($route_preflight['collisions'])) : ?>
@@ -72,23 +72,27 @@
 		</section>
 
 		<section class="kklidi-members-admin-card">
-			<h2><?php esc_html_e('Member route links', 'kklidi-members'); ?></h2>
-			<p><?php esc_html_e('Add the links you need to a site menu manually. Members does not create or modify menu items.', 'kklidi-members'); ?></p>
+			<h2><?php esc_html_e('Members manual menu links', 'kklidi-members'); ?></h2>
+			<p><?php esc_html_e('These are Members-owned screen links for manual menus. They are independent of the WordPress-generated link settings below.', 'kklidi-members'); ?></p>
 			<table class="widefat striped kklidi-members-admin-table"><thead><tr><th scope="col"><?php esc_html_e('Screen', 'kklidi-members'); ?></th><th scope="col"><?php esc_html_e('URL', 'kklidi-members'); ?></th></tr></thead><tbody>
 			<?php foreach ($route_urls as $route) : ?><tr><td data-label="<?php esc_attr_e('Screen', 'kklidi-members'); ?>"><?php echo esc_html($route[0]); ?></td><td data-label="<?php esc_attr_e('URL', 'kklidi-members'); ?>"><a href="<?php echo esc_url($route[1]); ?>"><?php echo esc_html($route[1]); ?></a></td></tr><?php endforeach; ?>
 			</tbody></table>
 		</section>
 
 		<section class="kklidi-members-admin-card">
-			<h2><?php esc_html_e('WordPress URL ownership', 'kklidi-members'); ?></h2>
-			<p><?php esc_html_e('Public registration remains controlled by the WordPress General Settings screen. These options only control whether WordPress-generated login and registration links use Members.', 'kklidi-members'); ?></p>
+			<h2><?php esc_html_e('WordPress-generated links', 'kklidi-members'); ?></h2>
+			<p><?php esc_html_e('Public registration remains controlled by WordPress General Settings. These options only choose whether WordPress-generated login and registration links use Members.', 'kklidi-members'); ?></p>
+			<p><?php esc_html_e('Direct wp-login.php access remains available and is not redirected.', 'kklidi-members'); ?></p>
+			<table class="widefat striped kklidi-members-admin-table"><thead><tr><th scope="col"><?php esc_html_e('Screen', 'kklidi-members'); ?></th><th scope="col"><?php esc_html_e('Current generated link', 'kklidi-members'); ?></th><th scope="col"><?php esc_html_e('Core fallback', 'kklidi-members'); ?></th></tr></thead><tbody>
+			<?php foreach ($wordpress_urls as $wordpress_url) : ?><tr><td data-label="<?php esc_attr_e('Screen', 'kklidi-members'); ?>"><?php echo esc_html($wordpress_url[0]); ?></td><td data-label="<?php esc_attr_e('Current generated link', 'kklidi-members'); ?>"><a href="<?php echo esc_url($wordpress_url[1]); ?>"><?php echo esc_html($wordpress_url[1]); ?></a></td><td data-label="<?php esc_attr_e('Core fallback', 'kklidi-members'); ?>"><code><?php echo esc_html($wordpress_url[2]); ?></code></td></tr><?php endforeach; ?>
+			</tbody></table>
 			<form method="post">
 				<?php wp_nonce_field('kklidi_members_admin', '_kklidi_members_admin_nonce'); ?>
 				<input type="hidden" name="section" value="routes">
 				<input type="hidden" name="kklidi_members_admin_action" value="save_url_settings">
-				<p><label><input type="checkbox" name="own_login_url" value="1" <?php checked(get_option('kklidi_members_own_login_url'), '1'); ?>> <?php esc_html_e('Members owns the Core login URL', 'kklidi-members'); ?></label></p>
-				<p><label><input type="checkbox" name="own_register_url" value="1" <?php checked(get_option('kklidi_members_own_register_url'), '1'); ?>> <?php esc_html_e('Members owns the Core registration URL', 'kklidi-members'); ?></label></p>
-				<p><button class="button button-primary" type="submit"><?php esc_html_e('Save URL ownership', 'kklidi-members'); ?></button></p>
+				<p><label><input type="checkbox" name="own_login_url" value="1" <?php checked(get_option('kklidi_members_own_login_url'), '1'); ?>> <?php esc_html_e('WordPress-generated login links use Members', 'kklidi-members'); ?></label></p>
+				<p><label><input type="checkbox" name="own_register_url" value="1" <?php checked(get_option('kklidi_members_own_register_url'), '1'); ?>> <?php esc_html_e('WordPress-generated registration links use Members', 'kklidi-members'); ?></label></p>
+				<p><button class="button button-primary" type="submit"><?php esc_html_e('Save generated-link settings', 'kklidi-members'); ?></button></p>
 			</form>
 		</section>
 	<?php elseif ($section === 'documents') : ?>
@@ -191,6 +195,22 @@
 				<?php settings_fields(\KKLIDI\Members\Notifications\AdminNotificationSettings::OPTION_GROUP); ?>
 				<?php do_settings_sections(\KKLIDI\Members\Notifications\AdminNotificationSettings::SETTINGS_PAGE); ?>
 				<?php submit_button(__('Save administrator notification', 'kklidi-members')); ?>
+			</form>
+		</section>
+		<section class="kklidi-members-admin-card">
+			<h2><?php esc_html_e('Members sender and footer', 'kklidi-members'); ?></h2>
+			<?php settings_errors(\KKLIDI\Members\Notifications\MailSenderSettings::OPTION_NAME); ?>
+			<form action="<?php echo esc_url(admin_url('options.php')); ?>" method="post">
+				<?php settings_fields(\KKLIDI\Members\Notifications\MailSenderSettings::OPTION_GROUP); ?>
+				<?php do_settings_sections(\KKLIDI\Members\Notifications\MailSenderSettings::SETTINGS_PAGE); ?>
+				<?php submit_button(__('Save sender and footer settings', 'kklidi-members')); ?>
+			</form>
+			<form action="<?php echo esc_url(admin_url('users.php?page=kklidi-members&section=notifications')); ?>" method="post">
+				<?php wp_nonce_field('kklidi_members_admin', '_kklidi_members_admin_nonce'); ?>
+				<input type="hidden" name="kklidi_members_admin_action" value="test_mail_sender">
+				<p><strong><?php esc_html_e('Test delivery', 'kklidi-members'); ?></strong></p>
+				<p><?php esc_html_e('Send a plain-text test to the current WordPress administrator email. The recipient cannot be changed here, and the result only confirms that wp_mail() accepted the request.', 'kklidi-members'); ?></p>
+				<?php submit_button(__('Send test email', 'kklidi-members'), 'secondary', 'submit', false); ?>
 			</form>
 		</section>
 	<?php elseif ($section === 'withdrawals') : ?>

@@ -147,7 +147,7 @@ final class RegistrationController {
 				$login = self::unique_login();
 				$user_id = wp_insert_user(array(
 					'user_login' => $login,
-					'user_nicename' => str_replace('_', '-', $login),
+					'user_nicename' => self::unique_nicename(),
 					'user_email' => $email,
 					'user_pass' => $password,
 					'first_name' => $first,
@@ -206,6 +206,13 @@ final class RegistrationController {
 			}
 		}
 		return 'member_' . wp_generate_password(24, false, false);
+	}
+
+	private static function unique_nicename(): string {
+		$candidate = 'member-profile-' . bin2hex(random_bytes(12));
+		return function_exists('wp_unique_user_nicename')
+			? wp_unique_user_nicename($candidate)
+			: $candidate;
 	}
 
 	private static function valid_phone(string $phone): bool {

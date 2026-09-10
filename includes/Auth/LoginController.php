@@ -43,7 +43,7 @@ final class LoginController {
 			} elseif ($identifier === '' || $password === '') {
 				$message = __('Please correct the highlighted fields.', 'kklidi-members');
 				if ($identifier === '') {
-					$field_errors['identifier'] = __('Enter your username or email.', 'kklidi-members');
+					$field_errors['identifier'] = __('Enter your email.', 'kklidi-members');
 				}
 				if ($password === '') {
 					$field_errors['password'] = __('Enter your password.', 'kklidi-members');

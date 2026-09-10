@@ -1,7 +1,7 @@
 {
   "contract": "AUTH-WITHDRAW-UX-008",
   "version": 1,
-  "status": "IMPLEMENTED_AND_UNIT_VERIFIED",
+  "status": "IMPLEMENTED_AND_BROWSER_VERIFIED",
   "target_release": "0.7.25",
   "password_reauthentication": {
     "server_check": "wp_check_password",
@@ -18,7 +18,9 @@
   },
   "verification": {
     "status": "PASS",
-    "scope": "unit_and_static_ui_guards",
-    "test_runner": "tests/harness/test_runner.py"
+    "scope": "unit_static_and_real_browser_guards",
+    "test_runner": "tests/harness/test_runner.py",
+    "browser_regression_release": "0.7.30",
+    "browser_report": ".harness/reports/mamp-browser-0.7.30.json"
   }
 }

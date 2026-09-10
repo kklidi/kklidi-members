@@ -125,7 +125,7 @@ final class NotificationTemplates {
 	public static function render_transport_policy(): void {
 		?>
 		<p><?php esc_html_e('Messages use WordPress wp_mail() as plain text. The active WordPress or site mail transport controls the sender name and address.', 'kklidi-members'); ?></p>
-		<p><strong><?php esc_html_e('Sender policy', 'kklidi-members'); ?>:</strong> <?php esc_html_e('Inherited from the WordPress or site mail transport (read only)', 'kklidi-members'); ?></p>
+		<p><strong><?php esc_html_e('Sender policy', 'kklidi-members'); ?>:</strong> <?php esc_html_e('Optional Members sender and footer settings are shown below. Other WordPress and plugin mail keeps its existing sender.', 'kklidi-members'); ?></p>
 		<p><?php esc_html_e('Empty fields use the translated default at send time for the recipient locale. Leaving a field empty does not disable the notice.', 'kklidi-members'); ?></p>
 		<?php
 	}

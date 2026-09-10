@@ -37,24 +37,19 @@
 }
 
 .kklidi-members-main {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
 	width: min(100% - 32px, 680px);
+	min-height: 100vh;
 	margin: 0 auto;
 	padding: 40px 0 56px;
-}
-
-.kklidi-members-page--login .kklidi-members-main,
-.kklidi-members-page--password-reset .kklidi-members-main {
-	display: flex;
-	align-items: center;
-	min-height: 100vh;
-	padding: 24px 0;
 }
 
 .kklidi-members-page--login .kklidi-members-card,
 .kklidi-members-page--password-reset .kklidi-members-card {
 	width: 100%;
 	max-width: 480px;
-	margin: 0 auto;
 }
 
 .kklidi-members-card {
@@ -62,6 +57,7 @@
 	border: 1px solid var(--kklidi-members-line);
 	border-radius: 16px;
 	box-shadow: 0 10px 30px rgba(22, 36, 59, 0.08);
+	margin: auto;
 	padding: clamp(24px, 5vw, 40px);
 }
 
@@ -79,14 +75,6 @@
 .kklidi-members-header h1 {
 	font-size: var(--kklidi-members-font-title);
 	letter-spacing: -0.03em;
-}
-
-.kklidi-members-eyebrow {
-	font-size: 0.8rem;
-	font-weight: 700;
-	letter-spacing: 0.08em;
-	margin: 0 0 8px !important;
-	text-transform: uppercase;
 }
 
 .kklidi-members-section h2 {
@@ -366,17 +354,6 @@
 .kklidi-members-form-links__separator {
 	color: var(--kklidi-members-muted);
 	font-weight: 400;
-}
-
-.kklidi-members-brand {
-	color: inherit;
-	text-decoration: none;
-}
-
-.kklidi-members-brand:focus-visible,
-.kklidi-members-brand:hover {
-	color: var(--kklidi-members-accent);
-	text-decoration: underline;
 }
 
 .kklidi-members-link--tertiary {

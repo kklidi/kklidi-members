@@ -51,6 +51,7 @@ PRODUCTION_FILES = [
     'includes/Notifications/AccountMailer.php',
 	'includes/Notifications/AdminNotificationSettings.php',
 	'includes/Notifications/AdminRegistrationMailer.php',
+	'includes/Notifications/MailSenderSettings.php',
     'includes/Notifications/NotificationTemplates.php',
     'includes/Profile/ProfileController.php',
     'includes/Registration/RegistrationController.php',
@@ -72,6 +73,7 @@ PRODUCTION_FILES = [
     'templates/profile.php',
     'templates/register.php',
     'templates/withdrawal.php',
+	'templates/partials/route-links.php',
 ]
 PACKAGE_FILES = PRODUCTION_FILES + [
     'languages/kklidi-members.pot',
@@ -433,6 +435,8 @@ def run_members_cases(base, env, fixture):
                     and 'name="kklidi_members_password"' in document
                     and 'name="kklidi_members_remember"' in document,
                     'Members server-rendered login form missing')
+            require('Existing members may also use their existing username.' in document,
+                    'Email-first login guidance was not rendered')
             require('no-store' in cache_control and 'private' in cache_control,
                     'Members account response is not private/no-store')
             require(hidden_input(document, 'redirect_to') == destination,
@@ -481,7 +485,18 @@ def run_members_cases(base, env, fixture):
                          'roles_unchanged': True, 'destination_preserved': True,
                          'core_success_events': len(delta), 'cookie_persistent': remember,
                          'cookie_removal_control': 'PASS', 'wrong_id_control': 'PASS',
+                         'email_primary_ui_guidance': True,
                          'status': 'PASS'})
+
+    # A public nickname must never become an authentication identifier.
+    display_name_browser, display_name_response, _ = members_login(
+        base, env, fixture['fixtures']['email_identity']['display_name'], env['KKH_USER_PASSWORD'])
+    require(display_name_response[0] == 200
+            and 'Please check your login details.' in display_name_response[2]
+            and display_name_browser.observe(key)['logged_in'] is False
+            and not any(c.name.startswith('wordpress_logged_in_') for c in display_name_browser.cookies),
+            'Display name was accepted as an authentication identifier')
+    guard_rows.append({'display_name_not_identifier': True, 'status': 'PASS'})
 
     browser = Browser(base)
     hostile = 'https://example.invalid/escape'
@@ -571,6 +586,67 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
     setup = command(php_cli + [HERE / 'mvp_setup.php', 'core-on'], json_result=True)
     require(setup == {'required_ready': True, 'legacy_registration_option': '0',
                       'users_can_register': True}, 'MVP setup failed')
+
+    # Configure the Members-scoped sender before the first account notification.
+    sender_admin = Browser(base)
+    sender_login_status, _, _ = sender_admin.request('/wp-login.php')
+    sender_login_status, _, _ = sender_admin.request('/wp-login.php', data={
+        'log': 'fixture_admin', 'pwd': env['KKH_USER_PASSWORD'], 'testcookie': '1',
+        'redirect_to': base + '/wp-admin/users.php?page=kklidi-members&section=notifications',
+        'wp-submit': 'Log In',
+    })
+    sender_path = '/wp-admin/users.php?page=kklidi-members&section=notifications'
+    sender_page_status, _, sender_page = sender_admin.request(sender_path)
+    sender_forms = [form for form in re.findall(
+        r'<form\b.*?</form>', sender_page, flags=re.IGNORECASE | re.DOTALL)
+        if 'kklidi_members_mail_sender[sender_enabled]' in form]
+    require(sender_login_status == 302 and sender_page_status == 200 and len(sender_forms) == 1,
+            'Members sender Settings API form is unavailable')
+    sender_form = sender_forms[0]
+    sender_nonce = hidden_input(sender_form, '_wpnonce')
+
+    def sender_settings_fields(from_name='Synthetic Members', from_email='members@example.invalid',
+                               footer_text='This is a synthetic sender footer.', enabled=True,
+                               footer_enabled=True, extra=None):
+        fields = {
+            'option_page': 'kklidi_members_mail_sender',
+            'action': 'update',
+            '_wpnonce': sender_nonce,
+            '_wp_http_referer': sender_path,
+            'kklidi_members_mail_sender[version]': '1',
+            'kklidi_members_mail_sender[from_name]': from_name,
+            'kklidi_members_mail_sender[from_email]': from_email,
+            'kklidi_members_mail_sender[footer_text]': footer_text,
+        }
+        if enabled:
+            fields['kklidi_members_mail_sender[sender_enabled]'] = '1'
+        if footer_enabled:
+            fields['kklidi_members_mail_sender[footer_enabled]'] = '1'
+        if extra:
+            fields.update(extra)
+        return fields
+
+    sender_default = command(php_cli + [HERE / 'mvp_probe.php', 'mail-sender-summary'],
+                             json_result=True)
+    require(sender_default['autoload'] in ('no', 'off')
+            and sender_default['stored'] == {
+                'version': 1, 'sender_enabled': False, 'from_name': '', 'from_email': '',
+                'footer_enabled': False, 'footer_text': ''}
+            and sender_default['effective'] == sender_default['stored']
+            and sender_default['settings_audit_count'] == 0,
+            'Mail sender default was not a non-autoload disabled option')
+    sender_save_status, _, _ = sender_admin.request(
+        '/wp-admin/options.php', data=sender_settings_fields())
+    sender_saved = command(php_cli + [HERE / 'mvp_probe.php', 'mail-sender-summary'],
+                           json_result=True)
+    require(sender_save_status == 302
+            and sender_saved['stored'] == {
+                'version': 1, 'sender_enabled': True, 'from_name': 'Synthetic Members',
+                'from_email': 'members@example.invalid', 'footer_enabled': True,
+                'footer_text': 'This is a synthetic sender footer.'}
+            and sender_saved['effective'] == sender_saved['stored']
+            and sender_saved['settings_audit_count'] == 1,
+            'Valid Members sender settings did not save safely')
     initial_mail_count = len(read_mailbox(mailbox_path))
 
     allowed_destinations = [
@@ -668,7 +744,7 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
     status, headers, form = registration.request('/?kklidi_members_register=1')
     require(status == 200 and 'name="email"' in form and 'no-store' in headers.get('Cache-Control', '').lower(),
             'Enabled registration form missing or cacheable')
-    require('가입 후 가입할 때 사용한 이메일 주소로 로그인해야 하며 가입 직후 자동 로그인은 수행되지 않습니다.' in form,
+    require('계정을 만든 후 이메일 주소로 로그인하세요.' in form,
             'Korean registration sign-in guidance was not rendered')
 
     # The Members reset wrapper renders the Korean generic guidance and keeps
@@ -676,7 +752,8 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
     reset_ux = Browser(base)
     reset_status, _, reset_request_form = reset_ux.request('/?kklidi_members_password_reset=1')
     require(reset_status == 200 and 'name="user_login"' in reset_request_form
-            and '사용자명 또는 이메일을 입력하세요. 일치하는 계정이 있으면 WordPress가 비밀번호 재설정 링크를 보냅니다.' in reset_request_form,
+            and '비밀번호 재설정 링크를 받을 이메일을 입력하세요.' in reset_request_form
+            and '기존 회원은 기존 아이디로도 로그인할 수 있습니다.' in reset_request_form,
             'Members reset wrapper Korean guidance was not rendered')
     reset_fields = {
         'kklidi_members_password_reset': '1',
@@ -723,6 +800,9 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
         ['회원가입이 완료되었습니다.', '로그인:', base],
         [env['KKH_USER_PASSWORD'], request_id, env['KKH_MVP_EMAIL'], 'user_id', 'role=']
     )
+    require('From: Synthetic Members <members@example.invalid>' in registration_mail[-1]['headers']
+            and 'This is a synthetic sender footer.' in registration_mail[-1]['message'],
+            'Members sender settings were not applied to the registration notice')
     reset_mailbox_snapshot = mailbox_path.read_bytes()
     existing_reset = Browser(base)
     _, _, existing_reset_form = existing_reset.request('/?kklidi_members_password_reset=1')
@@ -804,6 +884,8 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
     probe = command(php_cli + [HERE / 'mvp_probe.php'], json_result=True)
     new_user = probe.get('user', {})
     require(probe['users_count'] == 4 and new_user.get('login_is_private') is True
+            and new_user.get('nicename_is_separate') is True
+            and new_user.get('nicename_is_public_slug') is True
             and new_user.get('roles') == ['subscriber'] and new_user.get('state') == 'active'
             and new_user.get('service_consents') == 1 and new_user.get('privacy_consents') == 1
             and new_user.get('marketing_actions') == [] and new_user.get('phone') == '',
@@ -835,7 +917,8 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
                                     'legacy_toggle_ignored': True,
                                     'required_documents_fail_closed': True,
                                     'phone_optional': True,
-                                    'email_verification': False}
+                                    'email_verification': False,
+                                    'user_nicename_separate': True}
     results['AUTH-REGISTER-002'] = {'status': 'PASS', 'duplicate_created': 0,
                                     'role_injection_ignored': True, 'disabled_form_hidden': True,
                                     'core_disabled_form_hidden': True}
@@ -859,7 +942,7 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
     overview_status, _, overview_page = admin.request('/wp-admin/users.php?page=kklidi-members&section=overview')
     require(overview_status == 200
             and 'Quick actions' in overview_page
-            and 'Member route links' in overview_page
+            and 'Members manual menu links' in overview_page
             and 'kklidi_members_login=1' in overview_page
             and 'WordPress registration settings' in overview_page,
             'Administrator overview quick actions or canonical route links missing')
@@ -1281,6 +1364,88 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
             'Notification Settings API screen is unavailable')
     settings_nonce = hidden_input(notification_page, '_wpnonce')
 
+    sender_status, _, sender_page = admin.request(sender_path)
+    sender_forms = [form for form in re.findall(
+        r'<form\b.*?</form>', sender_page, flags=re.IGNORECASE | re.DOTALL)
+        if 'kklidi_members_mail_sender[sender_enabled]' in form]
+    require(sender_status == 200 and len(sender_forms) == 1,
+            'Members sender settings form disappeared from Notifications')
+    sender_nonce = hidden_input(sender_forms[0], '_wpnonce')
+    invalid_sender_status, _, _ = admin.request('/wp-admin/options.php', data=sender_settings_fields(
+        extra={'kklidi_members_mail_sender[from_email]': 'bad\r\nBcc:attacker@example.invalid'}))
+    invalid_sender = command(php_cli + [HERE / 'mvp_probe.php', 'mail-sender-summary'],
+                             json_result=True)
+    require(invalid_sender_status == 302 and invalid_sender['stored'] == sender_saved['stored']
+            and invalid_sender['settings_audit_count'] == sender_saved['settings_audit_count'],
+            'Invalid or header-injection sender settings changed the last valid option')
+    denied_sender_status, _, _ = profile_browser.request(
+        '/wp-admin/options.php', data=sender_settings_fields())
+    require(denied_sender_status in (401, 403),
+            'Subscriber changed the Members sender settings')
+
+    test_mailbox_count = len(read_mailbox(mailbox_path))
+    test_form = [form for form in re.findall(
+        r'<form\b.*?</form>', sender_page, flags=re.IGNORECASE | re.DOTALL)
+        if 'name="kklidi_members_admin_action"' in form
+        and 'test_mail_sender' in form][0]
+    test_nonce = hidden_input(test_form, '_kklidi_members_admin_nonce')
+    test_fields = {
+        'kklidi_members_admin_action': 'test_mail_sender',
+        '_kklidi_members_admin_nonce': test_nonce,
+    }
+    failure_marker = Path(env['KKH_MAIL_FAILURE'])
+    failure_marker.write_text('sender test failure\n', encoding='utf-8')
+    failed_test_status, failed_test_headers, _ = admin.request(sender_path, data=test_fields)
+    failure_marker.unlink(missing_ok=True)
+    failed_test_mailbox = read_mailbox(mailbox_path)
+    require(failed_test_status == 302 and 'mail_failed' in failed_test_headers.get('Location', '')
+            and len(failed_test_mailbox) == test_mailbox_count,
+            'Sender test-mail failure did not fail closed without delivery')
+
+    successful_test_count = 0
+    rate_limited = False
+    for _ in range(3):
+        refreshed_status, _, refreshed_page = admin.request(sender_path)
+        refreshed_forms = [form for form in re.findall(
+            r'<form\b.*?</form>', refreshed_page, flags=re.IGNORECASE | re.DOTALL)
+            if 'test_mail_sender' in form]
+        require(refreshed_status == 200 and len(refreshed_forms) == 1,
+                'Sender test form was not rendered for the current administrator')
+        refreshed_fields = {
+            'kklidi_members_admin_action': 'test_mail_sender',
+            '_kklidi_members_admin_nonce': hidden_input(
+                refreshed_forms[0], '_kklidi_members_admin_nonce'),
+        }
+        test_status, test_headers, _ = admin.request(sender_path, data=refreshed_fields)
+        if 'mail_test_sent' in test_headers.get('Location', ''):
+            require(test_status == 302, 'Successful sender test did not redirect safely')
+            successful_test_count += 1
+        else:
+            require(test_status == 302 and 'rate_limited' in test_headers.get('Location', ''),
+                    'Sender test rate limit did not fail closed')
+            rate_limited = True
+    test_mailbox = read_mailbox(mailbox_path)
+    test_audit = command(php_cli + [HERE / 'mvp_probe.php', 'mail-sender-summary'],
+                         json_result=True)
+    require(successful_test_count == 2 and rate_limited
+            and len(test_mailbox) == test_mailbox_count + successful_test_count
+            and test_audit['test_audit'][-1]['reason_code'] == 'rate_limited'
+            and all(row['to'] == [fixture['admin_email']]
+                    for row in test_mailbox[-successful_test_count:])
+            and all('From: Synthetic Members <members@example.invalid>' in row['headers']
+                    and 'This is a synthetic sender footer.' in row['message']
+                    for row in test_mailbox[-successful_test_count:]),
+            'Sender test delivery, scoped headers, footer, or audit boundary failed')
+    results['AUTH-MAIL-SENDER-001'] = {
+        'status': 'PASS', 'default_off': True, 'settings_api': True,
+        'capability_and_nonce': True, 'non_autoload_option': True,
+        'invalid_and_crlf_rejected_atomically': True, 'members_scoped_from_header': True,
+        'plain_text_footer': True, 'test_recipient_current_admin_only': True,
+        'test_failure_no_delivery': True, 'test_rate_limit': '3_per_admin_per_15_minutes',
+        'metadata_only_audit': True, 'global_sender_filters': False,
+        'smtp_credentials_stored': False,
+    }
+
     def notification_settings_fields(subject='', body=''):
         fields = {
             'option_page': 'kklidi_members_notifications',
@@ -1456,7 +1621,10 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
             and 'Synthetic Admin Notice' in admin_notice['message']
             and env['KKH_ADMIN_NOTICE_EMAIL'] in admin_notice['message']
             and 'Registered at (UTC):' in admin_notice['message']
-            and admin_notice['headers'] == ['Content-Type: text/plain; charset=UTF-8']
+            and any(header.lower().startswith('content-type: text/plain;')
+                    for header in admin_notice['headers'])
+            and 'From: Synthetic Members <members@example.invalid>' in admin_notice['headers']
+            and 'This is a synthetic sender footer.' in admin_notice['message']
             and admin_notice.get('locale') == 'en_US'
             and admin_notice.get('site_locale_option') == 'en_US'
             and all(value not in admin_notice['subject'] + admin_notice['message']
@@ -1789,7 +1957,13 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
             and {row['event_type'] for row in mail_audit} == expected_mail_events
             and all(row['result'] == 'success' and row['reason_code'] == 'wp_mail_accepted'
                     for row in mail_audit),
-            'Administrator withdrawal finalization changed identity or missed the disabled transition')
+            'Administrator withdrawal finalization changed identity or missed the disabled transition: '
+            + repr({'status': finalize_status,
+                    'users_count': finalized_probe['users_count'],
+                    'user': finalized_probe.get('user'),
+                    'disabled_events': disabled_events,
+                    'mail_audit': mail_audit,
+                    'expected_mail_events': sorted(expected_mail_events)}))
     finalized_mail = read_mailbox(mailbox_path)
     require(len(finalized_mail) == len(withdrawal_mail) + 1,
             'Withdrawal finalization did not create exactly one account notice')
@@ -2262,7 +2436,7 @@ def execute(php, mysqld, one_prefix=False, skip_perf=False):
               'modes': {'core_baseline': {'status': 'FAIL', 'variants': []},
                         'members_on': {'status': 'FAIL', 'variants': []}},
               'contracts_total': 24, 'contracts_exercised': 24,
-               'extension_contracts_total': 6, 'extension_contracts_exercised': 6,
+               'extension_contracts_total': 8, 'extension_contracts_exercised': 8,
               'not_run': ['actual WooCommerce/LMS full-stack browser regression',
                           'KBoard removal-period compatibility smoke/no-fatal',
                           'device-limit WooCommerce login entry', 'TLS/Secure cookie deployment',
@@ -2396,6 +2570,26 @@ def execute(php, mysqld, one_prefix=False, skip_perf=False):
                 wait_port(server, int(env['KKH_HTTP_PORT']))
             mvp_results = run_mvp_cases(base, env, fixture, command, php_cli,
                                         restart_server=restart_mvp_server)
+            identity_rows = [row for row in members_rows if row.get('email_primary_ui_guidance')]
+            identity_display_guard = [row for row in guard_rows
+                                      if row.get('display_name_not_identifier')]
+            require(len(identity_rows) == 6 and identity_display_guard,
+                    'Identity contract did not exercise email-first and nickname boundaries')
+            require(mvp_results['AUTH-REGISTER-001'].get('user_nicename_separate') is True,
+                    'Identity contract did not exercise the independent public nicename')
+            mvp_results['AUTH-IDENTITY-002'] = {
+                'status': 'PASS',
+                'new_registration_username_field': False,
+                'new_user_login_private': True,
+                'new_user_nicename_separate': True,
+                'email_primary_login_guidance': True,
+                'legacy_username_login': True,
+                'legacy_email_login': True,
+                'password_reset_legacy_identifier_compatible': True,
+                'display_name_not_identifier': True,
+                'core_auth_and_reset_apis_preserved': True,
+                'members_off_core_login_no_fatal': True,
+            }
             stop(server)
             print('Checking limiter with 100 calls across 8 independent PHP workers...', flush=True)
             with ThreadPoolExecutor(max_workers=8) as pool:
@@ -2515,7 +2709,7 @@ def execute(php, mysqld, one_prefix=False, skip_perf=False):
         (output / 'latest.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
     core_total = sum(len(v['cases']) for v in report['modes']['core_baseline']['variants'])
     members_total = sum(len(v['cases']) for v in report['modes']['members_on']['variants'])
-    print(f'{report["status"]}: MVP contracts=24 + extension contracts=6, '
+    print(f'{report["status"]}: MVP contracts=24 + extension contracts=8, '
           f'AUTH-LOGIN-001 Core={core_total}, '
           f'Members={members_total}; release evidence PARTIAL. Report: .harness/reports/latest.json')
     if 'error' in report:

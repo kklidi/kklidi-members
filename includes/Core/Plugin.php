@@ -127,7 +127,8 @@ final class Plugin {
 
 	private static function is_password_enhancement_route(): bool {
 		foreach (array('kklidi_members_login', 'kklidi_members_register',
-			'kklidi_members_password', 'kklidi_members_password_reset') as $route) {
+			'kklidi_members_password', 'kklidi_members_password_reset',
+			'kklidi_members_withdrawal') as $route) {
 			if (RouteMap::request_has($route)) {
 				return true;
 			}

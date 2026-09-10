@@ -38,6 +38,7 @@ final class AdminRegistrationMailer {
 		$switched = switch_to_locale($site_locale);
 		$sent = false;
 		try {
+			require_once KKLIDI_MEMBERS_DIR . 'includes/Notifications/MailSenderSettings.php';
 			$site_name = sanitize_text_field(wp_specialchars_decode(get_bloginfo('name'), ENT_QUOTES));
 			$subject = sprintf(__('[%s] New member registration', 'kklidi-members'), $site_name);
 			$message = implode("\n\n", array(
@@ -47,7 +48,8 @@ final class AdminRegistrationMailer {
 				sprintf(__('Registered at (UTC): %s', 'kklidi-members'), sanitize_text_field($user->user_registered)),
 			));
 			$headers = array('Content-Type: text/plain; charset=' . get_bloginfo('charset'));
-			$sent = wp_mail($recipient, $subject, $message, $headers) === true;
+			$prepared = MailSenderSettings::prepare($message, $headers);
+			$sent = wp_mail($recipient, $subject, $prepared['message'], $prepared['headers']) === true;
 		} catch (\Throwable $error) {
 			$sent = false;
 		} finally {

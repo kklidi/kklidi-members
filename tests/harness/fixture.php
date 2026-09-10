@@ -31,4 +31,5 @@ if (!is_wp_error($blocked) || $blocked->get_error_code() !== 'harness_egress_blo
 global $wpdb, $wp_version;
 echo json_encode(['fixtures' => $fixtures, 'wordpress' => $wp_version, 'php' => PHP_VERSION,
     'prefix' => $wpdb->prefix, 'users_count' => (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->users}"),
+    'admin_email' => (string) get_userdata(1)->user_email,
     'plugins' => get_option('active_plugins'), 'mail_sink' => true, 'http_blocked' => true], JSON_UNESCAPED_UNICODE);

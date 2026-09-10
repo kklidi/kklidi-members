@@ -3,11 +3,28 @@ import argparse
 import http.cookiejar
 import json
 from pathlib import Path
+import socket
 import ssl
+import time
 import urllib.parse
 import urllib.request
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+def inspect_tls(hostname, port, context):
+    with socket.create_connection((hostname, port), timeout=30) as connection:
+        with context.wrap_socket(connection, server_hostname=hostname) as secured:
+            certificate = secured.getpeercert()
+            version = secured.version()
+    not_after = certificate.get('notAfter', '')
+    expires_at = ssl.cert_time_to_seconds(not_after) if not_after else 0
+    return {
+        'version': version,
+        'trusted_hostname': True,
+        'not_after': not_after,
+        'not_expired': expires_at > time.time(),
+    }
 
 def inspect(url, ca_file=None):
     parsed = urllib.parse.urlsplit(url)
@@ -19,6 +36,7 @@ def inspect(url, ca_file=None):
     target = base + '?' + urllib.parse.urlencode({'kklidi_members_login': '1'})
     jar = http.cookiejar.CookieJar()
     context = ssl.create_default_context(cafile=str(ca_file) if ca_file else None)
+    tls = inspect_tls(parsed.hostname, parsed.port or 443, context)
     opener = urllib.request.build_opener(urllib.request.ProxyHandler({}),
         urllib.request.HTTPCookieProcessor(jar), urllib.request.HTTPSHandler(context=context))
     with opener.open(urllib.request.Request(target, headers={'User-Agent': 'KKLIDI-Members-Deployment-Preflight/1'}),
@@ -30,6 +48,9 @@ def inspect(url, ca_file=None):
         guest = relevant[0] if len(relevant) == 1 else None
         checks = {
             'https_final_url': urllib.parse.urlsplit(response.url).scheme == 'https',
+            'tls_1_2_or_newer': tls['version'] in ('TLSv1.2', 'TLSv1.3'),
+            'certificate_trusted_hostname': tls['trusted_hostname'],
+            'certificate_not_expired': tls['not_expired'],
             'login_form': 'name="kklidi_members_identifier"' in body,
             'no_store': 'no-store' in headers.get('Cache-Control', '').lower(),
             'private_cache': 'private' in headers.get('Cache-Control', '').lower(),
@@ -46,7 +67,7 @@ def inspect(url, ca_file=None):
             'php_session_absent': not any(cookie.name == 'PHPSESSID' for cookie in jar),
         }
         return {'status': 'PASS' if all(checks.values()) else 'PARTIAL', 'checks': checks,
-                'network_request_sent': True, 'host': parsed.hostname}
+                'tls': tls, 'network_request_sent': True, 'host': parsed.hostname}
 
 def main():
     parser = argparse.ArgumentParser()

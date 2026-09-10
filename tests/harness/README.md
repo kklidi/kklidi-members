@@ -47,6 +47,8 @@ The runner has no option for an existing site URL, existing DB endpoint, existin
 | `test_runner.py` | Destructive-operation boundaries, assertion falsification, and UI route-asset guards |
 | `notification_contract.json` | `AUTH-NOTIFY-001` four-event runtime, delivery, localization, and failure contract |
 | `notification_settings_contract.json` | `AUTH-NOTIFY-002` Core-first admin wording design and implementation boundary |
+| `identity_policy_contract.json` | `AUTH-IDENTITY-002` email-first new-account UI with immutable legacy username compatibility |
+| `mail_sender_contract.json` | `AUTH-MAIL-SENDER-001` Members-scoped sender, footer, and bounded test-send security boundary |
 | `admin_ux_contract.json` | `AUTH-ADMIN-UX-001` bounded administrator diagnostics, route links, and quick actions |
 | `registration_fields_contract.json` | `AUTH-REGISTER-FIELDS-001` bounded built-in registration field states and security boundary |
 | `message_ux_contract.json` | `AUTH-MESSAGE-UX-001` read-only gettext catalog and visible notification-default boundary |
@@ -56,11 +58,13 @@ The runner has no option for an existing site URL, existing DB endpoint, existin
 | `auth_layout_contract.json` | `AUTH-UX-006` centered short auth routes, hidden site brand eyebrow, and one-line login links |
 | `registration_ux_contract.json` | `AUTH-REGISTER-UX-007` unified required-field metadata, explicit markers, and locked admin policy display |
 | `withdrawal_ux_contract.json` | `AUTH-WITHDRAW-UX-008` withdrawal reauthentication feedback, password visibility, and retention-qualified copy |
+| `route_ux_contract.json` | `AUTH-UX-009` brand-free route shell, centered overflow-safe layout, shared link row, and display-name semantics |
 | `ui_contract.json` | `AUTH-UI-001` screen/state/translation/accessibility/asset contract manifest |
 | `ux_strategy_contract.json` | `AUTH-UX-003` approved frontend/admin information architecture and implementation boundaries |
 | `mamp_woo_case.php` | CLI-only, fixed-sandbox Woo/WCI fixture with tagged user/product/orders, Members optional-dependency toggles, and exact cleanup |
 | `mamp_lms_case.php` | CLI-only, fixed-sandbox LMS fixture for identity/access/domain ownership, Members fallback, mail sink, and exact cleanup |
 | `mamp_lms_run.py` | Runs the actual fixed-sandbox LMS identity/access/on-off contract and writes a per-run JSON report |
+| `mamp_mail_sender_case.php` / `mamp_mail_sender_run.py` | Captures a Members-owned account notice through the actual fixed-sandbox WordPress `wp_mail()` API and verifies scoped `From`/plain-text footer, audit, and cleanup; it does not claim external mailbox delivery |
 | `mamp_lifecycle_run.py` | Verifies ZIP install, previous→current update, reinstall, deactivate/reactivate, protected IDs/domain fingerprint, and exact source restoration |
 | `mamp_route_case.php` / `mamp_route_run.py` | Enables the fixed clean-route map in the candidate sandbox, exercises all nine Apache paths and query fallback, then restores route/permalink/rewrite/`.htaccess`/audit state |
 | `mamp_candidate_run.py` | Temporarily mounts the current release ZIP, runs every fixed MAMP gate serially, and restores the original plugin tree by digest |
@@ -77,7 +81,11 @@ The `AUTH-UI-001` unit guard verifies that every current Members frontend route 
 
 `AUTH-NOTIFY-002` adds a second notification extension contract. The disposable runner submits the actual WordPress Settings API form as an administrator, rejects the same nonce for a subscriber, verifies non-autoload storage and metadata-only audit, checks event placeholder allowlists and gettext fallback, and then reruns the existing four-event mail and failure contracts under both database prefixes.
 
+`AUTH-MAIL-SENDER-001` adds the 0.7.29 Members-owned sender/footer boundary. The disposable runner verifies default-off Settings API storage, atomic CR/LF rejection, scoped headers, administrator-only test delivery failure and rate limit. The fixed MAMP candidate also runs `mamp_mail_sender_run.py`; its sink confirms WordPress `wp_mail()` accepted the rendered request without contacting an external mailbox.
+
 `AUTH-ADMIN-UX-001` keeps the route controller canonical and makes administrator setup easier without creating pages or mutating site menus. The contract is guarded by the unit suite and the MAMP lifecycle runner; it does not claim external mailbox delivery.
+
+`AUTH-UX-009` keeps the routed frontend shell consistent across all nine screens: short content is centered, long content starts after a safe top inset, the site-brand eyebrow is absent, and account links share one inline row. Display name is presented as a public nickname and is not a login identifier.
 
 `AUTH-ROUTE-MAP-001` implements the bounded route-management slice. It keeps all nine query routes as fallback, adds no WordPress page or shortcode, and requires an explicit capability/nonce-protected activation after pretty-permalink, namespace, page, rewrite-rule, and reserved-endpoint collision checks. The disposable runner verifies both prefixes, rollback, Core force-reauth, content isolation, and the paired performance budget.
 

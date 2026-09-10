@@ -1,0 +1,125 @@
+{
+  "contract": "AUTH-MAIL-SENDER-001",
+  "version": 1,
+  "status": "IMPLEMENTED_AND_SYNTHETIC_VERIFIED",
+  "target_release": "0.7.29",
+  "verification": {
+    "status": "PASS",
+    "scope": "default_and_non_default_database_prefix",
+    "evidence_id": "2fb34a1a46b14894989c36e755b2dbd1",
+    "report": ".harness/reports/latest.json",
+    "mamp_candidate": "mamp-candidate-2ac4faf1bb6b",
+    "mamp_mail_sender": "mamp-mail-sender-56dbd5af1df2",
+    "mamp_wp_mail_request_accepted": true,
+    "external_mailbox_delivery": false
+  },
+  "depends_on": [
+    "AUTH-NOTIFY-001",
+    "AUTH-NOTIFY-002",
+    "AUTH-ADMIN-NOTIFY-001"
+  ],
+  "principle": "members_scoped_sender_on_wordpress_mail",
+  "admin": {
+    "menu_parent": "users",
+    "section": "notifications",
+    "api": "wordpress_settings_api",
+    "capability": "manage_kklidi_members",
+    "server_nonce_required": true,
+    "show_in_rest": false,
+    "fields": [
+      "sender_enabled",
+      "from_name",
+      "from_email",
+      "footer_enabled",
+      "footer_text"
+    ]
+  },
+  "storage": {
+    "api": "wordpress_options",
+    "option_name": "kklidi_members_mail_sender",
+    "schema_version": 1,
+    "autoload": false,
+    "custom_table": false,
+    "invalid_update": "reject_and_retain_last_valid",
+    "missing_or_incomplete": "wordpress_site_sender_and_no_footer"
+  },
+  "validation": {
+    "from_name_max_chars": 100,
+    "from_email_max_chars": 254,
+    "footer_max_chars": 500,
+    "email_api": "is_email",
+    "crlf_allowed": false,
+    "raw_html": false,
+    "shortcodes": false,
+    "php": false
+  },
+  "transport": {
+    "api": "wp_mail",
+    "format": "text/plain",
+    "application": "per_members_message_from_header",
+    "members_registers_global_sender_filters": false,
+    "smtp_owned_by_members": false,
+    "provider_credentials_stored": false,
+    "reply_to_editable": false,
+    "delivery_claim": "wp_mail_request_accepted_only"
+  },
+  "scope": {
+    "members_user_events": [
+      "registration_completed",
+      "password_changed",
+      "withdrawal_requested",
+      "withdrawal_finalized"
+    ],
+    "members_admin_events": [
+      "admin_registration"
+    ],
+    "wordpress_core_password_reset_mail": false,
+    "woocommerce_order_mail": false,
+    "lms_learning_mail": false,
+    "kboard_mail": false
+  },
+  "defaults": {
+    "sender_enabled": false,
+    "footer_enabled": false,
+    "footer_source": "gettext_when_enabled",
+    "preserve_existing_delivery": true
+  },
+  "test_send": {
+    "enabled": true,
+    "recipient": "current_administrator_core_user_email",
+    "arbitrary_recipient_input": false,
+    "capability_and_nonce_required": true,
+    "rate_limit": "3_per_admin_per_15_minutes",
+    "delivery_claim": "wp_mail_request_accepted_only"
+  },
+  "failure_and_audit": {
+    "mail_failure_rolls_back_account_action": false,
+    "automatic_retry": false,
+    "audit": "metadata_only",
+    "audit_addresses_or_content": false
+  },
+  "security": {
+    "header_injection_rejected": true,
+    "credentials_stored": false,
+    "global_mail_behavior_changed": false,
+    "members_deactivation_leaves_filter": false,
+    "owned_domain_and_spf_dkim_dmarc_are_deployment_gate": true
+  },
+  "current_runtime_gap": [],
+  "out_of_scope": [
+    "global_wp_mail_sender_override",
+    "smtp_settings",
+    "provider_api_or_credentials",
+    "html_email",
+    "wysiwyg_editor",
+    "arbitrary_reply_to",
+    "arbitrary_test_recipient",
+    "retry_queue",
+    "delivery_webhooks",
+    "delivery_log",
+    "wordpress_core_password_reset_mail",
+    "woocommerce_order_mail",
+    "lms_learning_mail",
+    "kboard_mail"
+  ]
+}
