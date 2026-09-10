@@ -507,7 +507,7 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('| D14 | **IMPLEMENTED FOR 0.7.21', product)
         self.assertIn('AUTH-ROUTE-MAP-001 / 0.7.21 extension (IMPLEMENTED)', harness)
         self.assertIn("'docs/ROUTE_MANAGEMENT.md'", builder)
-        self.assertIn("Version: 0.7.22", plugin)
+        self.assertIn("Version: 0.7.23", plugin)
         self.assertIn('RouteMap::install()', installer)
         self.assertIn('RouteMap::deactivate()', plugin)
         self.assertIn("public const OPTION_NAME = 'kklidi_members_route_map';", route_map)
@@ -1225,6 +1225,35 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('Create an account, then sign in with your email address.', register)
         self.assertIn('data-kklidi-members-password-toggle', withdrawal)
 
+    def test_auth_ux_006_auth_routes_are_centered_and_login_links_are_flat(self):
+        repository = Path(__file__).resolve().parents[2]
+        contract = json.loads(
+            (repository / 'tests/harness/auth_layout_contract.json').read_text(encoding='utf-8')
+        )
+        self.assertEqual(contract['contract'], 'AUTH-UX-006')
+        self.assertEqual(contract['target_release'], '0.7.23')
+        self.assertEqual(contract['status'], 'IMPLEMENTED_AND_UNIT_VERIFIED')
+        self.assertTrue(contract['layout']['vertically_centered'])
+        self.assertEqual(contract['layout']['max_card_width_px'], 480)
+        self.assertFalse(contract['layout']['site_brand_eyebrow'])
+        self.assertEqual(contract['login_links']['order'], ['sign_up', 'find_password', 'home'])
+        self.assertTrue(contract['login_links']['single_row'])
+        self.assertTrue(contract['login_links']['same_hierarchy'])
+        css = (repository / 'assets/css/members.css').read_text(encoding='utf-8')
+        login = (repository / 'templates/login.php').read_text(encoding='utf-8')
+        reset = (repository / 'templates/password-reset.php').read_text(encoding='utf-8')
+        register = (repository / 'templates/register.php').read_text(encoding='utf-8')
+        self.assertIn('.kklidi-members-page--login .kklidi-members-main', css)
+        self.assertIn('min-height: 100vh;', css)
+        self.assertIn('max-width: 480px;', css)
+        self.assertIn('kklidi-members-form-links--inline', login)
+        self.assertIn("esc_html_e('Sign up', 'kklidi-members')", login)
+        self.assertIn("esc_html_e('Find password', 'kklidi-members')", login)
+        self.assertIn("esc_html_e('Home', 'kklidi-members')", login)
+        self.assertNotIn('kklidi-members-brand', login)
+        self.assertNotIn('kklidi-members-brand', reset)
+        self.assertNotIn('kklidi-members-page--login', register)
+
     def test_auth_notify_001_catalog_covers_mail_presets(self):
         repository = Path(__file__).resolve().parents[2]
         templates = (repository / 'includes/Notifications/NotificationTemplates.php').read_text(
@@ -1326,7 +1355,7 @@ class HarnessGuards(unittest.TestCase):
 
         lifecycle = (repository / 'tests/harness/mamp_lifecycle_run.py').read_text(encoding='utf-8')
         self.assertIn("SANDBOX = Path('C:/MAMP/htdocs/kklidi-members-mamp-sandbox')", lifecycle)
-        self.assertIn("PREVIOUS_VERSION = '0.7.21'", lifecycle)
+        self.assertIn("PREVIOUS_VERSION = '0.7.22'", lifecycle)
         self.assertIn("ALLOWED_INITIAL_VERSIONS = ('0.7.0', PREVIOUS_VERSION, CURRENT_VERSION)", lifecycle)
         self.assertIn("CURRENT_VERSION = re.search(", lifecycle)
         self.assertIn("OLD_ARCHIVE = ROOT / ('dist/kklidi-members-' + PREVIOUS_VERSION + '.zip')", lifecycle)
@@ -1431,7 +1460,7 @@ class HarnessGuards(unittest.TestCase):
         ready = json.loads(json.dumps(example))
         ready['environment']['base_url'] = 'https://staging.kklidi.com'
         ready['versions'].update(
-            wordpress='7.1', php='8.3', members='0.7.22', woocommerce='11.1.0')
+            wordpress='7.1', php='8.3', members='0.7.23', woocommerce='11.1.0')
         ready['owners'] = {key: 'approved-' + key for key in ready['owners']}
         ready['backup'].update(
             artifact_sha256='a' * 64,

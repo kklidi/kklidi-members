@@ -1,0 +1,28 @@
+{
+  "contract": "AUTH-UX-006",
+  "version": 1,
+  "status": "IMPLEMENTED_AND_UNIT_VERIFIED",
+  "target_release": "0.7.23",
+  "scope": "login_and_password_reset_routes",
+  "routes": ["login", "password_reset"],
+  "layout": {
+    "vertically_centered": true,
+    "max_card_width_px": 480,
+    "site_brand_eyebrow": false
+  },
+  "login_links": {
+    "order": ["sign_up", "find_password", "home"],
+    "single_row": true,
+    "same_hierarchy": true,
+    "separator": "|"
+  },
+  "registration_layout": {
+    "vertically_centered": false,
+    "reason": "long_form"
+  },
+  "verification": {
+    "status": "PASS",
+    "scope": "unit_and_static_ui_guards",
+    "test_runner": "tests/harness/test_runner.py"
+  }
+}

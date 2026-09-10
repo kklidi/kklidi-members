@@ -42,6 +42,21 @@
 	padding: 40px 0 56px;
 }
 
+.kklidi-members-page--login .kklidi-members-main,
+.kklidi-members-page--password-reset .kklidi-members-main {
+	display: flex;
+	align-items: center;
+	min-height: 100vh;
+	padding: 24px 0;
+}
+
+.kklidi-members-page--login .kklidi-members-card,
+.kklidi-members-page--password-reset .kklidi-members-card {
+	width: 100%;
+	max-width: 480px;
+	margin: 0 auto;
+}
+
 .kklidi-members-card {
 	background: var(--kklidi-members-surface);
 	border: 1px solid var(--kklidi-members-line);
@@ -332,6 +347,22 @@
 
 .kklidi-members-form-links--tertiary {
 	margin-top: 8px;
+}
+
+.kklidi-members-form-links--inline {
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	margin-top: 24px;
+}
+
+.kklidi-members-form-links--inline a {
+	font-weight: 650;
+}
+
+.kklidi-members-form-links__separator {
+	color: var(--kklidi-members-muted);
+	font-weight: 400;
 }
 
 .kklidi-members-brand {

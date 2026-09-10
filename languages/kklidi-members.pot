@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the KKLIDI Members plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: KKLIDI Members 0.7.22\n"
+"Project-Id-Version: KKLIDI Members 0.7.23\n"
 "Report-Msgid-Bugs-To: https://kklidi.com/\n"
 "POT-Creation-Date: 2026-09-07 00:00+0000\n"
 "MIME-Version: 1.0\n"
@@ -1193,4 +1193,16 @@ msgid "Create an account, then sign in with your email address."
 msgstr ""
 
 msgid "Enter your username or email to receive a reset link."
+msgstr ""
+
+msgid "Login options"
+msgstr ""
+
+msgid "Sign up"
+msgstr ""
+
+msgid "Find password"
+msgstr ""
+
+msgid "Home"
 msgstr ""

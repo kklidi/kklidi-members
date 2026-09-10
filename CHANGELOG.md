@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.23 — 2026-09-10
+
+- Center the short login and password-reset routes in a compact card.
+- Remove the redundant site-name eyebrow from those auth screens.
+- Present login links in one same-hierarchy row: Sign up | Find password | Home.
+
 ## 0.7.22 — 2026-09-10
 
 - Put password visibility icons inside password fields across account screens.

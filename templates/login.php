@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
 <?php wp_body_open(); ?>
 	<main class="kklidi-members-main">
 		<section class="kklidi-members-card" aria-labelledby="kklidi-members-page-title">
-			<header class="kklidi-members-header"><p class="kklidi-members-eyebrow"><a class="kklidi-members-brand" href="<?php echo esc_url($home_url); ?>"><?php echo esc_html(get_bloginfo('name')); ?></a></p><h1 id="kklidi-members-page-title"><?php esc_html_e('Log in', 'kklidi-members'); ?></h1><p><?php esc_html_e('Enter your account details to continue.', 'kklidi-members'); ?></p></header>
+			<header class="kklidi-members-header"><h1 id="kklidi-members-page-title"><?php esc_html_e('Log in', 'kklidi-members'); ?></h1><p><?php esc_html_e('Enter your account details to continue.', 'kklidi-members'); ?></p></header>
 			<?php if ($notice !== '') : ?><p class="kklidi-members-notice" role="status"><?php echo esc_html($notice); ?></p><?php endif; ?>
 			<?php if ($message !== '') : ?><p class="kklidi-members-notice kklidi-members-notice--error" role="alert"><?php echo esc_html($message); ?></p><?php endif; ?>
 			<?php if ($message_html !== '') : ?><div class="kklidi-members-notice kklidi-members-notice--error" role="alert"><?php echo wp_kses_post($message_html); ?></div><?php endif; ?>
@@ -31,7 +31,7 @@ if (!defined('ABSPATH')) {
 				<label class="kklidi-members-check"><input name="kklidi_members_remember" type="checkbox" value="1" <?php checked($remember); ?>> <?php esc_html_e('Remember me', 'kklidi-members'); ?></label>
 				<button class="kklidi-members-button" type="submit"><?php esc_html_e('Log in', 'kklidi-members'); ?></button>
 			</form>
-			<nav class="kklidi-members-form-links kklidi-members-form-links--primary" aria-label="<?php esc_attr_e('Login help', 'kklidi-members'); ?>"><a href="<?php echo esc_url($password_reset_url); ?>"><?php esc_html_e('Forgot your password?', 'kklidi-members'); ?></a></nav><nav class="kklidi-members-form-links kklidi-members-form-links--secondary" aria-label="<?php esc_attr_e('Account links', 'kklidi-members'); ?>"><a href="<?php echo esc_url($register_url); ?>"><?php esc_html_e('Create an account', 'kklidi-members'); ?></a></nav><nav class="kklidi-members-form-links kklidi-members-form-links--tertiary" aria-label="<?php esc_attr_e('Site navigation', 'kklidi-members'); ?>"><a class="kklidi-members-link--tertiary" href="<?php echo esc_url($home_url); ?>"><?php esc_html_e('Back to site', 'kklidi-members'); ?></a></nav>
+			<nav class="kklidi-members-form-links kklidi-members-form-links--inline" aria-label="<?php esc_attr_e('Login options', 'kklidi-members'); ?>"><a href="<?php echo esc_url($register_url); ?>"><?php esc_html_e('Sign up', 'kklidi-members'); ?></a><span class="kklidi-members-form-links__separator" aria-hidden="true">|</span><a href="<?php echo esc_url($password_reset_url); ?>"><?php esc_html_e('Find password', 'kklidi-members'); ?></a><span class="kklidi-members-form-links__separator" aria-hidden="true">|</span><a href="<?php echo esc_url($home_url); ?>"><?php esc_html_e('Home', 'kklidi-members'); ?></a></nav>
 		</section>
 	</main>
 	<?php wp_footer(); ?>
