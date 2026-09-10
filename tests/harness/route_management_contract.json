@@ -1,7 +1,7 @@
 {
   "contract": "AUTH-ROUTE-MAP-001",
   "version": 1,
-  "status": "SPECIFIED_NOT_IMPLEMENTED",
+  "status": "IMPLEMENTED_AND_MAMP_VERIFIED",
   "target_release": "0.7.21",
   "depends_on": [
     "AUTH-REDIRECT-001",
@@ -35,6 +35,7 @@
     "capability": "manage_kklidi_members",
     "wordpress_nonce_required": true,
     "preflight_scope": [
+      "pretty_permalinks",
       "namespace",
       "wordpress_pages",
       "existing_rewrite_rules",
@@ -42,10 +43,12 @@
     ],
     "collision_result": "reject_all_without_mutation",
     "collision_disclosure": ["path", "page_id", "status", "owner_type"],
-    "rewrite_flush": ["plugin_activation", "actual_setting_transition"],
+    "rewrite_flush": ["plugin_activation", "plugin_deactivation", "actual_setting_transition"],
     "flush_on_normal_request": false,
     "post_flush_rule_verification": true,
-    "failed_transition": "restore_previous_option_state"
+    "failed_transition": "restore_previous_option_state",
+    "successful_transition_audit_event": "route_settings_update",
+    "audit_contains_raw_url_or_user_input": false
   },
   "storage": {
     "api": "wordpress_options",
@@ -92,6 +95,27 @@
     "query_routes_continue": true,
     "pages_or_menus_to_restore": false,
     "wordpress_user_ids_preserved": true
+  },
+  "verification": {
+    "status": "PASS",
+    "scope": "synthetic_wordpress",
+    "prefixes": ["wp_", "non_default"],
+    "evidence_id": "8c6ea0415d3d4e208ed79dbc7727886b",
+    "report": ".harness/reports/latest.json",
+    "performance": {
+      "median_overhead_ms": 2.922,
+      "p95_overhead_ms": 1.369,
+      "query_median_off_on": [4, 5],
+      "memory_median_unchanged": true
+    },
+    "mamp": {
+      "status": "PASS",
+      "runner": "tests/harness/mamp_route_run.py",
+      "candidate_orchestrator": "tests/harness/mamp_candidate_run.py",
+      "apache_routes": 9,
+      "query_fallback": true,
+      "state_and_plugin_tree_restored": true
+    }
   },
   "future_or_excluded": [
     "custom_slugs",

@@ -58,6 +58,8 @@ The runner has no option for an existing site URL, existing DB endpoint, existin
 | `mamp_lms_case.php` | CLI-only, fixed-sandbox LMS fixture for identity/access/domain ownership, Members fallback, mail sink, and exact cleanup |
 | `mamp_lms_run.py` | Runs the actual fixed-sandbox LMS identity/access/on-off contract and writes a per-run JSON report |
 | `mamp_lifecycle_run.py` | Verifies ZIP install, previous→current update, reinstall, deactivate/reactivate, protected IDs/domain fingerprint, and exact source restoration |
+| `mamp_route_case.php` / `mamp_route_run.py` | Enables the fixed clean-route map in the candidate sandbox, exercises all nine Apache paths and query fallback, then restores route/permalink/rewrite/`.htaccess`/audit state |
+| `mamp_candidate_run.py` | Temporarily mounts the current release ZIP, runs every fixed MAMP gate serially, and restores the original plugin tree by digest |
 | `wordpress.lock.json` | Exact Core archive and checksum manifest provenance |
 | `database.php` | CLI-only, datadir-verified database provisioning |
 | `config.php` | Guarded temporary wp-config template; never deployed |
@@ -73,7 +75,7 @@ The `AUTH-UI-001` unit guard verifies that every current Members frontend route 
 
 `AUTH-ADMIN-UX-001` keeps the route controller canonical and makes administrator setup easier without creating pages or mutating site menus. The contract is guarded by the unit suite and the MAMP lifecycle runner; it does not claim external mailbox delivery.
 
-`AUTH-ROUTE-MAP-001` specifies the next bounded route-management slice. It keeps all nine query routes as fallback, adds no WordPress page or shortcode, and requires an explicit capability/nonce-protected activation after namespace, page, rewrite-rule, and reserved-endpoint collision checks. The current runtime has not implemented this contract.
+`AUTH-ROUTE-MAP-001` implements the bounded route-management slice. It keeps all nine query routes as fallback, adds no WordPress page or shortcode, and requires an explicit capability/nonce-protected activation after pretty-permalink, namespace, page, rewrite-rule, and reserved-endpoint collision checks. The disposable runner verifies both prefixes, rollback, Core force-reauth, content isolation, and the paired performance budget.
 
 `AUTH-REGISTER-FIELDS-001` implements the 0.7.18 registration-only field policy. Email, password, display name and required consent stay locked; only first name, last name and phone may be required, optional or hidden. The disposable runner verifies Settings API capability/nonce, non-autoload storage, invalid-state rejection, required validation, hidden POST rejection, fixed role, both prefixes, and exact synthetic-user cleanup.
 
@@ -90,6 +92,7 @@ With the dedicated MAMP Apache and MySQL sandbox running, the repeatable LMS and
 ```powershell
 & $Python tests/harness/mamp_lms_run.py
 & $Python tests/harness/mamp_lifecycle_run.py
+& $Python tests/harness/mamp_candidate_run.py
 ```
 
 Both runners accept no alternate site path or URL, use a per-run token, write `.harness/reports/<run-id>.json`, and restore their owned data, plugin state, files, and temporary directories in `finally`. The lifecycle runner probes the fixed plugin parent before mutation and uses same-volume atomic directory moves so a permission failure cannot degrade into a partial copy.

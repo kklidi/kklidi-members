@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the KKLIDI Members plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: KKLIDI Members 0.7.20\n"
+"Project-Id-Version: KKLIDI Members 0.7.21\n"
 "Language: ko_KR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1006,3 +1006,87 @@ msgstr "일반 설정 열기"
 
 msgid "Save administrator notification"
 msgstr "관리자 알림 저장"
+
+msgid "%d route conflicts found"
+msgstr "라우트 충돌 %d개 발견"
+
+msgid "Add the links you need to a site menu manually. Members does not create or modify menu items."
+msgstr "필요한 링크를 사이트 메뉴에 직접 추가하세요. Members는 메뉴 항목을 생성하거나 수정하지 않습니다."
+
+msgid "Administrator disabled clean member routes"
+msgstr "관리자가 회원 전용주소를 비활성화함"
+
+msgid "Administrator enabled clean member routes"
+msgstr "관리자가 회원 전용주소를 활성화함"
+
+msgid "Apply clean route setting"
+msgstr "전용주소 설정 적용"
+
+msgid "Clean member routes"
+msgstr "회원 전용주소"
+
+msgid "Clean routes cannot be enabled until all route conflicts are resolved."
+msgstr "모든 라우트 충돌을 해결하기 전에는 전용주소를 활성화할 수 없습니다."
+
+msgid "Clean routes were not enabled because a route conflict or incompatible permalink setting was found."
+msgstr "라우트 충돌 또는 호환되지 않는 고유주소 설정이 발견되어 전용주소를 활성화하지 않았습니다."
+
+msgid "Connect the fixed member URLs after checking for conflicts."
+msgstr "충돌을 확인한 후 고정 회원 URL을 연결합니다."
+
+msgid "Current state"
+msgstr "현재 상태"
+
+msgid "Enable the fixed /members/ clean routes"
+msgstr "고정 /members/ 전용주소 활성화"
+
+msgid "Enabled"
+msgstr "활성화"
+
+msgid "Member route settings updated"
+msgstr "회원 라우트 설정 업데이트"
+
+msgid "No route conflicts found"
+msgstr "라우트 충돌 없음"
+
+msgid "Owner type"
+msgstr "소유자 유형"
+
+msgid "Page ID"
+msgstr "페이지 ID"
+
+msgid "Path"
+msgstr "경로"
+
+msgid "Preflight"
+msgstr "사전 점검"
+
+msgid "Public registration remains controlled by the WordPress General Settings screen. These options only control whether WordPress-generated login and registration links use Members."
+msgstr "공개 회원가입은 WordPress 일반 설정 화면에서 계속 관리합니다. 이 옵션은 WordPress가 생성하는 로그인 및 회원가입 링크에 Members를 사용할지만 제어합니다."
+
+msgid "Route conflicts"
+msgstr "라우트 충돌"
+
+msgid "Routes"
+msgstr "라우트"
+
+msgid "Save URL ownership"
+msgstr "URL 소유권 저장"
+
+msgid "The clean route setting could not be applied. The previous route setting remains active."
+msgstr "전용주소 설정을 적용하지 못했습니다. 이전 라우트 설정이 계속 적용됩니다."
+
+msgid "The clean route setting could not be saved."
+msgstr "전용주소 설정을 저장하지 못했습니다."
+
+msgid "Use fixed member URLs without creating WordPress pages or shortcodes. Existing query URLs remain available as a fallback."
+msgstr "WordPress 페이지나 숏코드를 만들지 않고 고정 회원 URL을 사용합니다. 기존 쿼리 URL은 대체 경로로 계속 사용할 수 있습니다."
+
+msgid "WordPress URL ownership"
+msgstr "WordPress URL 소유권"
+
+msgid "WordPress could not persist the member route rules."
+msgstr "WordPress가 회원 라우트 규칙을 저장하지 못했습니다."
+
+msgid "You do not have permission to manage member routes."
+msgstr "회원 라우트를 관리할 권한이 없습니다."

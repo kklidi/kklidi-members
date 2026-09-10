@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.21 — 2026-09-10
+
+- Implemented `AUTH-ROUTE-MAP-001` with nine fixed, opt-in `/members/` clean routes that reuse the existing controllers and templates.
+- Added pretty-permalink, page, specific rewrite-rule, and reserved-endpoint preflight with atomic rollback and persisted-rule verification.
+- Added a dedicated Routes administrator section while keeping page creation, shortcodes, menu mutation, custom slugs, and Core force-reauth outside Members.
+- Preserved query-route fallback, optional plugin dependencies, route-scoped assets, WordPress Core identity/authentication, and external domain ownership.
+
 ## 0.7.20 — 2026-09-10
 
 - Added `AUTH-ADMIN-NOTIFY-001`, a default-off Settings API checkbox for one administrator notice after a registration becomes active.

@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the KKLIDI Members plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: KKLIDI Members 0.7.20\n"
+"Project-Id-Version: KKLIDI Members 0.7.21\n"
 "Report-Msgid-Bugs-To: https://kklidi.com/\n"
 "POT-Creation-Date: 2026-09-07 00:00+0000\n"
 "MIME-Version: 1.0\n"
@@ -1100,4 +1100,88 @@ msgid "Open General Settings"
 msgstr ""
 
 msgid "Save administrator notification"
+msgstr ""
+
+msgid "%d route conflicts found"
+msgstr ""
+
+msgid "Add the links you need to a site menu manually. Members does not create or modify menu items."
+msgstr ""
+
+msgid "Administrator disabled clean member routes"
+msgstr ""
+
+msgid "Administrator enabled clean member routes"
+msgstr ""
+
+msgid "Apply clean route setting"
+msgstr ""
+
+msgid "Clean member routes"
+msgstr ""
+
+msgid "Clean routes cannot be enabled until all route conflicts are resolved."
+msgstr ""
+
+msgid "Clean routes were not enabled because a route conflict or incompatible permalink setting was found."
+msgstr ""
+
+msgid "Connect the fixed member URLs after checking for conflicts."
+msgstr ""
+
+msgid "Current state"
+msgstr ""
+
+msgid "Enable the fixed /members/ clean routes"
+msgstr ""
+
+msgid "Enabled"
+msgstr ""
+
+msgid "Member route settings updated"
+msgstr ""
+
+msgid "No route conflicts found"
+msgstr ""
+
+msgid "Owner type"
+msgstr ""
+
+msgid "Page ID"
+msgstr ""
+
+msgid "Path"
+msgstr ""
+
+msgid "Preflight"
+msgstr ""
+
+msgid "Public registration remains controlled by the WordPress General Settings screen. These options only control whether WordPress-generated login and registration links use Members."
+msgstr ""
+
+msgid "Route conflicts"
+msgstr ""
+
+msgid "Routes"
+msgstr ""
+
+msgid "Save URL ownership"
+msgstr ""
+
+msgid "The clean route setting could not be applied. The previous route setting remains active."
+msgstr ""
+
+msgid "The clean route setting could not be saved."
+msgstr ""
+
+msgid "Use fixed member URLs without creating WordPress pages or shortcodes. Existing query URLs remain available as a fallback."
+msgstr ""
+
+msgid "WordPress URL ownership"
+msgstr ""
+
+msgid "WordPress could not persist the member route rules."
+msgstr ""
+
+msgid "You do not have permission to manage member routes."
 msgstr ""

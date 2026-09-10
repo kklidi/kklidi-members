@@ -2,7 +2,7 @@
 
 WordPress Core Auth 위에서 KKLIDI 서비스가 공유하는 회원·계정·인증 UX 계층.
 
-**현재 개발 후보: 0.7.20.** 0.7.20은 `AUTH-ADMIN-NOTIFY-001`에 따라 신규 가입 관리자 알림을 기본 꺼짐 opt-in으로 추가한다. 활성 가입 완료 뒤 WordPress Core `admin_email`에 plain-text 발송을 요청하며 실패는 가입을 되돌리지 않는다. 0.7.19의 읽기 전용 메시지 catalog와 WordPress Core 인증·사용자 ID·가입 공개 정책·동의·메일 소유권 경계는 그대로 유지한다. 실제 운영 인증서·다중 서버·운영 migration 승인은 [운영 계약](docs/OPERATIONS.md)의 환경 gate를 따른다.
+**현재 개발 후보: 0.7.21.** 0.7.21은 `AUTH-ROUTE-MAP-001`에 따라 WordPress 페이지·shortcode 없이 아홉 고정 `/members/` clean route를 선택적으로 연결한다. 기본은 꺼짐이고 pretty permalink와 namespace/page/rewrite 충돌 검사를 통과해야 하며 query route와 Core `force_reauth` fallback을 유지한다. 0.7.20의 관리자 가입 알림과 WordPress Core 인증·사용자 ID·가입 공개 정책·동의·메일 소유권 경계는 그대로 유지한다. 실제 운영 인증서·다중 서버·운영 migration 승인은 [운영 계약](docs/OPERATIONS.md)의 환경 gate를 따른다.
 
 이전 검증 기록: **첫 MVP runtime 0.2.0 구현 및 24개 MVP 계약의 합성 WordPress 실행 완료**. 최신 합성 실행은 24개 MVP 계약이 모두 PASS다. 실제 device-limit 1.1.3의 Members/Core 허용·차단·제거 경로, WooCommerce 11.1.0/WCI 1.0.3의 checkout·cart·주문 귀속, KKLIDI LMS의 주문→수강·진도·수료증·비공개 질문과 Members-off 폴백, KBoard 제거 전 호환성, TLS/browser gate를 통과했다. KBoard 권한 엔진 이전·복제와 content migration은 범위 밖이다. 제품 방향 판정은 **GREENFIELD_RECOMMENDED**다.
 

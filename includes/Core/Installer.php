@@ -19,6 +19,8 @@ final class Installer {
 		delete_option('kklidi_members_registration_enabled');
 		add_option('kklidi_members_own_login_url', '0', '', 'no');
 		add_option('kklidi_members_own_register_url', '0', '', 'no');
+		require_once KKLIDI_MEMBERS_DIR . 'includes/Core/RouteMap.php';
+		RouteMap::install();
 		add_option('kklidi_members_audit_success_days', '30', '', 'no');
 		add_option('kklidi_members_audit_security_days', '90', '', 'no');
 		add_option('kklidi_members_notification_templates', array(

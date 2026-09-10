@@ -9,6 +9,10 @@
 
 	<?php if (isset($_GET['notice']) && sanitize_key(wp_unslash($_GET['notice'])) === 'saved') : ?>
 		<div class="notice notice-success is-dismissible" role="status"><p><?php esc_html_e('Settings saved.', 'kklidi-members'); ?></p></div>
+	<?php elseif (isset($_GET['notice']) && sanitize_key(wp_unslash($_GET['notice'])) === 'route_collision') : ?>
+		<div class="notice notice-error" role="alert"><p><?php esc_html_e('Clean routes were not enabled because a route conflict or incompatible permalink setting was found.', 'kklidi-members'); ?></p></div>
+	<?php elseif (isset($_GET['notice']) && sanitize_key(wp_unslash($_GET['notice'])) === 'route_update_failed') : ?>
+		<div class="notice notice-error" role="alert"><p><?php esc_html_e('The clean route setting could not be applied. The previous route setting remains active.', 'kklidi-members'); ?></p></div>
 	<?php elseif (isset($_GET['notice']) && sanitize_key(wp_unslash($_GET['notice'])) === 'withdrawal_disabled') : ?>
 		<div class="notice notice-success is-dismissible" role="status"><p><?php esc_html_e('The account remains blocked and the withdrawal was finalized.', 'kklidi-members'); ?></p></div>
 	<?php elseif (isset($_GET['notice']) && sanitize_key(wp_unslash($_GET['notice'])) === 'withdrawal_restored') : ?>
@@ -46,19 +50,48 @@
 			<?php foreach ($route_urls as $route) : ?><tr><td data-label="<?php esc_attr_e('Screen', 'kklidi-members'); ?>"><?php echo esc_html($route[0]); ?></td><td data-label="<?php esc_attr_e('URL', 'kklidi-members'); ?>"><a href="<?php echo esc_url($route[1]); ?>"><?php echo esc_html($route[1]); ?></a></td></tr><?php endforeach; ?>
 			</tbody></table>
 		</section>
-	<?php elseif ($section === 'documents') : ?>
+	<?php elseif ($section === 'routes') : ?>
 		<section class="kklidi-members-admin-card">
-			<h2><?php esc_html_e('URL ownership', 'kklidi-members'); ?></h2>
-			<p><?php esc_html_e('Public registration remains controlled by the WordPress General Settings screen.', 'kklidi-members'); ?></p>
+			<h2><?php esc_html_e('Clean member routes', 'kklidi-members'); ?></h2>
+			<p><?php esc_html_e('Use fixed member URLs without creating WordPress pages or shortcodes. Existing query URLs remain available as a fallback.', 'kklidi-members'); ?></p>
+			<p><strong><?php esc_html_e('Current state', 'kklidi-members'); ?>:</strong> <?php echo esc_html(!empty($route_settings['clean_routes_enabled']) ? __('Enabled', 'kklidi-members') : __('Disabled', 'kklidi-members')); ?></p>
+			<p><strong><?php esc_html_e('Preflight', 'kklidi-members'); ?>:</strong> <?php echo esc_html(!empty($route_preflight['ready']) ? __('Ready', 'kklidi-members') : __('Needs attention', 'kklidi-members')); ?></p>
 			<form method="post">
 				<?php wp_nonce_field('kklidi_members_admin', '_kklidi_members_admin_nonce'); ?>
-				<input type="hidden" name="section" value="documents">
+				<input type="hidden" name="section" value="routes">
+				<input type="hidden" name="kklidi_members_admin_action" value="set_clean_routes">
+				<p><label><input type="checkbox" name="clean_routes_enabled" value="1" <?php checked(!empty($route_settings['clean_routes_enabled'])); ?>> <?php esc_html_e('Enable the fixed /members/ clean routes', 'kklidi-members'); ?></label></p>
+				<p><button class="button button-primary" type="submit"><?php esc_html_e('Apply clean route setting', 'kklidi-members'); ?></button></p>
+			</form>
+			<?php if (!empty($route_preflight['collisions'])) : ?>
+				<h3><?php esc_html_e('Route conflicts', 'kklidi-members'); ?></h3>
+				<table class="widefat striped kklidi-members-admin-table"><thead><tr><th scope="col"><?php esc_html_e('Path', 'kklidi-members'); ?></th><th scope="col"><?php esc_html_e('Owner type', 'kklidi-members'); ?></th><th scope="col"><?php esc_html_e('Status', 'kklidi-members'); ?></th><th scope="col"><?php esc_html_e('Page ID', 'kklidi-members'); ?></th></tr></thead><tbody>
+				<?php foreach ($route_preflight['collisions'] as $collision) : ?><tr><td data-label="<?php esc_attr_e('Path', 'kklidi-members'); ?>"><code><?php echo esc_html($collision['path']); ?></code></td><td data-label="<?php esc_attr_e('Owner type', 'kklidi-members'); ?>"><?php echo esc_html($collision['owner_type']); ?></td><td data-label="<?php esc_attr_e('Status', 'kklidi-members'); ?>"><?php echo esc_html($collision['status']); ?></td><td data-label="<?php esc_attr_e('Page ID', 'kklidi-members'); ?>"><?php echo esc_html((string) $collision['page_id']); ?></td></tr><?php endforeach; ?>
+				</tbody></table>
+			<?php endif; ?>
+		</section>
+
+		<section class="kklidi-members-admin-card">
+			<h2><?php esc_html_e('Member route links', 'kklidi-members'); ?></h2>
+			<p><?php esc_html_e('Add the links you need to a site menu manually. Members does not create or modify menu items.', 'kklidi-members'); ?></p>
+			<table class="widefat striped kklidi-members-admin-table"><thead><tr><th scope="col"><?php esc_html_e('Screen', 'kklidi-members'); ?></th><th scope="col"><?php esc_html_e('URL', 'kklidi-members'); ?></th></tr></thead><tbody>
+			<?php foreach ($route_urls as $route) : ?><tr><td data-label="<?php esc_attr_e('Screen', 'kklidi-members'); ?>"><?php echo esc_html($route[0]); ?></td><td data-label="<?php esc_attr_e('URL', 'kklidi-members'); ?>"><a href="<?php echo esc_url($route[1]); ?>"><?php echo esc_html($route[1]); ?></a></td></tr><?php endforeach; ?>
+			</tbody></table>
+		</section>
+
+		<section class="kklidi-members-admin-card">
+			<h2><?php esc_html_e('WordPress URL ownership', 'kklidi-members'); ?></h2>
+			<p><?php esc_html_e('Public registration remains controlled by the WordPress General Settings screen. These options only control whether WordPress-generated login and registration links use Members.', 'kklidi-members'); ?></p>
+			<form method="post">
+				<?php wp_nonce_field('kklidi_members_admin', '_kklidi_members_admin_nonce'); ?>
+				<input type="hidden" name="section" value="routes">
 				<input type="hidden" name="kklidi_members_admin_action" value="save_url_settings">
 				<p><label><input type="checkbox" name="own_login_url" value="1" <?php checked(get_option('kklidi_members_own_login_url'), '1'); ?>> <?php esc_html_e('Members owns the Core login URL', 'kklidi-members'); ?></label></p>
 				<p><label><input type="checkbox" name="own_register_url" value="1" <?php checked(get_option('kklidi_members_own_register_url'), '1'); ?>> <?php esc_html_e('Members owns the Core registration URL', 'kklidi-members'); ?></label></p>
-				<p><button class="button button-primary" type="submit"><?php esc_html_e('Save URL settings', 'kklidi-members'); ?></button></p>
+				<p><button class="button button-primary" type="submit"><?php esc_html_e('Save URL ownership', 'kklidi-members'); ?></button></p>
 			</form>
 		</section>
+	<?php elseif ($section === 'documents') : ?>
 
 		<?php foreach (array('service' => __('Service terms', 'kklidi-members'), 'privacy' => __('Privacy policy', 'kklidi-members'), 'marketing' => __('Optional marketing consent', 'kklidi-members')) as $type => $label) : $document = $documents[$type]; ?>
 			<section class="kklidi-members-admin-card">

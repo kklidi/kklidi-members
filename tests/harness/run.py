@@ -44,6 +44,7 @@ PRODUCTION_FILES = [
     'includes/Consent/Repository.php',
     'includes/Core/Installer.php',
     'includes/Core/Plugin.php',
+	'includes/Core/RouteMap.php',
     'includes/Core/Url.php',
     'includes/Frontend/AccountController.php',
     'includes/Migration/LegacyConsentImporter.php',
@@ -275,6 +276,7 @@ def assert_identity(observed, expected, prefix, run_id, expected_plugins=None,
     expected_kklidi_cookies = [] if expected_kklidi_cookies is None else expected_kklidi_cookies
     expected_files = ([] if not expected_plugins else [
         'includes/Audit/Recorder.php', 'includes/Core/Plugin.php',
+		'includes/Core/RouteMap.php',
         'includes/Security/AccountState.php', 'includes/Security/RateLimiter.php',
         'kklidi-members.php'])
     require(observed['run_id'] == run_id and observed['prefix'] == prefix, 'Wrong fixture observed')
@@ -405,6 +407,7 @@ def run_members_cases(base, env, fixture):
     journal = Path(env['KKH_EVENTS'])
     active = ['kklidi-members/kklidi-members.php']
     bootstrap_files = ['includes/Audit/Recorder.php', 'includes/Core/Plugin.php',
+                       'includes/Core/RouteMap.php',
                        'includes/Security/AccountState.php', 'includes/Security/RateLimiter.php',
                        'kklidi-members.php']
     unrelated = Browser(base).observe(key)
@@ -873,6 +876,250 @@ def run_mvp_cases(base, env, fixture, command, php_cli, restart_server=None):
             and denied_status in (401, 403) and 'name="email"' in
             Browser(base).request('/?kklidi_members_register=1')[2],
             'Subscriber used an administrator nonce to change Members settings')
+
+    # AUTH-ROUTE-MAP-001: fixed clean routes stay default-off, require a
+    # conflict-free pretty-permalink transition, and preserve query fallback.
+    route_path = '/wp-admin/users.php?page=kklidi-members&section=routes'
+    route_status, _, route_page = admin.request(route_path)
+    require(route_status == 200 and 'name="clean_routes_enabled"' in route_page
+            and 'name="own_login_url"' in route_page
+            and 'WordPress pages or shortcodes' in route_page,
+            'Route management administrator screen is unavailable')
+    route_nonce = hidden_input(route_page, '_kklidi_members_admin_nonce')
+
+    def clean_route_fields(enabled=True, extra=False, nonce=route_nonce):
+        fields = {
+            'section': 'routes',
+            'kklidi_members_admin_action': 'set_clean_routes',
+            '_kklidi_members_admin_nonce': nonce,
+        }
+        if enabled:
+            fields['clean_routes_enabled'] = '1'
+        if extra:
+            fields['custom_slug'] = 'unsafe-custom-route'
+        return fields
+
+    route_default = command(
+        php_cli + [HERE / 'mvp_probe.php', 'route-summary'], json_result=True)
+    require(route_default['autoload'] in ('no', 'off')
+            and route_default['stored'] == {
+                'version': 1, 'clean_routes_enabled': False}
+            and route_default['effective'] == route_default['stored']
+            and route_default['preflight']['ready'] is False
+            and any(item['owner_type'] == 'permalink_structure'
+                    for item in route_default['preflight']['collisions'])
+            and all(route_default['present_rules'].values()) is False
+            and all('kklidi_members_' in url for url in route_default['helpers'].values()),
+            'Clean routes were not default-off with plain-permalink fallback')
+    initial_page_count = route_default['page_count']
+    initial_menu_count = route_default['menu_item_count']
+
+    plain_status, plain_headers, _ = admin.request(
+        route_path, data=clean_route_fields())
+    plain_rejected = command(
+        php_cli + [HERE / 'mvp_probe.php', 'route-summary'], json_result=True)
+    require(plain_status == 302 and 'notice=route_collision' in plain_headers.get('Location', '')
+            and plain_rejected['stored'] == route_default['stored']
+            and plain_rejected['audit_count'] == 0,
+            'Plain permalink configuration did not reject clean-route activation')
+
+    pretty = command(
+        php_cli + [HERE / 'mvp_probe.php', 'set-pretty-permalinks'], json_result=True)
+    require(pretty == {'permalink_structure': '/%postname%/'},
+            'Synthetic pretty permalink setup failed')
+    collision_page = command(
+        php_cli + [HERE / 'mvp_probe.php', 'create-route-page-collision'], json_result=True)
+    page_collision = command(
+        php_cli + [HERE / 'mvp_probe.php', 'route-summary'], json_result=True)
+    require(collision_page['page_id'] > 0 and page_collision['preflight']['ready'] is False
+            and any(item['owner_type'] == 'wordpress_page'
+                    and item['page_id'] == collision_page['page_id']
+                    for item in page_collision['preflight']['collisions']),
+            'WordPress page collision was not detected')
+    collision_status, collision_headers, _ = admin.request(
+        route_path, data=clean_route_fields())
+    collision_rejected = command(
+        php_cli + [HERE / 'mvp_probe.php', 'route-summary'], json_result=True)
+    require(collision_status == 302
+            and 'notice=route_collision' in collision_headers.get('Location', '')
+            and collision_rejected['stored'] == route_default['stored']
+            and collision_rejected['page_count'] == initial_page_count + 1,
+            'Page collision changed content or enabled clean routes')
+    removed_page = command(
+        php_cli + [HERE / 'mvp_probe.php', 'remove-route-page-collision'], json_result=True)
+    require(removed_page == {'deleted': True, 'remaining': 0},
+            'Synthetic route collision page cleanup failed')
+
+    rewrite_collision_setup = command(
+        php_cli + [HERE / 'mvp_probe.php', 'set-route-rewrite-collision'], json_result=True)
+    rewrite_collision = command(
+        php_cli + [HERE / 'mvp_probe.php', 'route-summary'], json_result=True)
+    require(rewrite_collision_setup == {'configured': True}
+            and rewrite_collision['preflight']['ready'] is False
+            and any(item['owner_type'] == 'rewrite_rule'
+                    for item in rewrite_collision['preflight']['collisions']),
+            'Specific rewrite-rule collision was not detected')
+    rewrite_status, _, _ = admin.request(route_path, data=clean_route_fields())
+    rewrite_rejected = command(
+        php_cli + [HERE / 'mvp_probe.php', 'route-summary'], json_result=True)
+    require(rewrite_status == 302 and rewrite_rejected['stored'] == route_default['stored']
+            and rewrite_rejected['audit_count'] == 0,
+            'Rewrite-rule collision enabled clean routes or changed settings')
+    removed_rewrite = command(
+        php_cli + [HERE / 'mvp_probe.php', 'remove-route-rewrite-collision'], json_result=True)
+    require(removed_rewrite == {'remaining': 0},
+            'Synthetic rewrite collision cleanup failed')
+
+    denied_route_status, _, _ = profile_browser.request(
+        route_path, data=clean_route_fields())
+    require(denied_route_status in (401, 403),
+            'Subscriber changed the clean route setting with an administrator nonce')
+
+    _, _, route_page = admin.request(route_path)
+    route_nonce = hidden_input(route_page, '_kklidi_members_admin_nonce')
+    enabled_status, enabled_headers, _ = admin.request(
+        route_path, data=clean_route_fields(enabled=True, extra=True, nonce=route_nonce))
+    route_enabled = command(
+        php_cli + [HERE / 'mvp_probe.php', 'route-summary'], json_result=True)
+    clean_suffixes = {
+        'login': '/members/login/', 'register': '/members/register/',
+        'account': '/members/account/', 'profile': '/members/account/profile/',
+        'password': '/members/account/password/',
+        'password_reset': '/members/password-reset/',
+        'consent': '/members/account/consent/',
+        'withdrawal': '/members/account/withdrawal/', 'logout': '/members/logout/',
+    }
+    require(enabled_status == 302 and 'notice=saved' in enabled_headers.get('Location', '')
+            and route_enabled['stored'] == {'version': 1, 'clean_routes_enabled': True}
+            and route_enabled['effective'] == route_enabled['stored']
+            and route_enabled['preflight']['ready'] is True
+            and all(route_enabled['present_rules'].values())
+            and all(route_enabled['helpers'][name].endswith(suffix)
+                    for name, suffix in clean_suffixes.items())
+            and route_enabled['audit_count'] == 1
+            and route_enabled['page_count'] == initial_page_count
+            and route_enabled['menu_item_count'] == initial_menu_count,
+            'Clean route activation, strict schema, or bounded content behavior failed')
+
+    anonymous_clean = Browser(base)
+    clean_login_status, _, clean_login = anonymous_clean.request('/members/login/')
+    clean_register_status, _, clean_register = Browser(base).request('/members/register/')
+    clean_reset_status, _, clean_reset = Browser(base).request('/members/password-reset/')
+    clean_protected_status, clean_protected_headers, clean_guest_account = Browser(base).request('/members/account/')
+    clean_account_status, _, clean_account = admin.request('/members/account/')
+    clean_profile_status, _, _ = admin.request('/members/account/profile/')
+    clean_password_status, _, _ = admin.request('/members/account/password/')
+    clean_consent_status, _, _ = admin.request('/members/account/consent/')
+    clean_withdrawal_status, _, _ = admin.request('/members/account/withdrawal/')
+    clean_logout_status, _, _ = admin.request('/members/logout/')
+    query_fallback_status, _, query_fallback_page = Browser(base).request(
+        '/?kklidi_members_login=1')
+    require(clean_login_status == 200 and 'name="kklidi_members_identifier"' in clean_login
+            and 'kklidi-members-frontend-css' in clean_login
+            and clean_register_status == 200 and 'name="email"' in clean_register
+            and clean_reset_status == 200 and 'name="user_login"' in clean_reset
+            and clean_protected_status == 200
+            and '/members/login/' in clean_guest_account
+            and clean_account_status == clean_profile_status == clean_password_status == 200
+            and clean_consent_status == clean_withdrawal_status == clean_logout_status == 200
+            and 'kklidi-members-page' in clean_account
+            and query_fallback_status == 200
+            and 'name="kklidi_members_identifier"' in query_fallback_page,
+            'Clean routes did not dispatch through the existing account controllers: ' + repr({
+                'login': clean_login_status,
+                'login_has_form': 'name="kklidi_members_identifier"' in clean_login,
+                'login_has_css': 'kklidi-members-frontend-css' in clean_login,
+                'register': clean_register_status,
+                'register_has_email': 'name="email"' in clean_register,
+                'reset': clean_reset_status,
+                'reset_has_user_login': 'name="user_login"' in clean_reset,
+                'protected': clean_protected_status,
+                'protected_location': clean_protected_headers.get('Location', ''),
+                'account': clean_account_status,
+                'profile': clean_profile_status,
+                'password': clean_password_status,
+                'consent': clean_consent_status,
+                'withdrawal': clean_withdrawal_status,
+                'logout': clean_logout_status,
+                'query': query_fallback_status,
+                'query_has_form': 'name="kklidi_members_identifier"' in query_fallback_page,
+            }))
+
+    hash_before_requests = route_enabled['rewrite_rules_hash']
+    unrelated_status, _, unrelated_page = Browser(base).request('/')
+    route_after_unrelated = command(
+        php_cli + [HERE / 'mvp_probe.php', 'route-summary'], json_result=True)
+    require(unrelated_status == 200 and 'kklidi-members-frontend-css' not in unrelated_page
+            and route_after_unrelated['rewrite_rules_hash'] == hash_before_requests,
+            'Unrelated request loaded route assets or changed persisted rewrite rules')
+
+    _, _, ownership_page = admin.request(route_path)
+    ownership_nonce = hidden_input(ownership_page, '_kklidi_members_admin_nonce')
+    ownership_status, _, _ = admin.request(route_path, data={
+        'section': 'routes',
+        'kklidi_members_admin_action': 'save_url_settings',
+        '_kklidi_members_admin_nonce': ownership_nonce,
+        'own_login_url': '1',
+        'own_register_url': '1',
+    })
+    owned_urls = command(
+        php_cli + [HERE / 'mvp_probe.php', 'route-summary'], json_result=True)
+    require(ownership_status == 302
+            and owned_urls['core_urls']['login'].endswith('/members/login/')
+            and owned_urls['core_urls']['register'].endswith('/members/register/')
+            and '/wp-login.php' in owned_urls['core_urls']['force_reauth']
+            and '/members/login/' not in owned_urls['core_urls']['force_reauth'],
+            'Core URL ownership or force-reauth boundary changed')
+
+    _, _, disable_page = admin.request(route_path)
+    disable_nonce = hidden_input(disable_page, '_kklidi_members_admin_nonce')
+    disabled_status, _, _ = admin.request(
+        route_path, data=clean_route_fields(enabled=False, nonce=disable_nonce))
+    route_disabled = command(
+        php_cli + [HERE / 'mvp_probe.php', 'route-summary'], json_result=True)
+    disabled_clean_status, _, _ = Browser(base).request('/members/login/')
+    disabled_query_status, _, _ = Browser(base).request('/?kklidi_members_login=1')
+    require(disabled_status == 302
+            and route_disabled['stored'] == {'version': 1, 'clean_routes_enabled': False}
+            and all(route_disabled['present_rules'].values()) is False
+            and route_disabled['helpers']['login'].find('kklidi_members_login=1') >= 0
+            and route_disabled['core_urls']['login'].find('kklidi_members_login=1') >= 0
+            and route_disabled['audit_count'] == 2
+            and disabled_clean_status == 404 and disabled_query_status == 200,
+            'Clean route rollback did not restore query fallback and remove rules')
+
+    _, _, reset_ownership_page = admin.request(route_path)
+    reset_ownership_nonce = hidden_input(reset_ownership_page, '_kklidi_members_admin_nonce')
+    admin.request(route_path, data={
+        'section': 'routes',
+        'kklidi_members_admin_action': 'save_url_settings',
+        '_kklidi_members_admin_nonce': reset_ownership_nonce,
+    })
+    corrupted = command(
+        php_cli + [HERE / 'mvp_probe.php', 'corrupt-route-option'], json_result=True)
+    corrupt_summary = command(
+        php_cli + [HERE / 'mvp_probe.php', 'route-summary'], json_result=True)
+    reset_route = command(
+        php_cli + [HERE / 'mvp_probe.php', 'reset-route-option'], json_result=True)
+    route_final = command(
+        php_cli + [HERE / 'mvp_probe.php', 'route-summary'], json_result=True)
+    require(corrupted['stored']['custom_slug'] == 'unsafe'
+            and corrupt_summary['effective'] == {
+                'version': 1, 'clean_routes_enabled': False}
+            and 'kklidi_members_login=1' in corrupt_summary['helpers']['login']
+            and reset_route['stored'] == {'version': 1, 'clean_routes_enabled': False}
+            and route_final['page_count'] == initial_page_count
+            and route_final['menu_item_count'] == initial_menu_count,
+            'Invalid route schema did not fail closed or cleanup changed site content')
+    results['AUTH-ROUTE-MAP-001'] = {
+        'status': 'PASS', 'default_enabled': False, 'pretty_permalink_required': True,
+        'capability_and_nonce': True, 'strict_non_autoload_option': True,
+        'page_collision_rejected': True, 'rewrite_collision_rejected': True,
+        'clean_routes': 9, 'same_controllers_and_templates': True,
+        'query_fallback_preserved': True, 'core_force_reauth_preserved': True,
+        'automatic_pages_or_menus': False, 'unrelated_assets_or_flush': False,
+        'rollback_and_corrupt_setting_fallback': True,
+    }
 
     registration_settings_path = \
         '/wp-admin/users.php?page=kklidi-members&section=registration'
@@ -2015,7 +2262,7 @@ def execute(php, mysqld, one_prefix=False, skip_perf=False):
               'modes': {'core_baseline': {'status': 'FAIL', 'variants': []},
                         'members_on': {'status': 'FAIL', 'variants': []}},
               'contracts_total': 24, 'contracts_exercised': 24,
-               'extension_contracts_total': 5, 'extension_contracts_exercised': 5,
+               'extension_contracts_total': 6, 'extension_contracts_exercised': 6,
               'not_run': ['actual WooCommerce/LMS full-stack browser regression',
                           'KBoard removal-period compatibility smoke/no-fatal',
                           'device-limit WooCommerce login entry', 'TLS/Secure cookie deployment',
@@ -2268,7 +2515,7 @@ def execute(php, mysqld, one_prefix=False, skip_perf=False):
         (output / 'latest.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
     core_total = sum(len(v['cases']) for v in report['modes']['core_baseline']['variants'])
     members_total = sum(len(v['cases']) for v in report['modes']['members_on']['variants'])
-    print(f'{report["status"]}: MVP contracts=24 + extension contracts=5, '
+    print(f'{report["status"]}: MVP contracts=24 + extension contracts=6, '
           f'AUTH-LOGIN-001 Core={core_total}, '
           f'Members={members_total}; release evidence PARTIAL. Report: .harness/reports/latest.json')
     if 'error' in report:

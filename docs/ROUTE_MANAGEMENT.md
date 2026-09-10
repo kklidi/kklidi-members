@@ -1,6 +1,6 @@
 # Route management
 
-`AUTH-ROUTE-MAP-001` 상태: **SPECIFIED_NOT_IMPLEMENTED**
+`AUTH-ROUTE-MAP-001` 상태: **IMPLEMENTED_AND_MAMP_VERIFIED**
 
 대상 버전: **0.7.21**
 
@@ -32,9 +32,9 @@ Members는 기존의 query route를 계속 호환 경로로 제공하고, 관리
 
 초기값은 clean route 꺼짐이다. `Users → KKLIDI Members`의 route 관리 화면에서 `manage_kklidi_members` capability와 WordPress nonce를 통과한 관리자가 한 번의 명시적 action으로 켜거나 끈다.
 
-켜기 전에 `/members/` namespace와 아홉 경로를 모두 검사한다. 같은 path의 기존 WordPress 페이지, Members rule보다 먼저 같은 경로를 다른 query로 보내는 구체 rewrite rule이나 예약 endpoint가 있으면 전체 활성화를 거부한다. WordPress의 일반 page catch-all rule 자체를 충돌로 오판하지 않는다. Members는 충돌한 페이지를 삭제·휴지통 이동·이름 변경하거나 본문을 바꾸지 않는다. 충돌 대상의 path와 WordPress page ID처럼 관리에 필요한 최소 정보만 보여준다.
+켜기 전에 pretty permalink가 활성인지, `/members/` namespace와 아홉 경로가 비어 있는지 모두 검사한다. plain permalink 사이트는 clean route를 켜지 않고 query fallback을 유지한다. 같은 path의 기존 WordPress 페이지, Members rule보다 먼저 같은 경로를 다른 query로 보내는 구체 rewrite rule이나 예약 endpoint가 있으면 전체 활성화를 거부한다. WordPress의 일반 page catch-all rule 자체를 충돌로 오판하지 않는다. Members는 충돌한 페이지를 삭제·휴지통 이동·이름 변경하거나 본문을 바꾸지 않는다. 충돌 대상의 path와 WordPress page ID처럼 관리에 필요한 최소 정보만 보여준다.
 
-활성화 성공 시 versioned non-autoload option `kklidi_members_route_map`에 schema version과 `clean_routes_enabled` boolean만 저장한다. rewrite rule 추가·제거 뒤의 rewrite flush는 plugin 활성화나 이 설정의 실제 상태 변경 때 한 번만 수행하고 일반 요청에서는 수행하지 않는다. WordPress flush API의 반환값에 성공을 가정하지 않고 생성된 rule을 다시 확인하며, 저장 또는 rule 확인이 실패하면 option을 이전 상태로 되돌리고 켜졌다고 표시하지 않는다.
+활성화 성공 시 versioned non-autoload option `kklidi_members_route_map`에 schema version과 `clean_routes_enabled` boolean만 저장한다. rewrite rule 추가·제거 뒤의 rewrite flush는 plugin 활성화·비활성화나 이 설정의 실제 상태 변경 때 한 번만 수행하고 일반 요청에서는 수행하지 않는다. WordPress flush API의 반환값에 성공을 가정하지 않고 생성된 rule을 다시 확인하며, 저장 또는 rule 확인이 실패하면 option을 이전 상태로 되돌리고 켜졌다고 표시하지 않는다. 성공한 상태 변경은 raw URL이나 사용자 입력 없이 최소 감사 사건으로 남긴다.
 
 ## 4. URL 소유권과 연결 방식
 
@@ -56,7 +56,7 @@ Members public URL helper는 clean route가 활성화됐을 때 clean URL을, �
 ## 6. 구현 합격 기준
 
 1. 신규 설치와 업데이트의 기본값은 꺼짐이며 현재 query route 동작과 URL helper 결과가 바뀌지 않는다.
-2. 관리자 capability와 nonce, strict option schema, non-autoload 저장과 실제 상태 변경 때만 수행되는 bounded rewrite flush를 검증한다.
+2. pretty/plain permalink, 관리자 capability와 nonce, strict option schema, non-autoload 저장과 실제 상태 변경 때만 수행되는 bounded rewrite flush를 검증한다.
 3. namespace·page·rewrite 충돌에서는 아무 page·menu·option을 바꾸지 않고 활성화를 거부한다.
 4. 활성화 후 아홉 clean route가 기존 controller와 template으로 동작하며 로그인·가입·프로필·reset·동의·탈퇴 상태 전이가 query route와 같다.
 5. 위험한 `redirect_to`, reset key, Core `force_reauth`, 로그인/회원가입 URL ownership opt-in을 두 URL 형식에서 회귀 검증한다.
@@ -66,3 +66,11 @@ Members public URL helper는 clean route가 활성화됐을 때 clean URL을, �
 ## 7. 제외 범위
 
 WordPress 페이지 자동 생성, shortcode, block, page builder widget, 메뉴 자동 변경, custom slug, 언어별 route, 범용 접근 제한, redirect 일괄 강제, SEO canonical 설정과 multisite network route는 포함하지 않는다. 필요해지면 현재 route map 위의 별도 behavior contract로 검토한다.
+
+## 8. 검증 증거
+
+2026-09-10 합성 실행 `8c6ea0415d3d4e208ed79dbc7727886b`는 WordPress 7.1/PHP 8.3의 새 임시 설치와 기본·임의 DB prefix에서 default-off, plain permalink 거부, page와 구체 rewrite 충돌 무변경 거부, 관리자 capability·nonce, strict non-autoload schema, 아홉 clean route의 기존 controller/template dispatch, query fallback, Core URL ownership과 `force_reauth`, 비활성 rollback, 손상 option fallback, page/menu 무변경과 임시 데이터 정리를 PASS했다.
+
+같은 실행의 일반 페이지 paired 측정은 off/on 중앙값 227.368/230.290ms, p95 247.514/248.883ms로 각각 2.922ms와 1.369ms 증가해 budget 안이었다. 메모리 중앙값은 37,748,736 bytes로 같았고 전역 Members 자산은 없었다. non-autoload route option 확인으로 query 중앙값은 4에서 5로 1회 증가했다.
+
+고정 MAMP 후보 runner는 최종 ZIP을 임시 장착해 Apache의 실제 rewrite 경로로 아홉 URL을 요청한다. 공개 화면은 기존 template을 렌더링하고 보호 화면은 clean login URL로 이동하며, query fallback과 일반 페이지 무자산을 함께 검사한다. 실행 뒤 route option, permalink, rewrite rules, `.htaccess`, page/menu 수, audit와 기존 플러그인 tree를 원래 상태로 복원해야만 PASS한다.

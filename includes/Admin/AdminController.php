@@ -7,7 +7,7 @@ if (!defined('ABSPATH')) {
 }
 
 final class AdminController {
-	private const SECTIONS = array('overview', 'documents', 'registration', 'messages', 'notifications', 'withdrawals', 'audit');
+	private const SECTIONS = array('overview', 'routes', 'documents', 'registration', 'messages', 'notifications', 'withdrawals', 'audit');
 	private static $document_preview = null;
 	private static $consent_status_cache = array();
 
@@ -99,7 +99,16 @@ final class AdminController {
 		$action = sanitize_key(wp_unslash($_POST['kklidi_members_admin_action']));
 		if ($action === 'save_url_settings') {
 			self::save_url_settings();
-			self::redirect('documents', 'saved');
+			self::redirect('routes', 'saved');
+		}
+		if ($action === 'set_clean_routes') {
+			require_once KKLIDI_MEMBERS_DIR . 'includes/Core/RouteMap.php';
+			$result = \KKLIDI\Members\Core\RouteMap::transition(isset($_POST['clean_routes_enabled']));
+			if (is_wp_error($result)) {
+				self::redirect('routes', $result->get_error_code() === 'route_collision'
+					? 'route_collision' : 'route_update_failed');
+			}
+			self::redirect('routes', 'saved');
 		}
 		if ($action === 'publish_document') {
 			self::publish_document();
@@ -293,6 +302,7 @@ final class AdminController {
 		$section = self::requested_section();
 		$sections = array(
 			'overview' => __('Overview', 'kklidi-members'),
+			'routes' => __('Routes', 'kklidi-members'),
 			'documents' => __('Documents', 'kklidi-members'),
 			'registration' => __('Registration fields', 'kklidi-members'),
 			'messages' => __('Messages', 'kklidi-members'),
@@ -307,12 +317,15 @@ final class AdminController {
 		$audit_view = array();
 		$quick_links = array();
 		$route_urls = array();
+		$route_preflight = array();
+		$route_settings = array();
 		$message_groups = array();
 
 		if ($section === 'overview') {
 			$overview = self::overview();
 			require_once KKLIDI_MEMBERS_DIR . 'includes/Core/Url.php';
 			$quick_links = array(
+				array('label' => __('Routes', 'kklidi-members'), 'description' => __('Connect the fixed member URLs after checking for conflicts.', 'kklidi-members'), 'url' => self::page_url('routes')),
 				array('label' => __('Documents', 'kklidi-members'), 'description' => __('Publish and review the required account documents.', 'kklidi-members'), 'url' => self::page_url('documents')),
 				array('label' => __('Registration fields', 'kklidi-members'), 'description' => __('Choose which approved profile fields appear during registration.', 'kklidi-members'), 'url' => self::page_url('registration')),
 				array('label' => __('Messages', 'kklidi-members'), 'description' => __('Review the translated account and security messages.', 'kklidi-members'), 'url' => self::page_url('messages')),
@@ -323,17 +336,12 @@ final class AdminController {
 			if (current_user_can('manage_options')) {
 				$quick_links[] = array('label' => __('WordPress registration settings', 'kklidi-members'), 'description' => __('Public registration remains controlled by WordPress Core.', 'kklidi-members'), 'url' => admin_url('options-general.php#users_can_register'));
 			}
-			$route_urls = array(
-				'login' => array(__('Login', 'kklidi-members'), \KKLIDI\Members\Core\Url::login()),
-				'register' => array(__('Registration', 'kklidi-members'), \KKLIDI\Members\Core\Url::register()),
-				'account' => array(__('Account', 'kklidi-members'), \KKLIDI\Members\Core\Url::account()),
-				'profile' => array(__('Profile', 'kklidi-members'), \KKLIDI\Members\Core\Url::profile()),
-				'password' => array(__('Change password', 'kklidi-members'), \KKLIDI\Members\Core\Url::password()),
-				'password_reset' => array(__('Password reset', 'kklidi-members'), \KKLIDI\Members\Core\Url::passwordReset()),
-				'consent' => array(__('Consent settings', 'kklidi-members'), \KKLIDI\Members\Core\Url::consent()),
-				'withdrawal' => array(__('Withdrawal request', 'kklidi-members'), \KKLIDI\Members\Core\Url::withdrawal()),
-				'logout' => array(__('Log out', 'kklidi-members'), \KKLIDI\Members\Core\Url::logout()),
-			);
+			$route_urls = self::route_urls();
+		} elseif ($section === 'routes') {
+			require_once KKLIDI_MEMBERS_DIR . 'includes/Core/RouteMap.php';
+			$route_settings = \KKLIDI\Members\Core\RouteMap::settings();
+			$route_preflight = \KKLIDI\Members\Core\RouteMap::preflight();
+			$route_urls = self::route_urls();
 		} elseif ($section === 'documents') {
 			require_once KKLIDI_MEMBERS_DIR . 'includes/Consent/Documents.php';
 			foreach (array('service', 'privacy', 'marketing') as $type) {
@@ -447,6 +455,8 @@ final class AdminController {
 		$labels = array(
 			'core' => __('WordPress Core', 'kklidi-members'),
 			'admin_settings' => __('Administrator updated notification messages', 'kklidi-members'),
+			'clean_routes_enabled' => __('Administrator enabled clean member routes', 'kklidi-members'),
+			'clean_routes_disabled' => __('Administrator disabled clean member routes', 'kklidi-members'),
 			'admin_review' => __('Administrator confirmed access block', 'kklidi-members'),
 			'admin_restore' => __('Administrator restored access with a reason', 'kklidi-members'),
 			'wp_mail_accepted' => __('WordPress accepted the email for delivery', 'kklidi-members'),
@@ -476,6 +486,7 @@ final class AdminController {
 			'mail_withdrawal_finalized' => __('Withdrawal-finalized notice', 'kklidi-members'),
 			'notification_settings_update' => __('Notification settings updated', 'kklidi-members'),
 			'admin_notification_settings_update' => __('Administrator notification settings updated', 'kklidi-members'),
+			'route_settings_update' => __('Member route settings updated', 'kklidi-members'),
 			'mail_admin_registration' => __('Administrator registration notice', 'kklidi-members'),
 			'registration_fields_update' => __('Registration field settings updated', 'kklidi-members'),
 		);
@@ -503,8 +514,8 @@ final class AdminController {
 		return array(
 			array('key' => 'public_registration', 'label' => __('WordPress public registration', 'kklidi-members'), 'ready' => (bool) get_option('users_can_register'), 'detail' => get_option('users_can_register') ? __('Allowed by WordPress', 'kklidi-members') : __('Closed by WordPress', 'kklidi-members'), 'action_url' => current_user_can('manage_options') ? admin_url('options-general.php#users_can_register') : '', 'action_label' => __('Open WordPress settings', 'kklidi-members')),
 			array('key' => 'required_documents', 'label' => __('Required documents', 'kklidi-members'), 'ready' => \KKLIDI\Members\Consent\Documents::required_ready(), 'detail' => \KKLIDI\Members\Consent\Documents::required_ready() ? __('Ready', 'kklidi-members') : __('Service terms or privacy policy is missing', 'kklidi-members'), 'action_url' => self::page_url('documents'), 'action_label' => __('Manage documents', 'kklidi-members')),
-			array('key' => 'clean_route', 'label' => __('Clean route preflight', 'kklidi-members'), 'ready' => (bool) $preflight['ready'], 'detail' => $preflight['ready'] ? __('No page collisions found', 'kklidi-members') : sprintf(__('%d page collisions found', 'kklidi-members'), count($preflight['collisions'])), 'action_url' => self::page_url('documents'), 'action_label' => __('Review route settings', 'kklidi-members')),
-			array('key' => 'url_ownership', 'label' => __('Members URL ownership', 'kklidi-members'), 'ready' => get_option('kklidi_members_own_login_url') === '1' || get_option('kklidi_members_own_register_url') === '1', 'detail' => sprintf(__('Login: %1$s / Registration: %2$s', 'kklidi-members'), get_option('kklidi_members_own_login_url') === '1' ? __('Owned', 'kklidi-members') : __('Core fallback', 'kklidi-members'), get_option('kklidi_members_own_register_url') === '1' ? __('Owned', 'kklidi-members') : __('Core fallback', 'kklidi-members')), 'action_url' => self::page_url('documents'), 'action_label' => __('Manage URL ownership', 'kklidi-members')),
+			array('key' => 'clean_route', 'label' => __('Clean route preflight', 'kklidi-members'), 'ready' => (bool) $preflight['ready'], 'detail' => $preflight['ready'] ? __('No route conflicts found', 'kklidi-members') : sprintf(__('%d route conflicts found', 'kklidi-members'), count($preflight['collisions'])), 'action_url' => self::page_url('routes'), 'action_label' => __('Review route settings', 'kklidi-members')),
+			array('key' => 'url_ownership', 'label' => __('Members URL ownership', 'kklidi-members'), 'ready' => get_option('kklidi_members_own_login_url') === '1' || get_option('kklidi_members_own_register_url') === '1', 'detail' => sprintf(__('Login: %1$s / Registration: %2$s', 'kklidi-members'), get_option('kklidi_members_own_login_url') === '1' ? __('Owned', 'kklidi-members') : __('Core fallback', 'kklidi-members'), get_option('kklidi_members_own_register_url') === '1' ? __('Owned', 'kklidi-members') : __('Core fallback', 'kklidi-members')), 'action_url' => self::page_url('routes'), 'action_label' => __('Manage URL ownership', 'kklidi-members')),
 			array('key' => 'members_tables', 'label' => __('Members tables', 'kklidi-members'), 'ready' => $tables_ready, 'detail' => $tables_ready ? __('Both owned tables are available', 'kklidi-members') : __('An owned table is missing', 'kklidi-members')),
 			array('key' => 'cleanup_schedule', 'label' => __('Daily cleanup schedule', 'kklidi-members'), 'ready' => $cleanup !== false, 'detail' => $cleanup !== false ? sprintf(__('Next run: %s UTC', 'kklidi-members'), gmdate('Y-m-d H:i:s', (int) $cleanup)) : __('Cleanup is not scheduled', 'kklidi-members')),
 		);
@@ -518,6 +529,21 @@ final class AdminController {
 			'disabled' => __('Disabled', 'kklidi-members'),
 		);
 		return $labels[$state] ?? __('Unknown', 'kklidi-members');
+	}
+
+	private static function route_urls(): array {
+		require_once KKLIDI_MEMBERS_DIR . 'includes/Core/Url.php';
+		return array(
+			'login' => array(__('Login', 'kklidi-members'), \KKLIDI\Members\Core\Url::login()),
+			'register' => array(__('Registration', 'kklidi-members'), \KKLIDI\Members\Core\Url::register()),
+			'account' => array(__('Account', 'kklidi-members'), \KKLIDI\Members\Core\Url::account()),
+			'profile' => array(__('Profile', 'kklidi-members'), \KKLIDI\Members\Core\Url::profile()),
+			'password' => array(__('Change password', 'kklidi-members'), \KKLIDI\Members\Core\Url::password()),
+			'password_reset' => array(__('Password reset', 'kklidi-members'), \KKLIDI\Members\Core\Url::passwordReset()),
+			'consent' => array(__('Consent settings', 'kklidi-members'), \KKLIDI\Members\Core\Url::consent()),
+			'withdrawal' => array(__('Withdrawal request', 'kklidi-members'), \KKLIDI\Members\Core\Url::withdrawal()),
+			'logout' => array(__('Log out', 'kklidi-members'), \KKLIDI\Members\Core\Url::logout()),
+		);
 	}
 
 	private static function requested_filter(string $key): string {

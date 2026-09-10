@@ -396,7 +396,7 @@ class HarnessGuards(unittest.TestCase):
 
         self.assertEqual(contract['contract'], 'AUTH-ROUTE-MAP-001')
         self.assertEqual(contract['version'], 1)
-        self.assertEqual(contract['status'], 'SPECIFIED_NOT_IMPLEMENTED')
+        self.assertEqual(contract['status'], 'IMPLEMENTED_AND_MAMP_VERIFIED')
         self.assertEqual(contract['target_release'], '0.7.21')
         self.assertEqual(contract['principle'], 'route_first_no_page_dependency')
         self.assertTrue(contract['defaults_preserve_0_7_20_behavior'])
@@ -431,7 +431,7 @@ class HarnessGuards(unittest.TestCase):
         self.assertTrue(activation['wordpress_nonce_required'])
         self.assertEqual(
             set(activation['preflight_scope']),
-            {'namespace', 'wordpress_pages', 'existing_rewrite_rules',
+            {'pretty_permalinks', 'namespace', 'wordpress_pages', 'existing_rewrite_rules',
              'reserved_endpoints'},
         )
         self.assertEqual(activation['collision_result'], 'reject_all_without_mutation')
@@ -440,6 +440,14 @@ class HarnessGuards(unittest.TestCase):
         self.assertEqual(
             activation['failed_transition'], 'restore_previous_option_state'
         )
+        self.assertEqual(
+            activation['rewrite_flush'],
+            ['plugin_activation', 'plugin_deactivation', 'actual_setting_transition'],
+        )
+        self.assertEqual(
+            activation['successful_transition_audit_event'], 'route_settings_update'
+        )
+        self.assertFalse(activation['audit_contains_raw_url_or_user_input'])
 
         storage = contract['storage']
         self.assertEqual(storage['option_name'], 'kklidi_members_route_map')
@@ -470,6 +478,15 @@ class HarnessGuards(unittest.TestCase):
         self.assertTrue(contract['rollback']['query_routes_continue'])
         self.assertFalse(contract['rollback']['pages_or_menus_to_restore'])
         self.assertTrue(contract['rollback']['wordpress_user_ids_preserved'])
+        self.assertEqual(contract['verification']['status'], 'PASS')
+        self.assertEqual(
+            contract['verification']['evidence_id'],
+            '8c6ea0415d3d4e208ed79dbc7727886b',
+        )
+        self.assertEqual(contract['verification']['prefixes'], ['wp_', 'non_default'])
+        self.assertEqual(
+            contract['verification']['performance']['query_median_off_on'], [4, 5]
+        )
 
         design = (repository / 'docs/ROUTE_MANAGEMENT.md').read_text(encoding='utf-8')
         product = (repository / 'docs/PRODUCT.md').read_text(encoding='utf-8')
@@ -477,13 +494,32 @@ class HarnessGuards(unittest.TestCase):
         builder = (repository / 'tests/harness/build_release.py').read_text(encoding='utf-8')
         plugin = (repository / 'kklidi-members.php').read_text(encoding='utf-8')
         installer = (repository / 'includes/Core/Installer.php').read_text(encoding='utf-8')
-        self.assertIn('SPECIFIED_NOT_IMPLEMENTED', design)
-        self.assertIn('| D14 | **SPECIFIED FOR 0.7.21', product)
-        self.assertIn('AUTH-ROUTE-MAP-001 / 0.7.21 extension (SPECIFIED)', harness)
+        route_map = (repository / 'includes/Core/RouteMap.php').read_text(encoding='utf-8')
+        self.assertIn('IMPLEMENTED_AND_MAMP_VERIFIED', design)
+        self.assertIn('| D14 | **IMPLEMENTED FOR 0.7.21', product)
+        self.assertIn('AUTH-ROUTE-MAP-001 / 0.7.21 extension (IMPLEMENTED)', harness)
         self.assertIn("'docs/ROUTE_MANAGEMENT.md'", builder)
-        self.assertIn("Version: 0.7.20", plugin)
-        self.assertNotIn('kklidi_members_route_map', installer)
-        self.assertNotIn('add_rewrite_rule(', plugin + installer)
+        self.assertIn("Version: 0.7.21", plugin)
+        self.assertIn('RouteMap::install()', installer)
+        self.assertIn('RouteMap::deactivate()', plugin)
+        self.assertIn("public const OPTION_NAME = 'kklidi_members_route_map';", route_map)
+        self.assertIn("add_rewrite_rule($regex, $query, 'top')", route_map)
+        self.assertIn("current_user_can('manage_kklidi_members')", route_map)
+        self.assertIn('flush_rewrite_rules(false)', route_map)
+        self.assertNotIn('wp_insert_post(', route_map)
+        self.assertNotIn('wp_create_nav_menu(', route_map)
+        self.assertNotIn('session_start(', route_map)
+        route_case = (repository / 'tests/harness/mamp_route_case.php').read_text(
+            encoding='utf-8')
+        route_runner = (repository / 'tests/harness/mamp_route_run.py').read_text(
+            encoding='utf-8')
+        candidate_runner = (repository / 'tests/harness/mamp_candidate_run.py').read_text(
+            encoding='utf-8')
+        self.assertIn("$fixture_action = $argv[1] ?? '';", route_case)
+        self.assertNotIn("$action = $argv[1] ?? '';", route_case)
+        self.assertIn("'mamp-route-' + token", route_runner)
+        self.assertIn("'mamp_route_run.py'", candidate_runner)
+        self.assertIn("original_restored", candidate_runner)
 
     def test_auth_register_fields_001_design_is_bounded_and_default_compatible(self):
         repository = Path(__file__).resolve().parents[2]
@@ -723,7 +759,7 @@ class HarnessGuards(unittest.TestCase):
         for secret in ('password', 'key', 'user_id', 'email'):
             self.assertNotIn("add_query_arg('" + secret + "'", password)
         self.assertIn("results['AUTH-MESSAGE-UX-001']", runtime_harness)
-        self.assertIn("'extension_contracts_total': 5", runtime_harness)
+        self.assertIn("'extension_contracts_total': 6", runtime_harness)
 
     def test_auth_admin_notify_001_design_is_default_off_and_core_owned(self):
         repository = Path(__file__).resolve().parents[2]
@@ -798,7 +834,7 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('AdminNotificationSettings::OPTION_GROUP', template)
         self.assertIn("AdminNotificationSettings::defaults()", installer)
         self.assertIn("results['AUTH-ADMIN-NOTIFY-001']", runtime_harness)
-        self.assertIn("'extension_contracts_total': 5", runtime_harness)
+        self.assertIn("'extension_contracts_total': 6", runtime_harness)
 
     def test_auth_ux_003_078_withdrawal_and_audit_operations_are_bounded(self):
         repository = Path(__file__).resolve().parents[2]
@@ -1155,7 +1191,7 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('If an account matches, WordPress will send a password reset link.', reset_template)
         self.assertIn("'includes/Notifications/NotificationTemplates.php'", package)
         self.assertIn("results['AUTH-NOTIFY-002']", package)
-        self.assertIn("'extension_contracts_total': 5", package)
+        self.assertIn("'extension_contracts_total': 6", package)
 
     def test_auth_notify_001_catalog_covers_mail_presets(self):
         repository = Path(__file__).resolve().parents[2]
@@ -1258,7 +1294,7 @@ class HarnessGuards(unittest.TestCase):
 
         lifecycle = (repository / 'tests/harness/mamp_lifecycle_run.py').read_text(encoding='utf-8')
         self.assertIn("SANDBOX = Path('C:/MAMP/htdocs/kklidi-members-mamp-sandbox')", lifecycle)
-        self.assertIn("PREVIOUS_VERSION = '0.7.19'", lifecycle)
+        self.assertIn("PREVIOUS_VERSION = '0.7.20'", lifecycle)
         self.assertIn("ALLOWED_INITIAL_VERSIONS = ('0.7.0', PREVIOUS_VERSION, CURRENT_VERSION)", lifecycle)
         self.assertIn("CURRENT_VERSION = re.search(", lifecycle)
         self.assertIn("OLD_ARCHIVE = ROOT / ('dist/kklidi-members-' + PREVIOUS_VERSION + '.zip')", lifecycle)
@@ -1363,7 +1399,7 @@ class HarnessGuards(unittest.TestCase):
         ready = json.loads(json.dumps(example))
         ready['environment']['base_url'] = 'https://staging.kklidi.com'
         ready['versions'].update(
-            wordpress='7.1', php='8.3', members='0.7.20', woocommerce='11.1.0')
+            wordpress='7.1', php='8.3', members='0.7.21', woocommerce='11.1.0')
         ready['owners'] = {key: 'approved-' + key for key in ready['owners']}
         ready['backup'].update(
             artifact_sha256='a' * 64,

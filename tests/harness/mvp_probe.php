@@ -61,6 +61,127 @@ if ($action === 'translation-check') {
     ));
     exit;
 }
+if ($action === 'route-summary') {
+	require_once KKLIDI_MEMBERS_DIR . 'includes/Core/RouteMap.php';
+	require_once KKLIDI_MEMBERS_DIR . 'includes/Core/Url.php';
+	$option_name = \KKLIDI\Members\Core\RouteMap::OPTION_NAME;
+	$stored = get_option($option_name, null);
+	$autoload = $wpdb->get_var($wpdb->prepare(
+		"SELECT autoload FROM {$wpdb->options} WHERE option_name = %s",
+		$option_name
+	));
+	$preflight = \KKLIDI\Members\Core\RouteMap::preflight();
+	$rules = get_option('rewrite_rules', array());
+	$expected_rules = array(
+		'^members/login/?$' => 'index.php?kklidi_members_login=1',
+		'^members/register/?$' => 'index.php?kklidi_members_register=1',
+		'^members/account/?$' => 'index.php?kklidi_members_account=1',
+		'^members/account/profile/?$' => 'index.php?kklidi_members_profile=1',
+		'^members/account/password/?$' => 'index.php?kklidi_members_password=1',
+		'^members/password-reset/?$' => 'index.php?kklidi_members_password_reset=1',
+		'^members/account/consent/?$' => 'index.php?kklidi_members_consent=1',
+		'^members/account/withdrawal/?$' => 'index.php?kklidi_members_withdrawal=1',
+		'^members/logout/?$' => 'index.php?kklidi_members_logout=1',
+	);
+	$present_rules = array();
+	foreach ($expected_rules as $regex => $query) {
+		$present_rules[$regex] = is_array($rules) && isset($rules[$regex]) && $rules[$regex] === $query;
+	}
+	$page_counts = wp_count_posts('page');
+	$menu_counts = wp_count_posts('nav_menu_item');
+	$count_posts = static function ($counts): int {
+		return is_object($counts) ? array_sum(array_map('intval', get_object_vars($counts))) : 0;
+	};
+	$audit_table = $wpdb->prefix . 'kklidi_mem_login_audit';
+	echo wp_json_encode(array(
+		'autoload' => $autoload,
+		'stored' => $stored,
+		'effective' => \KKLIDI\Members\Core\RouteMap::settings(),
+		'preflight' => $preflight,
+		'present_rules' => $present_rules,
+		'rewrite_rules_hash' => hash('sha256', maybe_serialize($rules)),
+		'page_count' => $count_posts($page_counts),
+		'menu_item_count' => $count_posts($menu_counts),
+		'helpers' => array(
+			'login' => \KKLIDI\Members\Core\Url::login(),
+			'register' => \KKLIDI\Members\Core\Url::register(),
+			'account' => \KKLIDI\Members\Core\Url::account(),
+			'profile' => \KKLIDI\Members\Core\Url::profile(),
+			'password' => \KKLIDI\Members\Core\Url::password(),
+			'password_reset' => \KKLIDI\Members\Core\Url::passwordReset(),
+			'consent' => \KKLIDI\Members\Core\Url::consent(),
+			'withdrawal' => \KKLIDI\Members\Core\Url::withdrawal(),
+			'logout' => \KKLIDI\Members\Core\Url::logout(),
+		),
+		'core_urls' => array(
+			'login' => wp_login_url(),
+			'force_reauth' => wp_login_url('', true),
+			'register' => wp_registration_url(),
+		),
+		'audit_count' => (int) $wpdb->get_var($wpdb->prepare(
+			"SELECT COUNT(*) FROM {$audit_table} WHERE event_type = %s",
+			'route_settings_update'
+		)),
+	));
+	exit;
+}
+if ($action === 'set-pretty-permalinks') {
+	global $wp_rewrite;
+	$wp_rewrite->set_permalink_structure('/%postname%/');
+	flush_rewrite_rules(false);
+	echo wp_json_encode(array('permalink_structure' => get_option('permalink_structure')));
+	exit;
+}
+if ($action === 'create-route-page-collision') {
+	$page = get_page_by_path('members', OBJECT, 'page');
+	if (!$page) {
+		$page_id = wp_insert_post(array(
+			'post_type' => 'page',
+			'post_status' => 'publish',
+			'post_title' => 'Synthetic Members Collision',
+			'post_name' => 'members',
+		));
+	} else {
+		$page_id = $page->ID;
+	}
+	if (is_wp_error($page_id) || (int) $page_id < 1) { exit('Route page collision setup failed.'); }
+	echo wp_json_encode(array('page_id' => (int) $page_id));
+	exit;
+}
+if ($action === 'remove-route-page-collision') {
+	$page = get_page_by_path('members', OBJECT, 'page');
+	$deleted = $page instanceof WP_Post ? wp_delete_post($page->ID, true) : false;
+	flush_rewrite_rules(false);
+	echo wp_json_encode(array('deleted' => $deleted instanceof WP_Post, 'remaining' => get_page_by_path('members', OBJECT, 'page') ? 1 : 0));
+	exit;
+}
+if ($action === 'set-route-rewrite-collision') {
+	$rules = get_option('rewrite_rules', array());
+	$rules = is_array($rules) ? $rules : array();
+	$rules = array('^members/(.+)/?$' => 'index.php?pagename=synthetic-conflict') + $rules;
+	update_option('rewrite_rules', $rules, false);
+	echo wp_json_encode(array('configured' => isset(get_option('rewrite_rules', array())['^members/(.+)/?$'])));
+	exit;
+}
+if ($action === 'remove-route-rewrite-collision') {
+	$rules = get_option('rewrite_rules', array());
+	$rules = is_array($rules) ? $rules : array();
+	unset($rules['^members/(.+)/?$']);
+	update_option('rewrite_rules', $rules, false);
+	echo wp_json_encode(array('remaining' => isset(get_option('rewrite_rules', array())['^members/(.+)/?$']) ? 1 : 0));
+	exit;
+}
+if ($action === 'corrupt-route-option') {
+	update_option('kklidi_members_route_map', array('version' => 1, 'clean_routes_enabled' => '1', 'custom_slug' => 'unsafe'), false);
+	echo wp_json_encode(array('stored' => get_option('kklidi_members_route_map')));
+	exit;
+}
+if ($action === 'reset-route-option') {
+	update_option('kklidi_members_route_map', \KKLIDI\Members\Core\RouteMap::defaults(), false);
+	flush_rewrite_rules(false);
+	echo wp_json_encode(array('stored' => get_option('kklidi_members_route_map')));
+	exit;
+}
 if ($action === 'notification-settings-summary') {
     require_once KKLIDI_MEMBERS_DIR . 'includes/Notifications/NotificationTemplates.php';
     $option_name = \KKLIDI\Members\Notifications\NotificationTemplates::OPTION_NAME;

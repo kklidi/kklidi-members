@@ -3,7 +3,7 @@ Contributors: kklidi
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.7.20
+Stable tag: 0.7.21
 
 Core-based member accounts with scoped UI, consent records and safe withdrawal handling.
 
@@ -14,10 +14,10 @@ KKLIDI Members adds login, registration, profile, consent and account management
 WooCommerce orders and LMS enrollment/progress stay with their respective plugins.
 Korean UI uses WordPress gettext translation catalogs.
 
-0.7.20 adds a default-off administrator notice after a new registration becomes
-active. The recipient remains the WordPress administration email, delivery stays
-plain-text wp_mail(), and a mail failure never rolls back registration.
-See docs/RELEASE-0.7.20.md.
+0.7.21 adds optional fixed /members/ clean routes without creating WordPress
+pages or shortcodes. Activation requires pretty permalinks and a conflict-free
+preflight; query routes and Core force-reauth remain available as fallbacks.
+See docs/RELEASE-0.7.21.md.
 
 0.7.17 adds administrator diagnostics, quick actions, route links, and clearer
 notification, withdrawal, and audit management while preserving the approved
@@ -35,6 +35,11 @@ docs/RELEASE-0.7.16.md.
 3. Review registration and consent policy before changing the closed defaults.
 
 == Changelog ==
+
+= 0.7.21 =
+* Added opt-in fixed clean routes for nine Members screens.
+* Rejected plain-permalink, page, rewrite-rule, and endpoint conflicts without changing content.
+* Preserved query routes, Core force-reauth, manual menu ownership, and route-scoped assets.
 
 = 0.7.20 =
 * Added an opt-in administrator notification after active member registration.

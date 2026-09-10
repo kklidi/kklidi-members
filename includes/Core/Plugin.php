@@ -22,6 +22,8 @@ final class Plugin {
 	public static function boot(): void {
 		self::load_textdomain();
 		add_action('init', array(__CLASS__, 'load_textdomain'), 1);
+		require_once KKLIDI_MEMBERS_DIR . 'includes/Core/RouteMap.php';
+		RouteMap::boot();
 
 		require_once KKLIDI_MEMBERS_DIR . 'includes/Security/AccountState.php';
 		require_once KKLIDI_MEMBERS_DIR . 'includes/Security/RateLimiter.php';
@@ -62,7 +64,7 @@ final class Plugin {
 		self::maybe_redirect_lms_profile();
 
 		foreach (self::ROUTES as $route => $handler) {
-			if (!isset($_GET[$route]) && !isset($_POST[$route])) {
+			if (!RouteMap::request_has($route)) {
 				continue;
 			}
 
@@ -124,15 +126,18 @@ final class Plugin {
 	}
 
 	private static function is_password_enhancement_route(): bool {
-		return isset($_GET['kklidi_members_login']) || isset($_POST['kklidi_members_login'])
-			|| isset($_GET['kklidi_members_register']) || isset($_POST['kklidi_members_register'])
-			|| isset($_GET['kklidi_members_password']) || isset($_POST['kklidi_members_password'])
-			|| isset($_GET['kklidi_members_password_reset']) || isset($_POST['kklidi_members_password_reset']);
+		foreach (array('kklidi_members_login', 'kklidi_members_register',
+			'kklidi_members_password', 'kklidi_members_password_reset') as $route) {
+			if (RouteMap::request_has($route)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static function is_frontend_route(): bool {
 		foreach (self::ROUTES as $route => $handler) {
-			if (isset($_GET[$route]) || isset($_POST[$route])) {
+			if (RouteMap::request_has($route)) {
 				return true;
 			}
 		}

@@ -16,31 +16,31 @@ final class Url {
 	}
 
 	public static function account(): string {
-		return add_query_arg('kklidi_members_account', '1', home_url('/'));
+		return self::route('kklidi_members_account');
 	}
 
 	public static function profile(): string {
-		return add_query_arg('kklidi_members_profile', '1', home_url('/'));
+		return self::route('kklidi_members_profile');
 	}
 
 	public static function password(): string {
-		return add_query_arg('kklidi_members_password', '1', home_url('/'));
+		return self::route('kklidi_members_password');
 	}
 
 	public static function consent(): string {
-		return add_query_arg('kklidi_members_consent', '1', home_url('/'));
+		return self::route('kklidi_members_consent');
 	}
 
 	public static function withdrawal(): string {
-		return add_query_arg('kklidi_members_withdrawal', '1', home_url('/'));
+		return self::route('kklidi_members_withdrawal');
 	}
 
 	public static function logout(): string {
-		return add_query_arg('kklidi_members_logout', '1', home_url('/'));
+		return self::route('kklidi_members_logout');
 	}
 
 	public static function passwordReset(string $redirect_to = ''): string {
-		$url = add_query_arg('kklidi_members_password_reset', '1', home_url('/'));
+		$url = self::route('kklidi_members_password_reset');
 		if ($redirect_to !== '') {
 			$url = add_query_arg('redirect_to', self::local($redirect_to), $url);
 		}
@@ -51,11 +51,10 @@ final class Url {
 		string $redirect_to = ''): string {
 		$url = add_query_arg(
 			array(
-				'kklidi_members_password_reset' => '1',
 				'key' => $key,
 				'login' => $login,
 			),
-			home_url('/')
+			self::route('kklidi_members_password_reset')
 		);
 		if ($redirect_to !== '') {
 			$url = add_query_arg('redirect_to', self::local($redirect_to), $url);
@@ -68,42 +67,13 @@ final class Url {
 	 * Existing query routes remain authoritative until this preflight is clear.
 	 */
 	public static function cleanRoutePreflight(): array {
-		$paths = array(
-			'login' => 'members/login',
-			'register' => 'members/register',
-			'account' => 'members/account',
-			'profile' => 'members/account/profile',
-			'password' => 'members/account/password',
-			'password_reset' => 'members/password-reset',
-			'consent' => 'members/account/consent',
-			'withdrawal' => 'members/account/withdrawal',
-			'logout' => 'members/logout',
-		);
-		$collisions = array();
-		if (function_exists('get_page_by_path')) {
-			foreach ($paths as $route => $path) {
-				$page = get_page_by_path($path, OBJECT, 'page');
-				if ($page instanceof \WP_Post) {
-					$collisions[$route] = array(
-						'path' => $path,
-						'page_id' => (int) $page->ID,
-						'status' => (string) $page->post_status,
-					);
-				}
-			}
-		}
-
-		return array(
-			'base' => '/members/',
-			'paths' => $paths,
-			'ready' => $collisions === array(),
-			'collisions' => $collisions,
-			'query_fallback' => true,
-		);
+		require_once KKLIDI_MEMBERS_DIR . 'includes/Core/RouteMap.php';
+		return RouteMap::preflight();
 	}
 
 	private static function route(string $key, string $redirect_to = ''): string {
-		$url = add_query_arg($key, '1', home_url('/'));
+		require_once KKLIDI_MEMBERS_DIR . 'includes/Core/RouteMap.php';
+		$url = RouteMap::url_for_query($key);
 
 		if ($redirect_to !== '') {
 			$url = add_query_arg('redirect_to', self::local($redirect_to), $url);

@@ -27,6 +27,11 @@ def main():
     )
     assert admin_ux['contract'] == 'AUTH-ADMIN-UX-001'
     assert admin_ux['status'] == 'IMPLEMENTED_AND_UNIT_VERIFIED'
+    route_contract = json.loads(
+        (ROOT / 'tests/harness/route_management_contract.json').read_text(encoding='utf-8')
+    )
+    assert route_contract['contract'] == 'AUTH-ROUTE-MAP-001'
+    assert route_contract['status'] == 'IMPLEMENTED_AND_MAMP_VERIFIED'
     contracts = {name: [{'status': row['status'], **{key: row[key] for key in
         ('parallel_processes', 'parallel_calls', 'parallel_allowed', 'shared_database_nodes',
          'object_cache_outage', 'storage_failure', 'bounded_rollback', 'rollback_deleted',
@@ -39,10 +44,9 @@ def main():
         for row in rows] for name, rows in synthetic['mvp_contracts'].items()}
 
     integrations = {}
-    for pattern in ('mamp-lms-*.json', 'mamp-lifecycle-*.json',
+    for pattern in ('mamp-route-*.json', 'mamp-lms-*.json', 'mamp-lifecycle-*.json',
                     'mamp-kboard-*.json', 'mamp-woo-*.json',
-                    'mamp-race-*.json', 'mamp-timing-*.json', 'mamp-https-*.json',
-                    'browser-chrome-*.json'):
+                    'mamp-race-*.json', 'mamp-timing-*.json', 'mamp-https-*.json'):
         data = newest(reports, pattern)
         assert data['status'] == 'PASS'
         integrations[data['run_id']] = {key: value for key, value in data.items()
@@ -55,6 +59,19 @@ def main():
     assert package_manifest['version'] == version
     assert package_manifest['archive_sha256'] == package_sha256
     assert lifecycle['new_archive_sha256'] == package_sha256
+    candidate = newest(reports, 'mamp-candidate-*.json')
+    assert candidate['status'] == 'PASS'
+    assert candidate['version'] == version
+    assert candidate['archive_sha256'] == package_sha256
+    assert candidate['original_restored']
+    assert candidate['temporary_directory_removed']
+    expected_gates = {'mamp_route_run.py', 'mamp_https_run.py', 'mamp_lms_run.py',
+                      'mamp_woo_run.py', 'mamp_kboard_run.py', 'mamp_race_run.py',
+                      'mamp_timing_run.py'}
+    assert set(candidate['gates']) == expected_gates
+    assert all(row['status'] == 'PASS' for row in candidate['gates'].values())
+    newest_ids = {row['run_id'] for row in integrations.values()}
+    assert all(row['run_id'] in newest_ids for row in candidate['gates'].values())
     https = newest(reports, 'mamp-https-*.json')
     assert https['status'] == 'PASS'
     preflight = https['preflight']
@@ -64,6 +81,7 @@ def main():
         'release': version,
         'synthetic_run': synthetic['run_id'],
         'execution_status': synthetic['status'],
+        'pre_release_candidate_status': candidate['status'],
         'production_acceptance': 'PARTIAL',
         'package': {
             'archive': package_path.name,
@@ -74,6 +92,8 @@ def main():
         'contracts': contracts,
         'strategy_contract': ux_strategy,
         'admin_ux_contract': admin_ux,
+        'route_management_contract': route_contract,
+        'candidate_gate': candidate,
         'integration': integrations,
         'performance': synthetic['mvp_contracts'].get('AUTH-PERF-003', []),
         'deployment_preflight': preflight,
