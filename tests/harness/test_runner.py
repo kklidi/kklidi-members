@@ -507,7 +507,7 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('| D14 | **IMPLEMENTED FOR 0.7.21', product)
         self.assertIn('AUTH-ROUTE-MAP-001 / 0.7.21 extension (IMPLEMENTED)', harness)
         self.assertIn("'docs/ROUTE_MANAGEMENT.md'", builder)
-        self.assertIn("Version: 0.7.24", plugin)
+        self.assertIn("Version: 0.7.25", plugin)
         self.assertIn('RouteMap::install()', installer)
         self.assertIn('RouteMap::deactivate()', plugin)
         self.assertIn("public const OPTION_NAME = 'kklidi_members_route_map';", route_map)
@@ -1287,6 +1287,34 @@ class HarnessGuards(unittest.TestCase):
         self.assertIn('Required · fixed', admin)
         self.assertNotIn(':has(input[required])', css)
 
+    def test_auth_withdraw_ux_008_reauthentication_feedback_and_retention_copy(self):
+        repository = Path(__file__).resolve().parents[2]
+        contract = json.loads(
+            (repository / 'tests/harness/withdrawal_ux_contract.json').read_text(encoding='utf-8')
+        )
+        self.assertEqual(contract['contract'], 'AUTH-WITHDRAW-UX-008')
+        self.assertEqual(contract['target_release'], '0.7.25')
+        self.assertEqual(contract['status'], 'IMPLEMENTED_AND_UNIT_VERIFIED')
+        self.assertEqual(contract['password_reauthentication']['server_check'], 'wp_check_password')
+        self.assertTrue(contract['password_reauthentication']['field_error'])
+        self.assertTrue(contract['password_reauthentication']['field_aria_invalid'])
+        self.assertTrue(contract['password_reauthentication']['password_visibility_toggle'])
+        self.assertTrue(contract['password_reauthentication']['no_password_repopulation'])
+        self.assertTrue(contract['copy']['immediate_sign_in_block'])
+        self.assertTrue(contract['copy']['retention_period_qualified'])
+        self.assertFalse(contract['copy']['universal_deletion_claim'])
+        self.assertTrue(contract['copy']['legal_or_service_retention_qualified'])
+        controller = (repository / 'includes/Withdrawal/WithdrawalController.php').read_text(encoding='utf-8')
+        template = (repository / 'templates/withdrawal.php').read_text(encoding='utf-8')
+        login = (repository / 'includes/Auth/LoginController.php').read_text(encoding='utf-8')
+        self.assertIn('wp_check_password($password, $user->user_pass, $user->ID)', controller)
+        self.assertIn("field_errors['current_password']", controller)
+        self.assertIn('data-kklidi-members-password-toggle', template)
+        self.assertIn('aria-invalid="true" aria-describedby="kklidi-members-withdrawal-password-error"', template)
+        self.assertIn('Deletion-eligible data is processed according to the applicable retention period', template)
+        self.assertIn('deletion-eligible data is handled according to the applicable retention period', login)
+        self.assertNotIn('It does not delete your WordPress account or service records.', template)
+
     def test_auth_notify_001_catalog_covers_mail_presets(self):
         repository = Path(__file__).resolve().parents[2]
         templates = (repository / 'includes/Notifications/NotificationTemplates.php').read_text(
@@ -1388,7 +1416,7 @@ class HarnessGuards(unittest.TestCase):
 
         lifecycle = (repository / 'tests/harness/mamp_lifecycle_run.py').read_text(encoding='utf-8')
         self.assertIn("SANDBOX = Path('C:/MAMP/htdocs/kklidi-members-mamp-sandbox')", lifecycle)
-        self.assertIn("PREVIOUS_VERSION = '0.7.23'", lifecycle)
+        self.assertIn("PREVIOUS_VERSION = '0.7.24'", lifecycle)
         self.assertIn("ALLOWED_INITIAL_VERSIONS = ('0.7.0', PREVIOUS_VERSION, CURRENT_VERSION)", lifecycle)
         self.assertIn("CURRENT_VERSION = re.search(", lifecycle)
         self.assertIn("OLD_ARCHIVE = ROOT / ('dist/kklidi-members-' + PREVIOUS_VERSION + '.zip')", lifecycle)
@@ -1493,7 +1521,7 @@ class HarnessGuards(unittest.TestCase):
         ready = json.loads(json.dumps(example))
         ready['environment']['base_url'] = 'https://staging.kklidi.com'
         ready['versions'].update(
-            wordpress='7.1', php='8.3', members='0.7.24', woocommerce='11.1.0')
+            wordpress='7.1', php='8.3', members='0.7.25', woocommerce='11.1.0')
         ready['owners'] = {key: 'approved-' + key for key in ready['owners']}
         ready['backup'].update(
             artifact_sha256='a' * 64,

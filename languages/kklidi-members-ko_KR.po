@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the KKLIDI Members plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: KKLIDI Members 0.7.24\n"
+"Project-Id-Version: KKLIDI Members 0.7.25\n"
 "Language: ko_KR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -322,6 +322,9 @@ msgstr "계정이 생성되었습니다. 계속하려면 로그인하세요."
 
 msgid "Your withdrawal request was submitted. Access is blocked while it is reviewed."
 msgstr "탈퇴 요청이 접수되었습니다. 검토하는 동안 접근이 차단됩니다."
+
+msgid "Your withdrawal request was submitted. Sign-in is blocked immediately; deletion-eligible data is handled according to the applicable retention period."
+msgstr "탈퇴 요청이 접수되었습니다. 로그인이 즉시 차단되며 삭제 대상 데이터는 해당 보존 기간에 따라 처리됩니다."
 
 msgid "Your password has been reset. Please log in with your new password."
 msgstr "비밀번호가 재설정되었습니다. 새 비밀번호로 로그인하세요."
@@ -775,6 +778,9 @@ msgstr "알림 설정 변경"
 
 msgid "Submitting this request blocks sign-in immediately. It does not delete your WordPress account or service records. Administrators review retained records before finalizing the withdrawal."
 msgstr "이 요청을 제출하면 즉시 로그인이 차단됩니다. WordPress 계정이나 서비스 기록이 삭제되는 것은 아닙니다. 관리자가 보존 대상 기록을 검토한 후 탈퇴 처리를 완료합니다."
+
+msgid "Submitting this request blocks sign-in immediately. Deletion-eligible data is processed according to the applicable retention period; records required by law or service policy may be retained."
+msgstr "요청을 제출하면 즉시 로그인이 차단됩니다. 삭제 대상 데이터는 해당 보존 기간에 따라 처리되며, 법률이나 서비스 정책상 필요한 기록은 보존될 수 있습니다."
 
 msgid "Submit request and block sign-in"
 msgstr "요청 제출 및 로그인 차단"

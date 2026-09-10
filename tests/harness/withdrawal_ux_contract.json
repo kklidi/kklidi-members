@@ -1,0 +1,24 @@
+{
+  "contract": "AUTH-WITHDRAW-UX-008",
+  "version": 1,
+  "status": "IMPLEMENTED_AND_UNIT_VERIFIED",
+  "target_release": "0.7.25",
+  "password_reauthentication": {
+    "server_check": "wp_check_password",
+    "field_error": true,
+    "field_aria_invalid": true,
+    "password_visibility_toggle": true,
+    "no_password_repopulation": true
+  },
+  "copy": {
+    "immediate_sign_in_block": true,
+    "retention_period_qualified": true,
+    "universal_deletion_claim": false,
+    "legal_or_service_retention_qualified": true
+  },
+  "verification": {
+    "status": "PASS",
+    "scope": "unit_and_static_ui_guards",
+    "test_runner": "tests/harness/test_runner.py"
+  }
+}

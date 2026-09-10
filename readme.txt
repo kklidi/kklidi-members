@@ -3,7 +3,7 @@ Contributors: kklidi
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.7.24
+Stable tag: 0.7.25
 
 Core-based member accounts with scoped UI, consent records and safe withdrawal handling.
 
@@ -14,6 +14,8 @@ KKLIDI Members adds login, registration, profile, consent and account management
 WooCommerce orders and LMS enrollment/progress stay with their respective plugins.
 Korean UI uses WordPress gettext translation catalogs.
 
+0.7.25 improves withdrawal reauthentication feedback, adds password visibility,
+and qualifies the immediate access block and retention-period processing copy.
 0.7.24 unifies required-field metadata and visible asterisks across registration,
 and labels always-required fields as fixed in the administrator settings.
 0.7.23 centers the short login and password-reset routes, removes the redundant
@@ -22,7 +24,7 @@ site-name eyebrow, and presents login links as Sign up | Find password | Home.
 frontend wording. 0.7.21 adds optional fixed /members/ clean routes without creating WordPress
 pages or shortcodes. Activation requires pretty permalinks and a conflict-free
 preflight; query routes and Core force-reauth remain available as fallbacks.
-See docs/RELEASE-0.7.24.md.
+See docs/RELEASE-0.7.25.md.
 
 0.7.17 adds administrator diagnostics, quick actions, route links, and clearer
 notification, withdrawal, and audit management while preserving the approved
@@ -40,6 +42,12 @@ docs/RELEASE-0.7.16.md.
 3. Review registration and consent policy before changing the closed defaults.
 
 == Changelog ==
+
+= 0.7.25 =
+
+* Show a field-level error when withdrawal password reauthentication fails.
+* Add the inline password visibility control to withdrawal requests.
+* Explain immediate sign-in blocking and retention-qualified processing without promising universal deletion.
 
 = 0.7.24 =
 

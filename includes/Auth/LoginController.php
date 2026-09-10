@@ -28,7 +28,7 @@ final class LoginController {
 		} elseif (self::request_value('password_reset') === '1') {
 			$notice = __('Your password has been reset. Please log in with your new password.', 'kklidi-members');
 		} elseif (self::request_value('withdrawal') === 'requested') {
-			$notice = __('Your withdrawal request was submitted. Access is blocked while it is reviewed.', 'kklidi-members');
+			$notice = __('Your withdrawal request was submitted. Sign-in is blocked immediately; deletion-eligible data is handled according to the applicable retention period.', 'kklidi-members');
 		}
 
 		if (strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {

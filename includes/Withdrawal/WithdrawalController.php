@@ -16,6 +16,7 @@ final class WithdrawalController {
 		}
 		$user = wp_get_current_user();
 		$message = '';
+		$field_errors = array();
 		if (user_can($user, 'manage_options')) {
 			$message = __('Administrator accounts require separate manual review for withdrawal.', 'kklidi-members');
 		} elseif (strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
@@ -26,6 +27,7 @@ final class WithdrawalController {
 				$message = __('We could not verify this request.', 'kklidi-members');
 			} elseif (!wp_check_password($password, $user->user_pass, $user->ID)) {
 				$message = __('Please check your current password.', 'kklidi-members');
+				$field_errors['current_password'] = __('Enter your current password again.', 'kklidi-members');
 			} else {
 				$state = \KKLIDI\Members\Security\AccountState::get((int) $user->ID);
 				$existing_request = (string) get_user_meta($user->ID, '_kklidi_members_withdrawal_request_id', true);

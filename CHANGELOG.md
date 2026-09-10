@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.25 — 2026-09-10
+
+- Show a field-level error when withdrawal password reauthentication fails.
+- Add the inline password visibility control to withdrawal requests.
+- Explain immediate sign-in blocking and retention-qualified processing without promising universal deletion.
+
 ## 0.7.24 — 2026-09-10
 
 - Unify required-field metadata and visible asterisks across registration.

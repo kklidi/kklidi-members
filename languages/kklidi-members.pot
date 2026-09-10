@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the KKLIDI Members plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: KKLIDI Members 0.7.24\n"
+"Project-Id-Version: KKLIDI Members 0.7.25\n"
 "Report-Msgid-Bugs-To: https://kklidi.com/\n"
 "POT-Creation-Date: 2026-09-07 00:00+0000\n"
 "MIME-Version: 1.0\n"
@@ -416,6 +416,9 @@ msgid "Your account was created. Please log in to continue."
 msgstr ""
 
 msgid "Your withdrawal request was submitted. Access is blocked while it is reviewed."
+msgstr ""
+
+msgid "Your withdrawal request was submitted. Sign-in is blocked immediately; deletion-eligible data is handled according to the applicable retention period."
 msgstr ""
 
 msgid "Your password has been reset. Please log in with your new password."
@@ -869,6 +872,9 @@ msgid "Notification settings updated"
 msgstr ""
 
 msgid "Submitting this request blocks sign-in immediately. It does not delete your WordPress account or service records. Administrators review retained records before finalizing the withdrawal."
+msgstr ""
+
+msgid "Submitting this request blocks sign-in immediately. Deletion-eligible data is processed according to the applicable retention period; records required by law or service policy may be retained."
 msgstr ""
 
 msgid "Submit request and block sign-in"
